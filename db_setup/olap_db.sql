@@ -1,0 +1,2 @@
+-- DROP DATABASE olap_hotel;
+CREATE DATABASE IF NOT EXISTS olap_hotel;
