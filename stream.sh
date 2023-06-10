@@ -18,3 +18,6 @@ python3 kafka/admin.py
 
 # stream data to kafka and consume
 (python3 kafka/producer.py > logs/producer.txt) & python3 kafka/consumer.py
+
+# shutdown brokers
+docker-compose down
