@@ -1,5 +1,4 @@
 from datetime import timedelta
-import math
 import random
 from dotenv import load_dotenv
 from os import getenv
