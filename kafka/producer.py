@@ -47,7 +47,9 @@ async def stream_data(table_name: str, producer):
     for row in conn.execute(text(f"SELECT * FROM {table_name}")):
         df = pd.DataFrame([dict(row._mapping)])
         producer.produce(
-            topic=table_name, value=df.iloc[0, :].to_json(), callback=report_ack
+            topic=table_name,
+            value=df.iloc[0, :].to_json(date_format="iso"),
+            callback=report_ack,
         )
         # Wait up to 1 second for events. Callbacks will be invoked during
         # this method call if the message is acknowledged.
