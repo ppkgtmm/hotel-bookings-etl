@@ -2,9 +2,10 @@ import json
 from confluent_kafka import Consumer, KafkaError, KafkaException
 from dotenv import load_dotenv
 from os import getenv
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.engine import Connection
 import asyncio
+import pandas as pd
 
 load_dotenv()
 
@@ -58,13 +59,8 @@ async def stage_data(table_name: str, conn: Connection):
                     break
                 raise KafkaException(msg.error())
             else:
-                result = msg.value().decode("utf-8")
-                conn.execute(
-                    text(
-                        f"INSERT INTO stg_{table_name} VALUES ({','.join('?'*len(result))})",
-                        result,
-                    )
-                )
+                result = pd.DataFrame([json.loads(msg.value())])
+                result.to_sql(f"stg_{table_name}", conn)
                 msg_count += 1
                 if msg_count % min_commit_count == 0:
                     consumer.commit(asynchronous=True)
