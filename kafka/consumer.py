@@ -39,7 +39,6 @@ oltp_tables = [
 
 def stage_data():
     try:
-        msg = ""
         while True:
             msg = consumer.poll(timeout=0.5)
             if msg is None:
