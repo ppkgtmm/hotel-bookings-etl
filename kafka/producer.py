@@ -51,6 +51,7 @@ async def stream_data(table_name: str, producer):
         # Wait up to 1 second for events. Callbacks will be invoked during
         # this method call if the message is acknowledged.
         producer.poll(2)
+    producer.flush()
     conn.close()
     engine.dispose()
 
