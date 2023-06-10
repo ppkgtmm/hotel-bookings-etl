@@ -3,6 +3,7 @@ from confluent_kafka import Consumer
 from dotenv import load_dotenv
 from os import getenv
 from sqlalchemy import create_engine, text
+import time
 
 load_dotenv()
 
@@ -39,10 +40,11 @@ oltp_tables = [
 
 def stage_data():
     try:
-        while True:
-            msg = consumer.poll(timeout=0.5)
+        start = time.time()
+        while True and (time.time() - start) <= 120:
+            msg = consumer.poll(timeout=1.0)
             if msg is None:
-                break
+                continue
             if msg.error():
                 print(msg.error())
                 break
