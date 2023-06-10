@@ -1,10 +1,8 @@
 import json
-from confluent_kafka import Consumer, KafkaError, KafkaException
+from confluent_kafka import Consumer
 from dotenv import load_dotenv
 from os import getenv
-from sqlalchemy import create_engine
-import asyncio
-import pandas as pd
+from sqlalchemy import create_engine, text
 
 load_dotenv()
 
@@ -39,44 +37,35 @@ oltp_tables = [
 ]
 
 
-async def stage_data(table_name: str):
+def stage_data():
     try:
-        engine = create_engine(connection_string)
-        conn = engine.connect()
-        consumer = Consumer(conf)
-        consumer.subscribe([table_name])
-        msg_count = 0
-        while True:
-            msg = consumer.poll(timeout=1.0)
-            if msg is None:
-                continue
-
+        msg = ""
+        while True and msg is not None:
+            msg = consumer.poll(timeout=0.5)
             if msg.error():
-                if msg.error().code() == KafkaError._PARTITION_EOF:
-                    # End of partition
-                    print(
-                        f"{msg.topic()}: {msg.partition()} reached end at offset {msg.offset()}"
-                    )
-                    break
-                raise KafkaException(msg.error())
+                print(msg.error())
+                break
             else:
-                result = pd.DataFrame([json.loads(msg.value())])
-                result.to_sql(
-                    f"stg_{table_name}", conn, if_exists="append", index=False
-                )
-                msg_count += 1
-                if msg_count % min_commit_count == 0:
-                    consumer.commit(asynchronous=True)
+                topic = msg.topic()
+                conn.execute(text(queries[topic]), json.loads(msg.value()))
+                conn.commit()
+
     finally:
         # Close down consumer to commit final offsets.
         consumer.close()
-        conn.close()
-        engine.dispose()
 
 
-async def main():
-    tasks = [asyncio.create_task(stage_data(table)) for table in oltp_tables]
-    await asyncio.gather(*tasks)
-
-
-asyncio.run(main())
+if __name__ == "__main__":
+    engine = create_engine(connection_string)
+    conn = engine.connect()
+    consumer = Consumer(conf)
+    consumer.subscribe(oltp_tables)
+    queries = {}
+    for table_name in oltp_tables:
+        columns = conn.execute(text(f"SHOW COLUMNS FROM stg_{table_name}"))
+        columns = [column[0] for column in columns]
+        query = f"INSERT INTO stg_{table_name} ({', '.join(columns)}) VALUES ({', '.join([':'+col for col in columns])})"
+        queries[table_name] = query
+    stage_data()
+    conn.close()
+    engine.dispose()
