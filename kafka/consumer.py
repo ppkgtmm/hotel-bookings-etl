@@ -3,7 +3,6 @@ from confluent_kafka import Consumer, KafkaError, KafkaException
 from dotenv import load_dotenv
 from os import getenv
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Connection
 import asyncio
 import pandas as pd
 
@@ -40,8 +39,10 @@ oltp_tables = [
 ]
 
 
-async def stage_data(table_name: str, conn: Connection):
+async def stage_data(table_name: str):
     try:
+        engine = create_engine(connection_string)
+        conn = engine.connect()
         consumer = Consumer(conf)
         consumer.subscribe([table_name])
         msg_count = 0
@@ -60,22 +61,22 @@ async def stage_data(table_name: str, conn: Connection):
                 raise KafkaException(msg.error())
             else:
                 result = pd.DataFrame([json.loads(msg.value())])
-                result.to_sql(f"stg_{table_name}", conn)
+                result.to_sql(
+                    f"stg_{table_name}", conn, if_exists="append", index=False
+                )
                 msg_count += 1
                 if msg_count % min_commit_count == 0:
                     consumer.commit(asynchronous=True)
     finally:
         # Close down consumer to commit final offsets.
         consumer.close()
+        conn.close()
+        engine.dispose()
 
 
 async def main():
-    engine = create_engine(connection_string)
-    conn = engine.connect()
-    tasks = [asyncio.create_task(stage_data(table, conn)) for table in oltp_tables]
+    tasks = [asyncio.create_task(stage_data(table)) for table in oltp_tables]
     await asyncio.gather(*tasks)
-    conn.close()
-    engine.dispose()
 
 
 asyncio.run(main())
