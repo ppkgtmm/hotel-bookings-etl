@@ -1,4 +1,4 @@
--- DROP DATABASE oltp_hotel;
+DROP DATABASE IF EXISTS oltp_hotel;
 CREATE DATABASE IF NOT EXISTS oltp_hotel;
 USE oltp_hotel;
 
