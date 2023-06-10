@@ -20,7 +20,6 @@ connection_string = (
 )
 
 conf = {"bootstrap.servers": getenv(server_key), "client.id": socket.gethostname()}
-topic = "hotel_oltp_data"
 
 oltp_tables = [
     "users",
@@ -45,9 +44,7 @@ async def stream_data(table_name: str, producer):
     engine = create_engine(connection_string)
     conn = engine.connect()
     for row in conn.execute(text(f"SELECT * FROM {table_name}")):
-        producer.produce(
-            topic=topic, key=table_name, value=str(row), callback=report_ack
-        )
+        producer.produce(topic=table_name, value=str(row), callback=report_ack)
         # Wait up to 1 second for events. Callbacks will be invoked during
         # this method call if the message is acknowledged.
         producer.poll(2)
