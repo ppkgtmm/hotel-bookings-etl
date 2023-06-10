@@ -15,22 +15,22 @@ db_user = "root"
 db_password = getenv(db_password_key)
 db_name = "oltp_hotel"
 
-data_dir = "data/"
+data_dir = "seeds/"
 connection_string = (
     f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:3306/{db_name}"
 )
 
 
 def load_person():
-    users = pd.read_csv(data_dir + "person/users.csv")
-    guests = pd.read_csv(data_dir + "person/guests.csv")
+    users = pd.read_csv(data_dir + "users.csv")
+    guests = pd.read_csv(data_dir + "guests.csv")
     users.to_sql("users", conn, index=False, if_exists="append")
     guests.to_sql("guests", conn, index=False, if_exists="append")
 
 
 def load_static_data():
-    room_types = pd.read_csv(data_dir + "static/room_types.csv")
-    addons = pd.read_csv(data_dir + "static/addons.csv")
+    room_types = pd.read_csv(data_dir + "room_types.csv")
+    addons = pd.read_csv(data_dir + "addons.csv")
     room_types.to_sql("roomtypes", conn, index=False, if_exists="append")
     addons.to_sql("addons", conn, index=False, if_exists="append")
 
