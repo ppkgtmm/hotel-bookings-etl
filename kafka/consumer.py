@@ -7,7 +7,6 @@ import time
 
 load_dotenv()
 
-min_commit_count = 4
 server_key = "KAFKA_BOOTSTRAP_SERVERS"
 db_password_key = "DB_PASSWORD"
 
@@ -25,7 +24,7 @@ conf = {
     "group.id": "olap_staging",
     "auto.offset.reset": "earliest",
 }
-topic = "hotel_oltp_data"
+
 oltp_tables = [
     "users",
     "guests",
