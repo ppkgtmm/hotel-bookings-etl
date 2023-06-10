@@ -36,9 +36,9 @@ oltp_tables = [
 
 def report_ack(err, msg):
     if err is not None:
-        print(f"Failed to deliver message: {str(msg)} with error {str(err)}")
+        print(f"Failed to deliver message: {msg.value()} with error {str(err)}")
     else:
-        print(f"Message produced: {str(msg)}")
+        print(f"Message produced: {msg.value()}")
 
 
 async def stream_data(table_name: str, producer):
