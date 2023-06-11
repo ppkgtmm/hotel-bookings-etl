@@ -50,7 +50,6 @@ def stage_data():
             else:
                 topic = msg.topic()
                 value = json.loads(msg.value())
-                conn.execute(text(f"DELETE FROM stg_{topic} WHERE id = {value['id']}"))
                 conn.execute(text(queries[topic]), value)
                 conn.commit()
 
@@ -68,7 +67,9 @@ if __name__ == "__main__":
     for table_name in oltp_tables:
         columns = conn.execute(text(f"SHOW COLUMNS FROM stg_{table_name}"))
         columns = [column[0] for column in columns]
-        query = f"INSERT INTO stg_{table_name} ({', '.join(columns)}) VALUES ({', '.join([':'+col for col in columns])})"
+        query = f"""INSERT INTO stg_{table_name} ({', '.join(columns)}) VALUES ({', '.join([':'+col for col in columns])})
+                    ON DUPLICATE KEY UPDATE {', '.join([col+'='+':'+col for col in columns])}
+                """
         queries[table_name] = query
     stage_data()
     conn.close()
