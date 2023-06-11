@@ -148,18 +148,18 @@ def load_booking_room_addons():
             for _ in range(max_distinct_addons):
                 chosen_addon = random.choices(addons, k=1)[0]
                 quantity = random.randint(1, 3)
-                date = br.checkin + timedelta(
+                datetime = br.checkin + timedelta(
                     days=day,
                     hours=random.randint(0, 23),
                     minutes=random.choice([0, 30]),
                 )
-                assert br.checkin <= date <= br.checkout
+                assert br.checkin <= datetime <= br.checkout
                 result.append(
                     dict(
                         bookingrooms=br.id,
                         addon=addon_df[addon_df["name"] == chosen_addon]["id"].iloc[0],
                         quantity=quantity,
-                        date=date,
+                        datetime=datetime,
                     )
                 )
     pd.DataFrame(result).to_sql(
@@ -167,7 +167,7 @@ def load_booking_room_addons():
     )
     pd.read_sql(
         """
-        SELECT bookingrooms, addon, FLOOR(SUM(quantity)) quantity, date
+        SELECT bookingrooms, addon, FLOOR(SUM(quantity)) quantity, datetime
         FROM booking_room_addons_temp
         GROUP BY 1, 2, 4
         ORDER BY 1
