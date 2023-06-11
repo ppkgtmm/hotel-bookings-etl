@@ -40,7 +40,7 @@ oltp_tables = [
 def stage_data():
     try:
         start = time.time()
-        while True and (time.time() - start) <= 120:
+        while True and (time.time() - start) <= 60:
             msg = consumer.poll(timeout=1.0)
             if msg is None:
                 continue
