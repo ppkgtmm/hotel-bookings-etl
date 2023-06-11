@@ -148,7 +148,11 @@ def load_booking_room_addons():
             for _ in range(max_distinct_addons):
                 chosen_addon = random.choices(addons, k=1)[0]
                 quantity = random.randint(1, 3)
-                date = br.checkin + timedelta(days=day)
+                date = br.checkin + timedelta(
+                    days=day,
+                    hours=random.randint(0, 23),
+                    minutes=random.choice([0, 30]),
+                )
                 assert br.checkin <= date <= br.checkout
                 result.append(
                     dict(
