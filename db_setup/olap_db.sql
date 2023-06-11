@@ -75,7 +75,7 @@ CREATE TABLE `stg_booking_room_addons` (
   `bookingrooms` integer,
   `addon` integer,
   `quantity` integer,
-  `date` date,
+  `datetime` timestamp,
   `created_at` timestamp,
   `updated_at` timestamp
 );

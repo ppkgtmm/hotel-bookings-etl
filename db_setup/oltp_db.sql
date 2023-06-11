@@ -60,7 +60,7 @@ CREATE TABLE `booking_room_addons` (
   `bookingrooms` integer,
   `addon` integer,
   `quantity` integer,
-  `date` date
+  `datetime` timestamp
 );
 
 ALTER TABLE `rooms` ADD FOREIGN KEY (`type`) REFERENCES `roomtypes` (`id`);
