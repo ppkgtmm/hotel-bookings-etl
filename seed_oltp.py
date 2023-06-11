@@ -133,7 +133,7 @@ def load_booking_room_addons():
     booking_rooms = conn.execute(
         text(
             """
-            SELECT br.*, b.checkin, b.checkout, DATEDIFF(b.checkout, b.checkin) day_diff
+            SELECT br.*, CAST(b.checkin AS DATETIME) checkin, CAST(b.checkout AS DATETIME) checkout, DATEDIFF(b.checkout, b.checkin) day_diff
             FROM booking_rooms br
             LEFT JOIN bookings b
             ON br.booking = b.id
