@@ -49,7 +49,9 @@ def stage_data():
                 break
             else:
                 topic = msg.topic()
-                conn.execute(text(queries[topic]), json.loads(msg.value()))
+                value = json.loads(msg.value())
+                conn.execute(text(f"DELETE FROM stg_{topic} WHERE id = {value['id']}"))
+                conn.execute(text(queries[topic]), value)
                 conn.commit()
 
     finally:
