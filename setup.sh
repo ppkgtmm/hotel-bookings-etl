@@ -14,8 +14,5 @@ docker-compose down
 # start kafka broker
 docker-compose up -d
 
-# wait for broker to start
-sleep 12
-
-# create topics to allow parallelization of producer and consumer w/o topic not exist error
-python3 kafka/admin.py
+# wait for services to start properly and register mysql database to kafka connect
+sleep 60 && python3 kafka_connect/register_mysql.py
