@@ -14,5 +14,9 @@ docker-compose down
 # start kafka broker
 docker-compose up -d
 
-# wait for services to start properly and register mysql database to kafka connect
-sleep 60 && python3 kafka_connect/register_mysql.py
+# insert generated data to oltp database
+python3 seed_oltp.py && \
+# wait for services to start properly 
+sleep 60 && \
+# register mysql database to kafka connect
+python3 kafka_connect/register_mysql.py
