@@ -10,7 +10,7 @@
         "database.server.id": "1",
         "topic.prefix": "hotel",
         "database.include.list": "oltp_hotel",
-        "database.history.kafka.bootstrap.servers": "broker:29092",
-        "database.history.kafka.topic": "schema-changes.hotel"
+        "schema.history.internal.kafka.bootstrap.servers": "broker:29092",
+        "schema.history.internal.kafka.topic": "schema-changes.hotel"
     }
 }
