@@ -1,0 +1,16 @@
+{
+    "name": "hotel-connector",
+    "config": {
+        "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+        "tasks.max": "1",
+        "database.hostname": "host.docker.internal",
+        "database.port": "3306",
+        "database.user": "root",
+        "database.password": "<PASSWORD>",
+        "database.server.id": "1",
+        "topic.prefix": "hotel",
+        "database.include.list": "oltp_hotel",
+        "database.history.kafka.bootstrap.servers": "broker:29092",
+        "database.history.kafka.topic": "schema-changes.hotel"
+    }
+}
