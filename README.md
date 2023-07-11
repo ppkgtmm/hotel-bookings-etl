@@ -22,5 +22,5 @@ python3 kafka_connect/register_mysql.py
 ### Tear down
 
 ```
-chmod +x teardown.sh && ./teardown.sh
+docker-compose down
 ```
