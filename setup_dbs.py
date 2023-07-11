@@ -4,18 +4,19 @@ from sqlalchemy import create_engine, text
 
 load_dotenv()
 
-db_password_key = "DB_PASSWORD"
-
-db_host = "localhost"
-db_user = "root"
-db_password = getenv(db_password_key)
+db_host = getenv("DB_HOST")
+db_port = getenv("DB_PORT")
+db_user = getenv("DB_USER")
+db_password = getenv("DB_PASSWORD")
 
 
 sql_dir = "./db_setup"
 oltp_sql = f"{sql_dir}/oltp_db.sql"
 olap_sql = f"{sql_dir}/olap_db.sql"
 
-connection_string = f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:3306"
+connection_string = (
+    f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}"
+)
 
 
 def get_queries(sql_file: str):
