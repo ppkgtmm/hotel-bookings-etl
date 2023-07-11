@@ -7,12 +7,12 @@ from sqlalchemy import create_engine, text
 
 load_dotenv()
 
-db_password_key = "DB_PASSWORD"
 
-db_host = "localhost"
-db_user = "root"
-db_password = getenv(db_password_key)
-db_name = "oltp_hotel"
+db_host = getenv("DB_HOST")
+db_user = getenv("DB_USER")
+db_password = getenv("DB_PASSWORD")
+db_port = getenv("DB_PORT")
+db_name = getenv("OLTP_DB")
 
 data_dir = "seeds/"
 connection_string = (
