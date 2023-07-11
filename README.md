@@ -7,13 +7,19 @@ chmod +x setup.sh && ./setup.sh
 ```
 
 ### Process
-1. insert generated data to OLTP database
+1. activate venv
+
+```
+source venv/bin/activate
+```
+
+2. insert generated data to OLTP database
    
 ```
 python3 seed_oltp.py
 ``` 
 
-2. register database to kafka connect
+3. register database to kafka connect
 
 ```
 python3 kafka_connect/register_mysql.py
