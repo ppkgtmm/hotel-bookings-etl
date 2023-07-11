@@ -12,7 +12,7 @@ DB_PORT = os.getenv("DB_PORT")
 OLTP_DB = os.getenv("OLTP_DB")
 OLAP_DB = os.getenv("OLAP_DB")
 KAFKA_CONNECT_SERVER = os.getenv("KAFKA_CONNECT_SERVER")
-KAFKA_INTERNAL = os.getenv("DB_HOST_INTERNAL")
+KAFKA_INTERNAL = os.getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 
 config_path = f"{os.path.dirname(__file__)}/register_mysql.json"
 
@@ -39,8 +39,8 @@ if __name__ == "__main__":
     mysql_kwargs = dict(
         DB_HOST=DB_HOST, DB_USER=DB_USER, DB_PASSWORD=DB_PASSWORD, DB_PORT=DB_PORT
     )
-    otlp_config = get_config(dict(**mysql_kwargs, DB_NAME=OLTP_DB))
-    olap_config = get_config(dict(**mysql_kwargs, DB_NAME=OLAP_DB))
+    otlp_config = get_config(**dict(**mysql_kwargs, DB_NAME=OLTP_DB))
+    olap_config = get_config(**dict(**mysql_kwargs, DB_NAME=OLAP_DB))
 
     oltp_response = requests.post(
         f"{KAFKA_CONNECT_SERVER}/connectors/",
