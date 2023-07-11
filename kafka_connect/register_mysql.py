@@ -50,7 +50,7 @@ if __name__ == "__main__":
         },
         json=otlp_config,
     )
-    print(oltp_response.json())
+    assert oltp_response.status_code == 201
     olap_response = requests.post(
         f"{KAFKA_CONNECT_SERVER}/connectors/",
         headers={
@@ -59,4 +59,4 @@ if __name__ == "__main__":
         },
         json=olap_config,
     )
-    print(olap_response.json())
+    assert oltp_response.status_code == 201
