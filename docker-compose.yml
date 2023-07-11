@@ -28,6 +28,7 @@ services:
   kafka-connect:
     depends_on:
       - broker
+      - mysql
     build: kafka_connect/
     image: kafka-connect:latest
     container_name: kafka-connect
@@ -47,3 +48,13 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components'
+  
+  mysql:
+    image: mysql:8.0.33
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    env_file:
+      - '.env'
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
