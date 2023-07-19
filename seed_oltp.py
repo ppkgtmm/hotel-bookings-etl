@@ -35,8 +35,28 @@ def load_static_data():
 def load_person():
     users = pd.read_csv(data_dir + "users.csv")
     guests = pd.read_csv(data_dir + "guests.csv")
-    users.to_sql("users", conn, index=False, if_exists="append")
-    guests.to_sql("guests", conn, index=False, if_exists="append")
+    users.to_sql("users_temp", conn, index=False, if_exists="append")
+    guests.to_sql("guests_temp", conn, index=False, if_exists="append")
+    users_merged = pd.read_sql(
+        """
+        SELECT u.firstname, u.lastname, u.email, l.id
+        FROM users_temp u
+        LEFT JOIN location l
+        ON u.state = l.state AND u.country = l.country
+        """,
+        conn,
+    )
+    users_merged.to_sql("users", conn, index=False, if_exists="append")
+    guests_merged = pd.read_sql(
+        """
+        SELECT g.firstname, g.lastname, g.email, g.dob, l.id
+        FROM guests_temp g
+        LEFT JOIN location l
+        ON g.state = l.state AND g.country = l.country
+        """,
+        conn,
+    )
+    guests_merged.to_sql("guests", conn, index=False, if_exists="append")
 
 
 def load_rooms():
