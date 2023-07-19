@@ -1,12 +1,19 @@
 from faker import Faker
 from faker.generator import random
 import pandas as pd
+from dotenv import load_dotenv
+from os import getenv
+
+load_dotenv()
 
 state_file_url = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/csv/states.csv"
 sep = ">>>"
-data_dir = "data/person/"
+
+data_dir = getenv("SEED_DIR")
+seed = getenv("SEED")
 
 fake = Faker(locale="en_US")
+Faker.seed(seed)
 
 
 states = pd.read_csv(state_file_url)[["name", "country_name"]]
@@ -38,7 +45,7 @@ def generate_person(count: int):
 
 if __name__ == "__main__":
     num_users = 30
-    num_guests = 15
+    num_guests = 20
     users = pd.DataFrame(generate_person(num_users))
     guests = pd.DataFrame(generate_person(num_guests))
     guests = pd.concat([guests, users]).reset_index(drop=True)
