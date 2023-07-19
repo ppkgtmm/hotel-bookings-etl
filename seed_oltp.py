@@ -47,6 +47,7 @@ def load_person():
         conn,
     )
     users_merged.to_sql("users", conn, index=False, if_exists="append")
+    conn.execute(text("DROP TABLE users_temp"))
     guests_merged = pd.read_sql(
         """
         SELECT g.firstname, g.lastname, g.email, g.dob, l.id
@@ -57,6 +58,7 @@ def load_person():
         conn,
     )
     guests_merged.to_sql("guests", conn, index=False, if_exists="append")
+    conn.execute(text("DROP TABLE guests_temp"))
 
 
 def load_rooms():
