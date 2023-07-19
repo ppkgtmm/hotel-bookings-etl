@@ -14,17 +14,15 @@ db_password = getenv("DB_PASSWORD")
 db_port = getenv("DB_PORT")
 db_name = getenv("OLTP_DB")
 
-data_dir = "seeds/"
+data_dir = getenv("SEED_DIR")
 connection_string = (
     f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:3306/{db_name}"
 )
 
 
-def load_person():
-    users = pd.read_csv(data_dir + "users.csv")
-    guests = pd.read_csv(data_dir + "guests.csv")
-    users.to_sql("users", conn, index=False, if_exists="append")
-    guests.to_sql("guests", conn, index=False, if_exists="append")
+def load_location():
+    location = pd.read_csv(data_dir + "location.csv")
+    location.to_sql("location", conn, index=False, if_exists="append")
 
 
 def load_static_data():
@@ -32,6 +30,13 @@ def load_static_data():
     addons = pd.read_csv(data_dir + "addons.csv")
     room_types.to_sql("roomtypes", conn, index=False, if_exists="append")
     addons.to_sql("addons", conn, index=False, if_exists="append")
+
+
+def load_person():
+    users = pd.read_csv(data_dir + "users.csv")
+    guests = pd.read_csv(data_dir + "guests.csv")
+    users.to_sql("users", conn, index=False, if_exists="append")
+    guests.to_sql("guests", conn, index=False, if_exists="append")
 
 
 def load_rooms():
@@ -180,11 +185,12 @@ def load_booking_room_addons():
 if __name__ == "__main__":
     engine = create_engine(connection_string)
     conn = engine.connect()
-    load_person()
+    load_location()
     load_static_data()
+    load_person()
     load_rooms()
     load_bookings()
-    load_booking_rooms()
-    load_booking_room_addons()
+    # load_booking_rooms()
+    # load_booking_room_addons()
     conn.close()
     engine.dispose()
