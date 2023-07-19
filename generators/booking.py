@@ -23,21 +23,21 @@ guests = pd.read_csv(guests_file)
 user_count = users.shape[0]
 
 
-def generate_room_preference(types_counts: list, room_counts: list):
-    types_count = random.choice(types_counts)
-    rooms = []
-    for type in random.choices(
-        room_types.name.tolist(), weights=weights, k=types_count
-    ):
-        rooms.append(
-            dict(
-                type=type,
-                count=random.choice(room_counts),
-                min_floor=math.floor(random.random() * (floors - 1))
-                + 1,  # min floor allowed from 1 to total floors - 1
-            )
-        )
-    return rooms
+# def generate_room_preference(types_counts: list, room_counts: list):
+#     types_count = random.choice(types_counts)
+#     rooms = []
+#     for type in random.choices(
+#         room_types.name.tolist(), weights=weights, k=types_count
+#     ):
+#         rooms.append(
+#             dict(
+#                 type=type,
+#                 count=random.choice(room_counts),
+#                 min_floor=math.floor(random.random() * (floors - 1))
+#                 + 1,  # min floor allowed from 1 to total floors - 1
+#             )
+#         )
+#     return rooms
 
 
 def generate_bookings(
