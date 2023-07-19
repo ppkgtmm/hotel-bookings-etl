@@ -1,10 +1,17 @@
 import pandas as pd
 from faker.generator import random
+from dotenv import load_dotenv
+from os import getenv
+
+load_dotenv()
 
 floors = 30
 floor_rooms = 40
-room_types_file = "data/static/room_types.csv"
-data_dir = "data/"
+data_dir = getenv("SEED_DIR")
+seed = getenv("SEED")
+
+random.seed(seed)
+room_types_file = data_dir + "room_types.csv"
 
 room_types = pd.read_csv(room_types_file)
 room_types.sort_values(by="price", ascending=False, inplace=True)
