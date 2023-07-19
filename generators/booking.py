@@ -54,7 +54,7 @@ def generate_bookings(
 
     bookings = pd.DataFrame(
         [],
-        columns=["user", "guest", "checkin", "checkout", "payment", "rooms_preference"],
+        columns=["user", "checkin", "checkout", "payment"],
     )
 
     for _ in range(count):
