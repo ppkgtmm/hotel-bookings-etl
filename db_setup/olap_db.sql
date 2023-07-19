@@ -88,17 +88,11 @@ CREATE TABLE `stg_booking_addons` (
 
 CREATE TABLE `dim_date` (
   `id` integer PRIMARY KEY,
+  `datetime` datetime,
   `date` date,
-  `year` integer,
-  `month` integer,
-  `day` integer,
-  `weekday` varchar(255)
-);
-
-CREATE TABLE `dim_time` (
-  `id` integer PRIMARY KEY,
-  `hour` integer,
-  `min` integer
+  `month` date,
+  `quarter` date,
+  `year` integer
 );
 
 CREATE TABLE `dim_roomtype` (
@@ -106,12 +100,6 @@ CREATE TABLE `dim_roomtype` (
   `_id` integer,
   `name` varchar(255),
   `price` float
-);
-
-CREATE TABLE `dim_room` (
-  `id` integer PRIMARY KEY,
-  `floor` integer,
-  `number` integer
 );
 
 CREATE TABLE `dim_addon` (
@@ -123,32 +111,33 @@ CREATE TABLE `dim_addon` (
 
 CREATE TABLE `dim_guest` (
   `id` integer PRIMARY KEY,
-  `_id` integer,
   `email` varchar(255),
   `dob` date,
+  `gender` varchar(255)
+);
+
+CREATE TABLE `dim_location` (
+  `id` integer PRIMARY KEY,
   `state` varchar(255),
   `country` varchar(255)
 );
 
 CREATE TABLE `fct_transaction` (
-  `date` integer,
-  `time` integer,
+  `datetime` integer,
   `guest` integer,
-  `room` integer,
+  `guest_location` integer,
   `roomtype` integer,
   `addon` integer,
   `addon_quantity` integer,
-  PRIMARY KEY (`date`, `time`, `guest`, `room`, `roomtype`, `addon`)
+  PRIMARY KEY (`datetime`, `guest`, `guest_location`, `roomtype`, `addon`)
 );
 
-ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`date`) REFERENCES `dim_date` (`id`);
-
-ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`time`) REFERENCES `dim_time` (`id`);
+ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
 
 ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`addon`) REFERENCES `dim_addon` (`id`);
 
 ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`guest`) REFERENCES `dim_guest` (`id`);
 
-ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`room`) REFERENCES `dim_room` (`id`);
-
 ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype` (`id`);
+
+ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
