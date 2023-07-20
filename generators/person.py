@@ -45,12 +45,12 @@ def generate_person(count: int):
 
 if __name__ == "__main__":
     num_users = 30
-    num_guests = 20
+    num_guests = 50
     users = pd.DataFrame(generate_person(num_users))
     guests = pd.DataFrame(generate_person(num_guests))
     guests = pd.concat([guests, users]).reset_index(drop=True)
     users.drop(columns=["dob"], inplace=True)
-    users.drop_duplicates(inplace=True)
-    guests.drop_duplicates(inplace=True)
+    users.drop_duplicates(subset=["email"], inplace=True)
+    guests.drop_duplicates(subset=["email"], inplace=True)
     users.to_csv(data_dir + "users.csv", index=False)
     guests.to_csv(data_dir + "guests.csv", index=False)
