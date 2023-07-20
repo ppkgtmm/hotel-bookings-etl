@@ -186,25 +186,25 @@ def load_booking_room_addons():
                 assert br.checkin <= datetime <= br.checkout
                 result.append(
                     dict(
-                        bookingrooms=br.id,
+                        booking_room=br.id,
                         addon=addon_df[addon_df["name"] == chosen_addon]["id"].iloc[0],
                         quantity=quantity,
                         datetime=datetime,
                     )
                 )
     pd.DataFrame(result).to_sql(
-        "booking_room_addons_temp", conn, index=False, if_exists="replace"
+        "booking_addons_temp", conn, index=False, if_exists="replace"
     )
     pd.read_sql(
         """
-        SELECT bookingrooms, addon, FLOOR(SUM(quantity)) quantity, datetime
+        SELECT booking_room, addon, FLOOR(SUM(quantity)) quantity, datetime
         FROM booking_room_addons_temp
         GROUP BY 1, 2, 4
         ORDER BY 1
         """,
         conn,
-    ).to_sql("booking_room_addons", conn, index=False, if_exists="append")
-    conn.execute(text("DROP TABLE booking_room_addons_temp;"))
+    ).to_sql("booking_addons", conn, index=False, if_exists="append")
+    conn.execute(text("DROP TABLE booking_addons_temp;"))
 
 
 if __name__ == "__main__":
@@ -216,6 +216,6 @@ if __name__ == "__main__":
     load_rooms()
     load_bookings()
     load_booking_rooms()
-    # load_booking_room_addons()
+    load_booking_room_addons()
     conn.close()
     engine.dispose()
