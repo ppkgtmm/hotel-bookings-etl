@@ -2,8 +2,6 @@ from faker import Faker
 from faker.generator import random
 import pandas as pd
 from datetime import date, timedelta
-from room import weights, room_types, floors
-import math
 from dotenv import load_dotenv
 from os import getenv
 
