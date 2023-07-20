@@ -40,7 +40,6 @@ if __name__ == "__main__":
         DB_HOST=DB_HOST, DB_USER=DB_USER, DB_PASSWORD=DB_PASSWORD, DB_PORT=DB_PORT
     )
     otlp_config = get_config(**dict(**mysql_kwargs, DB_NAME=OLTP_DB))
-    olap_config = get_config(**dict(**mysql_kwargs, DB_NAME=OLAP_DB))
 
     oltp_response = requests.post(
         f"{KAFKA_CONNECT_SERVER}/connectors/",
@@ -49,14 +48,5 @@ if __name__ == "__main__":
             "Content-Type": "application/json",
         },
         json=otlp_config,
-    )
-    assert oltp_response.status_code == 201
-    olap_response = requests.post(
-        f"{KAFKA_CONNECT_SERVER}/connectors/",
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        json=olap_config,
     )
     assert oltp_response.status_code == 201
