@@ -7,22 +7,21 @@ import time
 
 load_dotenv()
 
-server_key = "KAFKA_BOOTSTRAP_SERVERS"
-db_password_key = "DB_PASSWORD"
-
-db_host = "localhost"
-db_user = "root"
-db_password = getenv(db_password_key)
-db_name = "olap_hotel"
+db_host = getenv("DB_HOST")
+db_port = getenv("DB_PORT")
+db_user = getenv("DB_USER")
+db_password = getenv("DB_PASSWORD")
+oltp_db = getenv("OLTP_DB")
+olap_db = getenv("OLAP_DB")
 
 connection_string = (
-    f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:3306/{db_name}"
+    f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}/{olap_db}"
 )
 
 conf = {
-    "bootstrap.servers": getenv(server_key),
+    "bootstrap.servers": getenv("KAFKA_BOOTSTRAP_SERVERS"),
     "group.id": "olap_staging",
-    "auto.offset.reset": "earliest",
+    "auto.offset.reset": "earliest",  # start reading from first offset if no commits yet
 }
 
 oltp_tables = [
@@ -33,14 +32,14 @@ oltp_tables = [
     "rooms",
     "bookings",
     "booking_rooms",
-    "booking_room_addons",
+    "booking_addons",
 ]
 
 
-def stage_data():
+def consume_data(consumer):
     try:
         start = time.time()
-        while True and (time.time() - start) <= 60:
+        while True:
             msg = consumer.poll(timeout=1.0)
             if msg is None:
                 continue
@@ -49,9 +48,10 @@ def stage_data():
                 break
             else:
                 topic = msg.topic()
-                value = json.loads(msg.value())
+                value = json.loads(msg.value())["payload"]["after"]
                 conn.execute(text(queries[topic]), value)
                 conn.commit()
+            print("inserted record,", time.time() - start, "seconds passed")
 
     finally:
         # Close down consumer to commit final offsets.
@@ -62,15 +62,26 @@ if __name__ == "__main__":
     engine = create_engine(connection_string)
     conn = engine.connect()
     consumer = Consumer(conf)
-    consumer.subscribe(oltp_tables)
+    topics = ["{}.{}.{}".format(*([oltp_db] * 2), table) for table in oltp_tables]
+    consumer.subscribe(topics)
     queries = {}
-    for table_name in oltp_tables:
+    for table_name, topic in zip(oltp_tables, topics):
         columns = conn.execute(text(f"SHOW COLUMNS FROM stg_{table_name}"))
-        columns = [column[0] for column in columns]
-        query = f"""INSERT INTO stg_{table_name} ({', '.join(columns)}) VALUES ({', '.join([':'+col for col in columns])})
-                    ON DUPLICATE KEY UPDATE {', '.join([col+'='+':'+col for col in columns])}
+        columns = [(column[0], column[1].decode("utf-8")) for column in columns]
+        values = []
+        for col, dtype in columns:
+            processor = ":{}"
+            if dtype == "date":
+                processor = "CAST(:{} AS DATE)"
+            elif dtype == "datetime":
+                processor = "CAST(:{} AS DATETIME)"
+            elif dtype == "timestamp":
+                processor = "TIMESTAMP(STR_TO_DATE(:{}, '%Y-%m-%dT%H:%i:%sZ'))"
+            values.append(processor.format(col))
+        query = f"""INSERT INTO stg_{table_name} ({', '.join([col[0] for col in columns])}) VALUES ({', '.join(values)})
+                    ON DUPLICATE KEY UPDATE {', '.join([col[0]+'='+val for col, val in zip(columns, values)])}
                 """
-        queries[table_name] = query
-    stage_data()
+        queries[topic] = query
+    consume_data(consumer)
     conn.close()
     engine.dispose()
