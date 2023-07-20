@@ -57,7 +57,7 @@ def generate_bookings(count: int, max_stay: int):
 
 
 if __name__ == "__main__":
-    num_bookings = 90
+    num_bookings = 150
     max_stay = 15
 
     bookings = generate_bookings(num_bookings, max_stay)
