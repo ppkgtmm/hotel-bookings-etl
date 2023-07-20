@@ -198,7 +198,7 @@ def load_booking_room_addons():
     pd.read_sql(
         """
         SELECT booking_room, addon, FLOOR(SUM(quantity)) quantity, datetime
-        FROM booking_room_addons_temp
+        FROM booking_addons_temp
         GROUP BY 1, 2, 4
         ORDER BY 1
         """,
