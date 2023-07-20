@@ -132,8 +132,6 @@ def load_booking_rooms():
         for _ in range(num_rooms):
             avail_guests = avail_guests - set(guest)
             assert len(avail_guests) >= 1
-            # print("not enough guests available for booking", booking["id"])
-            # continue
             guest.append(random.choice(list(avail_guests)))
         room_type = random.choices(room_types, k=num_rooms)
         room_query = f"SELECT id FROM rooms WHERE type IN ({', '.join([str(rt) for rt in room_type])})"
@@ -143,9 +141,6 @@ def load_booking_rooms():
             booked_rooms = overlapping[overlapping.type == type].room.to_list()
             avail_rooms = list(rooms - set(booked_rooms) - set(assigned_rooms))
             assert len(avail_rooms) >= 1
-            # if avail_rooms == []:
-            #     print("no rooms available")
-            #     continue
             assigned_rooms.append(random.choice(avail_rooms))
         assigned_rooms, guest = list(set(assigned_rooms)), list(set(guest))
         num_deduped = min(len(assigned_rooms), len(guest))
