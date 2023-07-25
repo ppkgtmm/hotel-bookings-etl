@@ -66,4 +66,4 @@ services:
     image: processor:latest
     container_name: processor
     volumes:
-      - processor:/processor
+      - ./processor:/processor
