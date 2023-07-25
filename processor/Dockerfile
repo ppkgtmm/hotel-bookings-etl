@@ -13,5 +13,7 @@ RUN python3 -m ensurepip && pip3 install --upgrade pip
 COPY . /processor
 WORKDIR /processor
 
+RUN apk add bash
+
 # install required packages
 RUN pip3 --no-cache-dir install -r requirements.txt
