@@ -15,5 +15,3 @@ WORKDIR /processor
 
 # install required packages
 RUN pip3 --no-cache-dir install -r requirements.txt
-
-CMD ["python3 consumer.py"]
