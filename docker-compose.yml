@@ -58,3 +58,12 @@ services:
       - '.env'
     environment:
       - MYSQL_ROOT_PASSWORD=$DB_PASSWORD
+
+  processor:
+    depends_on:
+      - kafka-connect
+    build: processor/
+    image: processor:latest
+    container_name: processor
+    volumes:
+      - processor:/processor
