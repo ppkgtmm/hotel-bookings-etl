@@ -32,5 +32,5 @@ python3 kafka_connect/register_mysql.py
 ### Tear down
 
 ```
-docker-compose down
+docker-compose down -v
 ```
