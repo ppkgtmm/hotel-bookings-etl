@@ -1,6 +1,7 @@
+import json
 from pyspark.sql import SparkSession
 from dotenv import load_dotenv
-from os import getenv, environ
+from os import getenv
 
 load_dotenv()
 
@@ -19,16 +20,17 @@ if __name__ == "__main__":
 
     df = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", "host.docker.internal:9092")
-        .option("subscribe", f"{oltp_db}.{oltp_db}.*")
+        .option("kafka.bootstrap.servers", "broker:29092")
+        .option("subscribePattern", f"{oltp_db}\.{oltp_db}\..*")
         .option("startingOffsets", "earliest")
         .load()
     )
-
     query = (
-        df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
-        .writeStream.format("console")
+        df.select("value")
+        .writeStream.foreach(lambda x: print(json.loads(x.value)["payload"]["after"]))
         .start()
     )
 
     query.awaitTermination()
+
+# todo : https://spark.apache.org/docs/3.2.0/api/python/reference/api/pyspark.sql.streaming.DataStreamWriter.foreach.html
