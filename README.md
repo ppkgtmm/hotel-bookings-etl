@@ -4,7 +4,7 @@
 
 1. copy file `example.env` into a new file called `.env`
    
-2. in `.env` file created, replace `<YOUR DB PASSWORD>` with mysql root password
+2. in `.env` file created, replace `<YOUR DB PASSWORD>` with wanted password 
 
 3.  run set up script
 ```
