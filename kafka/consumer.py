@@ -58,6 +58,20 @@ def consume_data(consumer):
         consumer.close()
 
 
+def get_query_values(columns):
+    values = []
+    for col, dtype in columns:
+        processor = ":{}"
+        if dtype == "date":
+            processor = "FROM_UNIXTIME(:{})"
+        elif dtype == "datetime":
+            processor = "CAST(:{} AS DATETIME)"
+        elif dtype == "timestamp":
+            processor = "TIMESTAMP(STR_TO_DATE(:{}, '%Y-%m-%dT%H:%i:%sZ'))"
+        values.append(processor.format(col))
+    return values
+
+
 if __name__ == "__main__":
     engine = create_engine(connection_string)
     conn = engine.connect()
@@ -68,18 +82,10 @@ if __name__ == "__main__":
     for table_name, topic in zip(oltp_tables, topics):
         columns = conn.execute(text(f"SHOW COLUMNS FROM stg_{table_name}"))
         columns = [(column[0], column[1].decode("utf-8")) for column in columns]
-        values = []
-        for col, dtype in columns:
-            processor = ":{}"
-            if dtype == "date":
-                processor = "CAST(:{} AS DATE)"
-            elif dtype == "datetime":
-                processor = "CAST(:{} AS DATETIME)"
-            elif dtype == "timestamp":
-                processor = "TIMESTAMP(STR_TO_DATE(:{}, '%Y-%m-%dT%H:%i:%sZ'))"
-            values.append(processor.format(col))
-        query = f"""INSERT INTO stg_{table_name} ({', '.join([col[0] for col in columns])}) VALUES ({', '.join(values)})
-                    ON DUPLICATE KEY UPDATE {', '.join([col[0]+'='+val for col, val in zip(columns, values)])}
+        values = get_query_values(columns)
+        names = [col[0] for col in columns]
+        query = f"""INSERT INTO stg_{table_name} ({', '.join(names)}) VALUES ({', '.join(values)})
+                    ON DUPLICATE KEY UPDATE {', '.join([name+'='+val for name, val in zip(names, values)])}
                 """
         queries[topic] = query
     consume_data(consumer)
