@@ -67,3 +67,5 @@ services:
     container_name: processor
     volumes:
       - ./processor:/processor
+    env_file:
+      - '.env'
