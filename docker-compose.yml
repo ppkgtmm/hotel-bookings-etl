@@ -62,10 +62,10 @@ services:
   processor:
     depends_on:
       - kafka-connect
-    build: processor/
+    build: processors/
     image: processor:latest
     container_name: processor
     volumes:
-      - ./processor:/processor
+      - ./processors:/processor
     env_file:
       - '.env'
