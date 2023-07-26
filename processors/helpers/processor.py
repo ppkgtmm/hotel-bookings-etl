@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from os import getenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from datetime import datetime
 
 
@@ -29,6 +29,28 @@ class Processor:
     def open(self, partition_id, epoch_id):
         Processor.setup_db_conn()
         return True
+
+    @classmethod
+    def upsert_to_db(cls, table_name, payload):
+        query = f"""INSERT INTO {table_name} ({', '.join(cls.columns)}) 
+                    VALUES ({', '.join([':'+col for col in cls.columns])})
+                    ON DUPLICATE KEY UPDATE {', '.join([col+'=:'+col for col in cls.columns])}
+                """
+        cls.conn.execute(text(query), payload)
+        cls.conn.commit()
+
+    @staticmethod
+    def prepare_payload(payload):
+        payload["_id"] = payload.pop("id")
+        return payload
+
+    @classmethod
+    def insert_to_db(cls, table_name, payload):
+        query = f"""INSERT INTO {table_name} ({', '.join(cls.columns)}) 
+                    VALUES ({', '.join([':'+col for col in cls.columns])})
+                """
+        cls.conn.execute(text(query), Processor.prepare_payload(payload))
+        cls.conn.commit()
 
     def close(self, error):
         if error:
