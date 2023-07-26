@@ -12,6 +12,7 @@ CREATE TABLE `users` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
   `firstname` varchar(255),
   `lastname` varchar(255),
+  `gender` varchar(25),
   `email` varchar(255),
   `location` integer
 );
@@ -20,6 +21,7 @@ CREATE TABLE `guests` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
   `firstname` varchar(255),
   `lastname` varchar(255),
+  `gender` varchar(25),
   `email` varchar(255),
   `dob` date,
   `location` integer
