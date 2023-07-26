@@ -12,4 +12,5 @@ class GuestProcessor(Processor):
         if row.topic != "oltp_hotel.oltp_hotel.guests":
             return
         payload = json.loads(row.value)["payload"]["after"]
+        payload["dob"] = super().to_date(payload["dob"])
         super().upsert_to_db("dim_guest", payload)
