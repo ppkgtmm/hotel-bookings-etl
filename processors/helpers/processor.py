@@ -27,6 +27,7 @@ class Processor:
         cls.conn = cls.engine.connect()
 
     def open(self, partition_id, epoch_id):
+        Processor.load_envars()
         Processor.setup_db_conn()
         return True
 
