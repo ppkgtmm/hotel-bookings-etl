@@ -45,7 +45,7 @@ def load_person():
     guests.to_sql("guests_temp", conn, index=False, if_exists="append")
     users_merged = pd.read_sql(
         """
-        SELECT u.firstname, u.lastname, u.email, l.id location
+        SELECT u.firstname, u.lastname, u.gender, u.email, l.id location
         FROM users_temp u
         LEFT JOIN location l
         ON u.state = l.state AND u.country = l.country
@@ -56,7 +56,7 @@ def load_person():
     conn.execute(text("DROP TABLE users_temp"))
     guests_merged = pd.read_sql(
         """
-        SELECT g.firstname, g.lastname, g.email, g.dob, l.id location
+        SELECT g.firstname, g.lastname, g.gender, g.email, g.dob, l.id location
         FROM guests_temp g
         LEFT JOIN location l
         ON g.state = l.state AND g.country = l.country
