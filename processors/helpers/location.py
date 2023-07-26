@@ -3,7 +3,7 @@ from processor import Processor
 
 
 class LocationProcessor(Processor):
-    columns = ["id", "state", "country", "created_at", "updated_at"]
+    columns = ["id", "state", "country"]
 
     def __init__(self):
         super().__init__()
@@ -12,5 +12,4 @@ class LocationProcessor(Processor):
         if row.topic != "oltp_hotel.oltp_hotel.location":
             return
         payload = json.loads(row.value)["payload"]["after"]
-        payload["created_at"] = super().to_timestamp(payload["created_at"])
-        payload["updated_at"] = super().to_timestamp(payload["updated_at"])
+        super().upsert_to_db("dim_location", payload)
