@@ -8,6 +8,7 @@ load_dotenv()
 
 state_file_url = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/csv/states.csv"
 sep = ">>>"
+genders = ["M", "F", "Prefer not to say"]
 
 data_dir = getenv("SEED_DIR")
 seed = getenv("SEED")
@@ -26,6 +27,7 @@ def generate_person(count: int):
     for _ in range(count):
         fname = fake.first_name()
         lname = fake.last_name()
+        gender = fake.random.choice(genders)
         email = f"{fname}.{lname}@{fake.free_email().split('@')[-1]}".lower()
         dob = fake.date_between(start_date="-80y", end_date="-20y")
         state = random.choice(states)
@@ -34,6 +36,7 @@ def generate_person(count: int):
             dict(
                 firstname=fname,
                 lastname=lname,
+                gender=gender,
                 email=email,
                 dob=dob,
                 state=state_name,
