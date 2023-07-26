@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 from os import getenv
-from location import LocationProcessor
+from helpers import LocationProcessor
 
 load_dotenv()
 
