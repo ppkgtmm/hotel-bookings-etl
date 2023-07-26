@@ -1,7 +1,7 @@
-import json
 from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 from os import getenv
+from location import LocationProcessor
 
 load_dotenv()
 
@@ -25,12 +25,10 @@ if __name__ == "__main__":
         .option("startingOffsets", "earliest")
         .load()
     )
-    query = (
-        df.select("value")
-        .writeStream.foreach(lambda x: print(json.loads(x.value)["payload"]["after"]))
-        .start()
-    )
+    writer = df.writeStream.foreach(LocationProcessor()).start()
+    # writer = df.writeStream.foreach(RowPrinter()).start()
+    # lambda x: print(json.loads(x.value)["payload"]["after"])
 
-    query.awaitTermination()
+    writer.awaitTermination()
 
 # todo : https://spark.apache.org/docs/3.2.0/api/python/reference/api/pyspark.sql.streaming.DataStreamWriter.foreach.html
