@@ -1,1 +1,1 @@
-from location import LocationProcessor
+from helpers.location import LocationProcessor

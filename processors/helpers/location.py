@@ -1,5 +1,5 @@
 import json
-from processor import Processor
+from helpers.processor import Processor
 
 
 class LocationProcessor(Processor):
