@@ -1,13 +1,17 @@
 from dotenv import load_dotenv
 from os import getenv
 from sqlalchemy import create_engine, text
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Processor:
     @staticmethod
     def to_timestamp(date_time, fmt="%Y-%m-%dT%H:%M:%SZ"):
         return datetime.strptime(date_time, fmt)
+
+    @staticmethod
+    def to_date(days):
+        return datetime(1970, 1, 1) + timedelta(days=days)
 
     @classmethod
     def load_envars(cls):
