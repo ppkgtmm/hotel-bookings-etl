@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, text
 
 load_dotenv()
 
-db_host = getenv("DB_HOST")
+db_host = getenv("DB_HOST_INTERNAL")
 db_port = getenv("DB_PORT")
 db_user = getenv("DB_USER")
 db_password = getenv("DB_PASSWORD")
@@ -41,7 +41,7 @@ def to_timestamp(date_time: str, fmt: str = "%Y-%m-%dT%H:%M:%SZ"):
 class LocationProcessor:
     columns = ["id", "state", "country", "created_at", "updated_at"]
 
-    def open(self):
+    def open(self, partition_id, epoch_id):
         LocationProcessor.engine = create_engine(connection_string)
         LocationProcessor.conn = LocationProcessor.engine.connect()
         return True
@@ -54,10 +54,10 @@ class LocationProcessor:
         payload["updated_at"] = to_timestamp(payload["updated_at"])
         columns = LocationProcessor.columns
         # values = [payload[col] for col in columns]
-        query = f"""INSERT INTO stg_location ({', '.join(columns)}) VALUES ({', '.join(':'+columns)})
+        query = f"""INSERT INTO stg_location ({', '.join(columns)}) VALUES ({', '.join([':'+col for col in columns])})
                     ON DUPLICATE KEY UPDATE {', '.join([col+'= :'+col for col in columns])}
                 """
-        LocationProcessor.conn.execute(text(query), **payload)
+        LocationProcessor.conn.execute(text(query), payload)
         LocationProcessor.conn.commit()
 
     def close(self, error):
