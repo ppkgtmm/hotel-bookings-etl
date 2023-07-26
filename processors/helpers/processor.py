@@ -56,6 +56,7 @@ class Processor:
     def close(self, error):
         if error:
             print("Closed with error: %s" % str(error))
+        Processor.teardown_db_conn()
 
     @classmethod
     def teardown_db_conn(cls):
