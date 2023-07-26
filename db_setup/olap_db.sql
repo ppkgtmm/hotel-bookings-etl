@@ -113,7 +113,7 @@ CREATE TABLE `dim_guest` (
   `id` integer PRIMARY KEY,
   `email` varchar(255),
   `dob` date,
-  `gender` varchar(255)
+  `gender` varchar(25)
 );
 
 CREATE TABLE `dim_location` (
