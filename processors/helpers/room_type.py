@@ -12,4 +12,6 @@ class RoomTypeProcessor(Processor):
         if row.topic != "oltp_hotel.oltp_hotel.roomtypes":
             return
         payload = json.loads(row.value)["payload"]["after"]
+        if not payload:
+            return
         super().insert_to_db("dim_roomtype", payload)
