@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 from os import getenv
-from helpers import LocationProcessor, GuestProcessor
+from helpers import LocationProcessor, GuestProcessor, AddonProcessor, RoomTypeProcessor
 
 load_dotenv()
 
@@ -27,6 +27,8 @@ if __name__ == "__main__":
     )
     writer = df.writeStream.foreach(LocationProcessor()).start()
     writer = df.writeStream.foreach(GuestProcessor()).start()
+    writer = df.writeStream.foreach(AddonProcessor()).start()
+    writer = df.writeStream.foreach(RoomTypeProcessor()).start()
     # writer = df.writeStream.foreach(RowPrinter()).start()
     # lambda x: print(json.loads(x.value)["payload"]["after"])
 
