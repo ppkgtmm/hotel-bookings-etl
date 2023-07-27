@@ -96,14 +96,14 @@ CREATE TABLE `dim_date` (
 );
 
 CREATE TABLE `dim_roomtype` (
-  `id` integer PRIMARY KEY,
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
   `_id` integer,
   `name` varchar(255),
   `price` float
 );
 
 CREATE TABLE `dim_addon` (
-  `id` integer PRIMARY KEY,
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
   `_id` integer,
   `name` varchar(255),
   `price` float
