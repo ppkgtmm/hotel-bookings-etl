@@ -29,9 +29,5 @@ if __name__ == "__main__":
     writer = df.writeStream.foreach(GuestProcessor()).start()
     writer = df.writeStream.foreach(AddonProcessor()).start()
     writer = df.writeStream.foreach(RoomTypeProcessor()).start()
-    # writer = df.writeStream.foreach(RowPrinter()).start()
-    # lambda x: print(json.loads(x.value)["payload"]["after"])
 
     writer.awaitTermination()
-
-# todo : https://spark.apache.org/docs/3.2.0/api/python/reference/api/pyspark.sql.streaming.DataStreamWriter.foreach.html
