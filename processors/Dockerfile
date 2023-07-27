@@ -18,6 +18,6 @@ RUN apk add bash
 # install required packages
 RUN pip3 --no-cache-dir install -r requirements.txt
 
-RUN chmod +x ./run.sh
+RUN chmod +x run.sh
 
 CMD [ "./run.sh" ]
