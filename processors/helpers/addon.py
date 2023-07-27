@@ -3,7 +3,7 @@ from helpers.processor import Processor
 
 
 class AddonProcessor(Processor):
-    columns = ["id", "name", "price"]
+    columns = ["_id", "name", "price"]
 
     def __init__(self):
         super().__init__()
