@@ -87,7 +87,7 @@ CREATE TABLE `stg_booking_addons` (
 );
 
 CREATE TABLE `dim_date` (
-  `id` integer PRIMARY KEY,
+  `id` bigint PRIMARY KEY,
   `datetime` datetime,
   `date` date,
   `month` date,
@@ -123,7 +123,7 @@ CREATE TABLE `dim_location` (
 );
 
 CREATE TABLE `fct_transaction` (
-  `datetime` integer,
+  `datetime` bigint,
   `guest` integer,
   `guest_location` integer,
   `roomtype` integer,
