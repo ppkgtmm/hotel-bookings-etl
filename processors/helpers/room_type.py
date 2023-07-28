@@ -3,7 +3,7 @@ from helpers.processor import Processor
 
 
 class RoomTypeProcessor(Processor):
-    columns = ["_id", "name", "price"]
+    columns = ["_id", "name", "price", "created_at"]
 
     def __init__(self):
         super().__init__()
@@ -14,4 +14,5 @@ class RoomTypeProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        super().insert_to_db("dim_roomtype", payload)
+        payload["created_at"] = super().to_datetime(payload["created_at"])
+        super().insert_to_db("dim_roomtype", payload, RoomTypeProcessor.columns)
