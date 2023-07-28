@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 class Processor:
     @staticmethod
     def to_datetime(date_time):
-        return datetime(1970, 1, 1) + timedelta(seconds=date_time)
+        return datetime.fromtimestamp(date_time / 1000)
 
     @staticmethod
     def to_date(days):
