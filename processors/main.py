@@ -14,6 +14,7 @@ from helpers import (
 load_dotenv()
 
 oltp_db = getenv("OLTP_DB")
+broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 
 if __name__ == "__main__":
     spark = (
@@ -28,7 +29,7 @@ if __name__ == "__main__":
 
     df = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", "broker:29092")
+        .option("kafka.bootstrap.servers", broker)
         .option("subscribePattern", f"{oltp_db}\.{oltp_db}\..*")
         .option("startingOffsets", "earliest")
         .load()
