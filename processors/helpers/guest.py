@@ -15,4 +15,4 @@ class GuestProcessor(Processor):
         if not payload:
             return
         payload["dob"] = super().to_date(payload["dob"])
-        super().upsert_to_db("dim_guest", payload)
+        super().upsert_to_db("dim_guest", payload, GuestProcessor.columns)
