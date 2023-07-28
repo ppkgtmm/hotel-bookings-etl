@@ -36,10 +36,10 @@ class Processor:
         return True
 
     @classmethod
-    def upsert_to_db(cls, table_name, payload):
-        query = f"""INSERT INTO {table_name} ({', '.join(cls.columns)}) 
-                    VALUES ({', '.join([':'+col for col in cls.columns])})
-                    ON DUPLICATE KEY UPDATE {', '.join([col+'=:'+col for col in cls.columns])}
+    def upsert_to_db(cls, table_name, payload, columns):
+        query = f"""INSERT INTO {table_name} ({', '.join(columns)}) 
+                    VALUES ({', '.join([':'+col for col in columns])})
+                    ON DUPLICATE KEY UPDATE {', '.join([col+'=:'+col for col in columns])}
                 """
         cls.conn.execute(text(query), payload)
         cls.conn.commit()
@@ -50,9 +50,9 @@ class Processor:
         return payload
 
     @classmethod
-    def insert_to_db(cls, table_name, payload):
-        query = f"""INSERT INTO {table_name} ({', '.join(cls.columns)}) 
-                    VALUES ({', '.join([':'+col for col in cls.columns])})
+    def insert_to_db(cls, table_name, payload, columns):
+        query = f"""INSERT INTO {table_name} ({', '.join(columns)}) 
+                    VALUES ({', '.join([':'+col for col in columns])})
                 """
         cls.conn.execute(text(query), Processor.prepare_payload(payload))
         cls.conn.commit()
