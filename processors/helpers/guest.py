@@ -4,6 +4,7 @@ from helpers.processor import Processor
 
 class GuestProcessor(Processor):
     columns = ["id", "email", "dob", "gender"]
+    stg_columns = columns + ["location"]
 
     def __init__(self):
         super().__init__()
@@ -16,3 +17,4 @@ class GuestProcessor(Processor):
             return
         payload["dob"] = super().to_date(payload["dob"])
         super().upsert_to_db("dim_guest", payload, GuestProcessor.columns)
+        super().upsert_to_db("stg_guest", payload, GuestProcessor.stg_columns)
