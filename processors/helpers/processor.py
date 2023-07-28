@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 class Processor:
     @staticmethod
-    def to_timestamp(date_time, fmt="%Y-%m-%dT%H:%M:%SZ"):
+    def to_datetime(date_time, fmt="%Y-%m-%dT%H:%M:%SZ"):
         return datetime.strptime(date_time, fmt)
 
     @staticmethod
