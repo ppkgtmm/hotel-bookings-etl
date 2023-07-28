@@ -7,6 +7,7 @@ from helpers import (
     AddonProcessor,
     RoomTypeProcessor,
     RoomProcessor,
+    BookingProcessor,
 )
 
 load_dotenv()
@@ -36,5 +37,6 @@ if __name__ == "__main__":
     writer = df.writeStream.foreach(AddonProcessor()).start()
     writer = df.writeStream.foreach(RoomTypeProcessor()).start()
     writer = df.writeStream.foreach(RoomProcessor()).start()
+    writer = df.writeStream.foreach(BookingProcessor()).start()
 
     writer.awaitTermination()
