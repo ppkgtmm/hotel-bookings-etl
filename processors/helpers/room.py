@@ -9,7 +9,7 @@ class RoomProcessor(Processor):
         super().__init__()
 
     def process(self, row):
-        if row.topic != "oltp_hotel.oltp_hotel.roomtypes":
+        if row.topic != "oltp_hotel.oltp_hotel.rooms":
             return
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
