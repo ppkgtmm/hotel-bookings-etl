@@ -1,7 +1,13 @@
 from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 from os import getenv
-from helpers import LocationProcessor, GuestProcessor, AddonProcessor, RoomTypeProcessor
+from helpers import (
+    LocationProcessor,
+    GuestProcessor,
+    AddonProcessor,
+    RoomTypeProcessor,
+    RoomProcessor,
+)
 
 load_dotenv()
 
@@ -29,5 +35,6 @@ if __name__ == "__main__":
     writer = df.writeStream.foreach(GuestProcessor()).start()
     writer = df.writeStream.foreach(AddonProcessor()).start()
     writer = df.writeStream.foreach(RoomTypeProcessor()).start()
+    writer = df.writeStream.foreach(RoomProcessor()).start()
 
     writer.awaitTermination()
