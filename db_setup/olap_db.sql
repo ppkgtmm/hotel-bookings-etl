@@ -134,6 +134,22 @@ CREATE TABLE `fct_purchase` (
   PRIMARY KEY (`datetime`, `guest`, `guest_location`, `roomtype`, `addon`)
 );
 
+CREATE TABLE `fct_booking` (
+  `datetime` bigint,
+  `guest` integer,
+  `guest_location` integer,
+  `roomtype` integer,
+  PRIMARY KEY (`datetime`, `guest`, `guest_location`, `roomtype`)
+);
+
+ALTER TABLE `fct_booking` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
+
+ALTER TABLE `fct_booking` ADD FOREIGN KEY (`guest`) REFERENCES `dim_guest` (`id`);
+
+ALTER TABLE `fct_booking` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype` (`id`);
+
+ALTER TABLE `fct_booking` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
+
 ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
 
 ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`addon`) REFERENCES `dim_addon` (`id`);
