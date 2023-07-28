@@ -14,5 +14,6 @@ class RoomTypeProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        payload["created_at"] = super().to_datetime(payload["created_at"])
+        payload.pop("created_at")
+        payload["created_at"] = super().to_datetime(payload["updated_at"])
         super().insert_to_db("dim_roomtype", payload, RoomTypeProcessor.columns)
