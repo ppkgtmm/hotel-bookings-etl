@@ -39,7 +39,7 @@ class BookingRoomProcessor(Processor):
             BookingRoomProcessor.booking_q, {"id": payload["booking"]}
         ).first()
         data = []
-        current_date, end_date = booking[0][0], booking[0][1]
+        current_date, end_date = booking[0], booking[1]
         while current_date <= end_date:
             data.append(
                 {
