@@ -5,3 +5,4 @@ from helpers.room_type import RoomTypeProcessor
 from helpers.processor import Processor
 from helpers.room import RoomProcessor
 from helpers.booking import BookingProcessor
+from helpers.booking_room import BookingRoomProcessor
