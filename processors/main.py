@@ -34,6 +34,7 @@ if __name__ == "__main__":
         .option("startingOffsets", "latest")
         .load()
     )
+    # cr. https://stackoverflow.com/questions/67181848/how-to-make-spark-streams-execute-sequentially
     writer = df.writeStream.foreach(LocationProcessor()).processAllAvailable()
     writer = df.writeStream.foreach(GuestProcessor()).processAllAvailable()
     writer = df.writeStream.foreach(AddonProcessor()).processAllAvailable()
