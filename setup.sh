@@ -9,7 +9,7 @@ pip3 install -r requirements.txt
 docker-compose up -d
 
 # wait for services to start properly
-sleep 40
+sleep 45
 
 # initialize oltp and olap databases
 python3 setup_dbs.py
