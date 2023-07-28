@@ -99,14 +99,16 @@ CREATE TABLE `dim_roomtype` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
   `_id` integer,
   `name` varchar(255),
-  `price` float
+  `price` float,
+  `created_at` datetime
 );
 
 CREATE TABLE `dim_addon` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
   `_id` integer,
   `name` varchar(255),
-  `price` float
+  `price` float,
+  `created_at` datetime
 );
 
 CREATE TABLE `dim_guest` (
@@ -122,7 +124,7 @@ CREATE TABLE `dim_location` (
   `country` varchar(255)
 );
 
-CREATE TABLE `fct_transaction` (
+CREATE TABLE `fct_purchase` (
   `datetime` bigint,
   `guest` integer,
   `guest_location` integer,
@@ -132,12 +134,12 @@ CREATE TABLE `fct_transaction` (
   PRIMARY KEY (`datetime`, `guest`, `guest_location`, `roomtype`, `addon`)
 );
 
-ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
+ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
 
-ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`addon`) REFERENCES `dim_addon` (`id`);
+ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`addon`) REFERENCES `dim_addon` (`id`);
 
-ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`guest`) REFERENCES `dim_guest` (`id`);
+ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`guest`) REFERENCES `dim_guest` (`id`);
 
-ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype` (`id`);
+ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype` (`id`);
 
-ALTER TABLE `fct_transaction` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
+ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
