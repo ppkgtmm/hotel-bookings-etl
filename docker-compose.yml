@@ -62,6 +62,7 @@ services:
   processor:
     depends_on:
       - kafka-connect
+      - mysql
     build: processors/
     image: processor:latest
     container_name: processor
@@ -69,3 +70,4 @@ services:
       - ./processors:/processor
     env_file:
       - '.env'
+    command: "/processor/run.sh"
