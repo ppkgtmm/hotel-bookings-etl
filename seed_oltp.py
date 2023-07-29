@@ -51,37 +51,21 @@ def load_users():
 
 
 def load_guests():
+    columns = ["firstname", "lastname", "gender", "email", "dob", "id"]
     guests = pd.read_csv(data_dir + "guests.csv")
-    guests.to_sql("guests_temp", conn, index=False, if_exists="append")
-    guests_merged = pd.read_sql(
-        """
-        SELECT g.firstname, g.lastname, g.gender, g.email, g.dob, l.id location
-        FROM guests_temp g
-        LEFT JOIN location l
-        ON g.state = l.state AND g.country = l.country
-        """,
-        conn,
-    )
-    guests_merged.to_sql("guests", conn, index=False, if_exists="append")
-    conn.execute(text("DROP TABLE guests_temp"))
+    location = pd.read_sql_table("location", conn)
+    merged = guests.merge(location, on=["state", "country"])[columns]
+    merged = merged.rename(columns={"id": "location"})
+    merged.to_sql("guests", conn, index=False, if_exists="append")
 
 
 def load_rooms():
-    pd.read_csv(data_dir + "rooms.csv").to_sql(
-        "rooms_temp", conn, index=False, if_exists="replace"
-    )
-    rooms_merged = pd.read_sql(
-        """
-        SELECT r.floor, r.number, rt.id `type`
-        FROM rooms_temp r
-        LEFT JOIN roomtypes rt
-        ON r.type = rt.name
-        ORDER BY 1,2
-        """,
-        conn,
-    )
-    rooms_merged.to_sql("rooms", conn, index=False, if_exists="append")
-    conn.execute(text("DROP TABLE rooms_temp"))
+    columns = ["floor", "number", "id"]
+    rooms = pd.read_csv(data_dir + "rooms.csv")
+    room_types = pd.read_sql_table("roomtypes", conn)
+    merged = rooms.merge(room_types, left_on="type", right_on="name")[columns]
+    merged = merged.rename(columns={"id": "type"})
+    merged.to_sql("rooms", conn, index=False, if_exists="append")
 
 
 def load_bookings():
