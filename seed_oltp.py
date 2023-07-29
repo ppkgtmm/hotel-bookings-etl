@@ -12,6 +12,8 @@ filterwarnings(action="ignore")
 load_dotenv()
 
 max_rooms = 5
+max_addon_cnt = 10
+max_addon_quantity = 3
 
 db_host = getenv("DB_HOST")
 db_user = getenv("DB_USER")
@@ -80,6 +82,12 @@ def load_bookings():
     columns = ["id", "checkin", "checkout", "payment"]
     bookings = pd.read_csv(data_dir + "bookings.csv")
     users = pd.read_sql_table("users", conn)
+    addons = pd.read_sql_table("addons", conn)
+
+    bookings["checkin"] = pd.to_datetime(bookings["checkin"])
+    bookings["checkout"] = pd.to_datetime(bookings["checkout"])
+    bookings["payment"] = pd.to_datetime(bookings["payment"])
+
     merged = bookings.merge(users, left_on="user", right_on="email")[columns]
     merged = merged.rename(columns={"id": "user"})
 
@@ -90,11 +98,11 @@ def load_bookings():
         result = conn.execute(text(insert_q), row)
         conn.commit()
         booking = {**row, "id": result.lastrowid}
-        load_booking_rooms(booking, room_types, guests)
+        load_booking_rooms(booking, room_types, guests, addons)
 
 
-def load_booking_rooms(booking, room_types, guests):
-    # booking_room_q = "INSERT INTO booking_rooms (booking, room, guest) VALUES (:booking, :room, :guest)"
+def load_booking_rooms(booking, room_types, guests, addons):
+    booking_room_q = "INSERT INTO booking_rooms (booking, room, guest) VALUES (:booking, :room, :guest)"
     room_q = "SELECT id, type FROM rooms WHERE type IN ({})"
     checkin, checkout = booking["checkin"], booking["checkout"]
     overlapping = pd.read_sql(
@@ -104,9 +112,9 @@ def load_booking_rooms(booking, room_types, guests):
         WHERE booking IN (
             SELECT id
             FROM bookings
-            WHERE (checkin <= {checkin} AND {checkin} <= checkout)
-            OR (checkin <= {checkout} AND {checkout} <= checkout)
-            OR ({checkin} <= checkin AND {checkout} >= checkout)
+            WHERE (checkin <= DATE('{checkin}') AND DATE('{checkin}') <= checkout)
+            OR (checkin <= DATE('{checkout}')AND DATE('{checkout}') <= checkout)
+            OR (DATE('{checkin}') <= checkin AND DATE('{checkout}') >= checkout)
         )
         """,
         conn,
@@ -133,60 +141,42 @@ def load_booking_rooms(booking, room_types, guests):
     booking_rooms = pd.DataFrame([booking_room])
     booking_rooms = booking_rooms.explode(["room", "guest"])
     booking_rooms = booking_rooms.drop_duplicates("room").drop_duplicates("guest")
-    booking_rooms.to_sql("booking_rooms", conn, index=False, if_exists="append")
-def load_booking_room_addons():
-    addon_df = pd.read_sql("SELECT * FROM addons", conn)
-    addons = addon_df["name"].unique()
-    booking_rooms = conn.execute(
-        text(
-            """
-            SELECT br.*, CAST(b.checkin AS DATETIME) checkin, CAST(b.checkout AS DATETIME) checkout, DATEDIFF(b.checkout, b.checkin) day_diff
-            FROM booking_rooms br
-            LEFT JOIN bookings b
-            ON br.booking = b.id
-            ORDER BY br.booking
-        """
-        )
-    )
+    for row in booking_rooms.to_dict(orient="records"):
+        result = conn.execute(text(booking_room_q), row)
+        conn.commit()
+        booking_room = {**row, "id": result.lastrowid}
+        load_booking_addons(booking, booking_room, addons)
+
+
+def load_booking_addons(booking, booking_room, addons):
+    booking_addons_q = "INSERT INTO booking_addons (booking_room, addon, quantity, datetime) VALUES (:booking_room, :addon, :quantity, :datetime)"
+    stay_duration = (booking["checkout"] - booking["checkin"]).days
     result = []
-    for br in booking_rooms:
-        for day in range(random.randint(0, br.day_diff)):
-            max_distinct_addons = random.randint(1, addon_df.shape[0])
-            for _ in range(max_distinct_addons):
-                chosen_addon = random.choices(addons, k=1)[0]
-                quantity = random.randint(1, 3)
-                datetime = br.checkin + timedelta(
-                    days=day,
-                    hours=random.randint(0, 23),
-                    minutes=random.choice([0, 30]),
-                )
-                assert br.checkin <= datetime <= br.checkout
-                result.append(
-                    dict(
-                        booking_room=br.id,
-                        addon=addon_df[addon_df["name"] == chosen_addon]["id"].iloc[0],
-                        quantity=quantity,
-                        datetime=datetime,
-                    )
-                )
-    pd.DataFrame(result).to_sql(
-        "booking_addons_temp", conn, index=False, if_exists="replace"
-    )
-    pd.read_sql(
-        """
-        SELECT booking_room, addon, FLOOR(SUM(quantity)) quantity, datetime
-        FROM booking_addons_temp
-        GROUP BY 1, 2, 4
-        ORDER BY 1
-        """,
-        conn,
-    ).to_sql("booking_addons", conn, index=False, if_exists="append")
-    conn.execute(text("DROP TABLE booking_addons_temp;"))
-    # for booking_room in booking_rooms.to_dict(orient="records"):
-    #     conn.execute(text(booking_room_q), booking_room)
-    #     conn.commit()
-
-
+    for day in range(random.randint(0, stay_duration)):
+        max_addons = random.randint(1, max_addon_cnt)
+        chosen_addons = random.choices(addons["id"].tolist(), k=max_addons)
+        for addon in chosen_addons:
+            quantity = random.randint(1, max_addon_quantity)
+            datetime = booking["checkin"] + timedelta(
+                days=day,
+                hours=random.randint(0, 23),
+                minutes=random.choice([0, 30]),
+            )
+            assert booking["checkin"] <= datetime <= booking["checkout"]
+            data = dict(
+                booking_room=booking_room["id"],
+                addon=addon,
+                quantity=quantity,
+                datetime=datetime,
+            )
+            result.append(data)
+    if result == []:
+        return
+    df = pd.DataFrame(result)
+    df = df.groupby(["booking_room", "addon", "datetime"]).aggregate("sum")
+    for row in df.reset_index().to_dict(orient="records"):
+        conn.execute(text(booking_addons_q), row)
+        conn.commit()
 
 
 if __name__ == "__main__":
@@ -199,7 +189,5 @@ if __name__ == "__main__":
     load_guests()
     load_rooms()
     load_bookings()
-    # load_booking_rooms()
-    # load_booking_room_addons()
     conn.close()
     engine.dispose()
