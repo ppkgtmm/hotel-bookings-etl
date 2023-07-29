@@ -22,7 +22,7 @@ seed = getenv("SEED")
 random.seed(seed)
 
 connection_string = (
-    f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:3306/{db_name}"
+    f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 )
 
 
