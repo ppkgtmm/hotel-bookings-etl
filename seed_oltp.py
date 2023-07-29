@@ -31,18 +31,19 @@ def load_location():
     location.to_sql("location", conn, index=False, if_exists="append")
 
 
-def load_static_data():
+def load_room_types():
     room_types = pd.read_csv(data_dir + "room_types.csv")
-    addons = pd.read_csv(data_dir + "addons.csv")
     room_types.to_sql("roomtypes", conn, index=False, if_exists="append")
+
+
+def load_addons():
+    addons = pd.read_csv(data_dir + "addons.csv")
     addons.to_sql("addons", conn, index=False, if_exists="append")
 
 
-def load_person():
+def load_users():
     users = pd.read_csv(data_dir + "users.csv")
-    guests = pd.read_csv(data_dir + "guests.csv")
     users.to_sql("users_temp", conn, index=False, if_exists="append")
-    guests.to_sql("guests_temp", conn, index=False, if_exists="append")
     users_merged = pd.read_sql(
         """
         SELECT u.firstname, u.lastname, u.gender, u.email, l.id location
@@ -54,6 +55,11 @@ def load_person():
     )
     users_merged.to_sql("users", conn, index=False, if_exists="append")
     conn.execute(text("DROP TABLE users_temp"))
+
+
+def load_guests():
+    guests = pd.read_csv(data_dir + "guests.csv")
+    guests.to_sql("guests_temp", conn, index=False, if_exists="append")
     guests_merged = pd.read_sql(
         """
         SELECT g.firstname, g.lastname, g.gender, g.email, g.dob, l.id location
