@@ -46,7 +46,7 @@ class BookingRoomProcessor(Processor):
                     "guest": payload["guest"],
                     "guest_location": guest[0],
                     "roomtype": room_type[0],
-                    "datetime": current_date.strftime("%Y%m%d%H%M%S"),
+                    "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
                 }
             )
             current_date += timedelta(days=1)
