@@ -50,4 +50,6 @@ class BookingRoomProcessor(Processor):
                 }
             )
             current_date += timedelta(days=1)
-        super().insert_to_db("fct_booking", data, BookingRoomProcessor.fct_columns)
+        super().insert_to_db(
+            "fct_booking", data, BookingRoomProcessor.fct_columns, prepare=False
+        )
