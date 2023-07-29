@@ -50,11 +50,13 @@ class Processor:
         return payload
 
     @classmethod
-    def insert_to_db(cls, table_name, payload, columns):
+    def insert_to_db(cls, table_name, payload, columns, prepare=True):
         query = f"""INSERT INTO {table_name} ({', '.join(columns)}) 
                     VALUES ({', '.join([':'+col for col in columns])})
                 """
-        cls.conn.execute(text(query), Processor.prepare_payload(payload))
+        if prepare:
+            payload = Processor.prepare_payload(payload)
+        cls.conn.execute(text(query), payload)
         cls.conn.commit()
 
     def close(self, error):
