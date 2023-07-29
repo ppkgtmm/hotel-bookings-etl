@@ -42,19 +42,24 @@ def load_addons():
 
 
 def load_users():
+    columns = ["firstname", "lastname", "gender", "email", "id"]
     users = pd.read_csv(data_dir + "users.csv")
-    users.to_sql("users_temp", conn, index=False, if_exists="append")
-    users_merged = pd.read_sql(
-        """
-        SELECT u.firstname, u.lastname, u.gender, u.email, l.id location
-        FROM users_temp u
-        LEFT JOIN location l
-        ON u.state = l.state AND u.country = l.country
-        """,
-        conn,
-    )
-    users_merged.to_sql("users", conn, index=False, if_exists="append")
-    conn.execute(text("DROP TABLE users_temp"))
+    location = pd.read_sql_table("location", conn)
+    merged = users.merge(location, on=["state", "country"])[columns]
+    merged = merged.rename(columns={"id": "location"})
+    merged.to_sql("users", conn, index=False, if_exists="append")
+    # users.to_sql("users_temp", conn, index=False, if_exists="append")
+    # users_merged = pd.read_sql(
+    #     """
+    #     SELECT u.firstname, u.lastname, u.gender, u.email, l.id location
+    #     FROM users_temp u
+    #     LEFT JOIN location l
+    #     ON u.state = l.state AND u.country = l.country
+    #     """,
+    #     conn,
+    # )
+    # users_merged.to_sql("users", conn, index=False, if_exists="append")
+    # conn.execute(text("DROP TABLE users_temp"))
 
 
 def load_guests():
