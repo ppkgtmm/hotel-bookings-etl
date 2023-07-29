@@ -31,7 +31,7 @@ if __name__ == "__main__":
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
         .option("subscribePattern", f"{oltp_db}\.{oltp_db}\..*")
-        .option("startingOffsets", "latest")
+        .option("startingOffsets", "earliest")
         .load()
     )
     writer = df.writeStream.foreach(LocationProcessor()).start()
