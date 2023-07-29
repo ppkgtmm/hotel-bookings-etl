@@ -1,53 +1,50 @@
 version: '3'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.3.2
+    image: debezium/zookeeper:2.3
     container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
 
   broker:
-    image: confluentinc/cp-kafka:7.3.2
+    image: debezium/kafka:2.3
     container_name: broker
     ports:
-      # To learn about configuring Kafka for access across networks see
-      # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
       - "9092:9092"
     depends_on:
       - zookeeper
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #     KAFKA_BROKER_ID: 1
+      ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
   kafka-connect:
     depends_on:
       - broker
       - mysql
-    build: kafka_connect/
-    image: kafka-connect:latest
+  #   build: kafka_connect/
+    image: debezium/connect:2.3
     container_name: kafka-connect
     ports:
       - "8083:8083"
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
-      CONNECT_REST_PORT: 8083
-      CONNECT_GROUP_ID: 'hotel'
-      CONNECT_CONFIG_STORAGE_TOPIC: 'hotel-config'
-      CONNECT_OFFSET_STORAGE_TOPIC: 'hotel-offset'
-      CONNECT_STATUS_STORAGE_TOPIC: 'hotel-status'
-      CONNECT_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
-      CONNECT_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+      BOOTSTRAP_SERVERS: 'broker:29092'
+  #     CONNECT_REST_PORT: 8083
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: 'hotel-config'
+      OFFSET_STORAGE_TOPIC: 'hotel-offset'
+  #     CONNECT_STATUS_STORAGE_TOPIC: 'hotel-status'
+  #     CONNECT_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+  #     CONNECT_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
       CONNECT_REST_ADVERTISED_HOST_NAME: 'kafka-connect'
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components'
+  #     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components'
   
   mysql:
     image: mysql:8.0.33
