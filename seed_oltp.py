@@ -5,6 +5,9 @@ from os import getenv
 import pandas as pd
 from sqlalchemy import create_engine, text
 from faker.generator import random
+from warnings import filterwarnings
+
+filterwarnings(action="ignore")
 
 load_dotenv()
 
@@ -20,6 +23,10 @@ data_dir = getenv("SEED_DIR")
 seed = getenv("SEED")
 
 random.seed(seed)
+
+room_counts = list(range(1, max_rooms + 1))
+sum_count = sum(room_counts)
+count_weight = [(max_rooms - rc + 1) / sum_count for rc in room_counts]
 
 connection_string = (
     f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
@@ -69,77 +76,64 @@ def load_rooms():
 
 
 def load_bookings():
-    pd.read_csv(data_dir + "bookings.csv").to_sql(
-        "bookings_temp", conn, index=False, if_exists="replace"
-    )
-    bookings_merged = pd.read_sql(
-        """
-        SELECT DISTINCT u.id user, checkin, checkout, payment
-        FROM bookings_temp b
-        LEFT JOIN users u
-        ON b.user = u.email
-        ORDER BY 4
+    insert_q = "INSERT INTO bookings (user, checkin, checkout, payment) VALUES (:user, :checkin, :checkout, :payment)"
+    columns = ["id", "checkin", "checkout", "payment"]
+    bookings = pd.read_csv(data_dir + "bookings.csv")
+    users = pd.read_sql_table("users", conn)
+    merged = bookings.merge(users, left_on="user", right_on="email")[columns]
+    merged = merged.rename(columns={"id": "user"})
+
+    room_types = pd.read_sql("SELECT id FROM roomtypes", conn)["id"].tolist()
+    guests = pd.read_sql("SELECT id FROM guests", conn)["id"].tolist()
+
+    for row in merged.to_dict(orient="records"):
+        result = conn.execute(text(insert_q), row)
+        conn.commit()
+        booking = {**row, "id": result.lastrowid}
+        load_booking_rooms(booking, room_types, guests)
+
+
+def load_booking_rooms(booking, room_types, guests):
+    # booking_room_q = "INSERT INTO booking_rooms (booking, room, guest) VALUES (:booking, :room, :guest)"
+    room_q = "SELECT id, type FROM rooms WHERE type IN ({})"
+    checkin, checkout = booking["checkin"], booking["checkout"]
+    overlapping = pd.read_sql(
+        f"""
+        SELECT guest, room
+        FROM booking_rooms
+        WHERE booking IN (
+            SELECT id
+            FROM bookings
+            WHERE (checkin <= {checkin} AND {checkin} <= checkout)
+            OR (checkin <= {checkout} AND {checkout} <= checkout)
+            OR ({checkin} <= checkin AND {checkout} >= checkout)
+        )
         """,
         conn,
     )
-    bookings_merged.to_sql("bookings", conn, index=False, if_exists="append")
-    conn.execute(text("DROP TABLE bookings_temp"))
+    num_rooms = random.choices(room_counts, weights=count_weight, k=1)[0]
 
+    avail_guests = set(guests) - set(overlapping.guest.to_list())
+    assert len(avail_guests) >= num_rooms
+    guest = random.sample(avail_guests, k=num_rooms)
 
-def load_booking_rooms():
-    room_counts = list(range(1, max_rooms + 1))
-    sum_count = sum(room_counts)
-    count_weight = [(max_rooms - rc + 1) / sum_count for rc in room_counts]
-    bookings = pd.read_sql("SELECT id, checkin, checkout FROM bookings", conn)
-    room_types = [rt[0] for rt in conn.execute(text("SELECT id FROM roomtypes"))]
-    guests = set([g[0] for g in conn.execute(text("SELECT id FROM guests"))])
-    booking_rooms = []
-    for booking in bookings.to_dict(orient="records"):
-        checkin, checkout = booking["checkin"], booking["checkout"]
-        overlapping = pd.read_sql(
-            f"""
-            SELECT guest, room, type
-            FROM booking_rooms br
-            INNER JOIN bookings b
-            ON b.id = br.booking
-            INNER JOIN rooms r
-            ON br.room = r.id
-            WHERE (b.checkin <= {checkin} AND {checkin} <= b.checkout)
-            OR (b.checkin <= {checkout} AND {checkout} <= b.checkout)
-            OR ({checkin} <= b.checkin AND {checkout} >= b.checkout)
-            """,
-            conn,
-        )
-        num_rooms = random.choices(room_counts, weights=count_weight, k=1)[0]
-        guest, avail_guests = [], guests - set(overlapping.guest.to_list())
-        for _ in range(num_rooms):
-            avail_guests = avail_guests - set(guest)
-            assert len(avail_guests) >= 1
-            guest.append(random.choice(list(avail_guests)))
-        room_type = random.choices(room_types, k=num_rooms)
-        room_query = f"SELECT id FROM rooms WHERE type IN ({', '.join([str(rt) for rt in room_type])})"
-        rooms = set([r[0] for r in conn.execute(text(room_query))])
-        assigned_rooms = []
-        for type in room_type:
-            booked_rooms = overlapping[overlapping.type == type].room.to_list()
-            avail_rooms = list(rooms - set(booked_rooms) - set(assigned_rooms))
-            assert len(avail_rooms) >= 1
-            assigned_rooms.append(random.choice(avail_rooms))
-        assigned_rooms, guest = list(set(assigned_rooms)), list(set(guest))
-        num_deduped = min(len(assigned_rooms), len(guest))
-        booking_rooms.append(
-            {
-                "booking": booking["id"],
-                "room": assigned_rooms[0:num_deduped],
-                "guest": guest[0:num_deduped],
-            }
-        )
-    booking_rooms = pd.DataFrame(booking_rooms)
+    room_type = random.choices(room_types, k=num_rooms)
+    room_q = room_q.format(",".join(pd.Series(room_type, dtype=str).tolist()))
+    rooms = pd.read_sql(room_q, conn)
+    room = []
+    for type in room_type:
+        avail_rooms = set(rooms[rooms["type"] == type]["id"])
+        avail_rooms = avail_rooms - set(overlapping.room.to_list())
+        assert len(avail_rooms) >= 1
+        sample = random.sample(avail_rooms, k=1)
+        room += sample
+        rooms = rooms[~rooms["id"].isin(sample)]
+
+    booking_room = {"booking": booking["id"], "room": room, "guest": guest}
+    booking_rooms = pd.DataFrame([booking_room])
     booking_rooms = booking_rooms.explode(["room", "guest"])
+    booking_rooms = booking_rooms.drop_duplicates("room").drop_duplicates("guest")
     booking_rooms.to_sql("booking_rooms", conn, index=False, if_exists="append")
-    conn.commit()
-
-
 def load_booking_room_addons():
     addon_df = pd.read_sql("SELECT * FROM addons", conn)
     addons = addon_df["name"].unique()
@@ -188,6 +182,11 @@ def load_booking_room_addons():
         conn,
     ).to_sql("booking_addons", conn, index=False, if_exists="append")
     conn.execute(text("DROP TABLE booking_addons_temp;"))
+    # for booking_room in booking_rooms.to_dict(orient="records"):
+    #     conn.execute(text(booking_room_q), booking_room)
+    #     conn.commit()
+
+
 
 
 if __name__ == "__main__":
