@@ -34,12 +34,40 @@ if __name__ == "__main__":
         .option("startingOffsets", "earliest")
         .load()
     )
-    writer = df.writeStream.foreach(LocationProcessor()).start()
-    writer = df.writeStream.foreach(GuestProcessor()).start()
-    writer = df.writeStream.foreach(AddonProcessor()).start()
-    writer = df.writeStream.foreach(RoomTypeProcessor()).start()
-    writer = df.writeStream.foreach(RoomProcessor()).start()
-    writer = df.writeStream.foreach(BookingProcessor()).start()
-    writer = df.writeStream.foreach(BookingRoomProcessor()).start()
+    writer = (
+        df.where("topic == 'oltp_hotel.oltp_hotel.location'")
+        .writeStream.foreach(LocationProcessor())
+        .start()
+    )
+    writer = (
+        df.where("topic == 'oltp_hotel.oltp_hotel.guests'")
+        .writeStream.foreach(GuestProcessor())
+        .start()
+    )
+    writer = (
+        df.where("topic == 'oltp_hotel.oltp_hotel.addons'")
+        .writeStream.foreach(AddonProcessor())
+        .start()
+    )
+    writer = (
+        df.where("topic == 'oltp_hotel.oltp_hotel.roomtypes'")
+        .writeStream.foreach(RoomTypeProcessor())
+        .start()
+    )
+    writer = (
+        df.where("topic == 'oltp_hotel.oltp_hotel.rooms'")
+        .writeStream.foreach(RoomProcessor())
+        .start()
+    )
+    writer = (
+        df.where("topic == 'oltp_hotel.oltp_hotel.bookings'")
+        .writeStream.foreach(BookingProcessor())
+        .start()
+    )
+    writer = (
+        df.where("topic == 'oltp_hotel.oltp_hotel.booking_rooms'")
+        .writeStream.foreach(BookingRoomProcessor())
+        .start()
+    )
 
     writer.awaitTermination()
