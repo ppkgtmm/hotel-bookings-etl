@@ -11,6 +11,7 @@
     "topic.prefix": "",
     "database.include.list": "",
     "schema.history.internal.kafka.bootstrap.servers": "",
-    "schema.history.internal.kafka.topic": ""
+    "schema.history.internal.kafka.topic": "",
+    "snapshot.mode": "schema_only"
   }
 }
