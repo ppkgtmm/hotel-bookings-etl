@@ -36,18 +36,13 @@ class BookingRoomProcessor(Processor):
         booking = Processor.conn.execute(
             BookingRoomProcessor.booking_q, {"id": payload["booking"]}
         ).first()
-        data = []
         current_date, end_date = booking[0], booking[1]
         while current_date <= end_date:
-            data.append(
-                {
-                    "guest": payload["guest"],
-                    "guest_location": guest[0],
-                    "roomtype": room_type[0],
-                    "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
-                }
-            )
+            data = {
+                "guest": payload["guest"],
+                "guest_location": guest[0],
+                "roomtype": room_type[0],
+                "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
+            }
+            super().upsert_to_db("fct_booking", data, BookingRoomProcessor.fct_columns)
             current_date += timedelta(days=1)
-        super().upsert_to_db(
-            "fct_booking", data, BookingRoomProcessor.fct_columns, prepare=False
-        )
