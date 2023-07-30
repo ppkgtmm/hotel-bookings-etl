@@ -1,6 +1,10 @@
 import pandas as pd
+from dotenv import load_dotenv
+from os import getenv
 
-data_dir = "data/static/"
+load_dotenv()
+
+data_dir = getenv("SEED_DIR")
 
 room_types = [
     dict(name="standard", price=1500),
