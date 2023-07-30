@@ -13,6 +13,6 @@ class GuestProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        payload["dob"] = super().to_date(payload["dob"])
-        super().upsert_to_db("stg_guest", payload, GuestProcessor.stg_columns)
-        super().upsert_to_db("dim_guest", payload, GuestProcessor.columns)
+        payload["dob"] = Processor.to_date(payload["dob"])
+        self.upsert_to_db("stg_guest", payload, GuestProcessor.stg_columns)
+        self.upsert_to_db("dim_guest", payload, GuestProcessor.columns)

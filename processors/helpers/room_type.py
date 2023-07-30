@@ -13,5 +13,5 @@ class RoomTypeProcessor(Processor):
         if not payload:
             return
         payload.pop("created_at")
-        payload["created_at"] = super().to_datetime(payload["updated_at"])
-        super().insert_to_db("dim_roomtype", payload, RoomTypeProcessor.columns)
+        payload["created_at"] = Processor.to_datetime(payload["updated_at"])
+        self.insert_to_db("dim_roomtype", payload, RoomTypeProcessor.columns)

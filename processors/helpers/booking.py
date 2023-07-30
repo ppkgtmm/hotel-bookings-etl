@@ -12,6 +12,6 @@ class BookingProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        payload["checkin"] = super().to_date(payload["checkin"])
-        payload["checkout"] = super().to_date(payload["checkout"])
-        super().upsert_to_db("stg_booking", payload, BookingProcessor.columns)
+        payload["checkin"] = Processor.to_date(payload["checkin"])
+        payload["checkout"] = Processor.to_date(payload["checkout"])
+        self.upsert_to_db("stg_booking", payload, BookingProcessor.columns)

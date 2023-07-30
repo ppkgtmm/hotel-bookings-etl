@@ -12,4 +12,4 @@ class LocationProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        super().upsert_to_db("dim_location", payload, LocationProcessor.columns)
+        self.upsert_to_db("dim_location", payload, LocationProcessor.columns)

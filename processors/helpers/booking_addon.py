@@ -30,27 +30,23 @@ class BookingAddonProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        payload["updated_at"] = super().to_datetime(payload["updated_at"])
-        payload["datetime"] = super().to_datetime(payload["datetime"])
-        super().upsert_to_db(
-            "stg_booking_addon", payload, BookingAddonProcessor.columns
-        )
-        addon = Processor.conn.execute(
+        payload["updated_at"] = Processor.to_datetime(payload["updated_at"])
+        payload["datetime"] = Processor.to_datetime(payload["datetime"])
+        self.upsert_to_db("stg_booking_addon", payload, BookingAddonProcessor.columns)
+        addon = self.conn.execute(
             BookingAddonProcessor.addon_q,
             {"_id": payload["addon"], "created_at": payload["updated_at"]},
         ).first()
 
-        booking_room = Processor.conn.execute(
+        booking_room = self.conn.execute(
             BookingAddonProcessor.booking_room_q, {"id": payload["booking_room"]}
         ).first()
         guest, room = booking_room[0], booking_room[1]
-        guest_location = Processor.conn.execute(
+        guest_location = self.conn.execute(
             BookingAddonProcessor.guest_q, {"id": guest}
         ).first()
-        room_stg = Processor.conn.execute(
-            BookingAddonProcessor.room_q, {"id": room}
-        ).first()
-        room_type = Processor.conn.execute(
+        room_stg = self.conn.execute(BookingAddonProcessor.room_q, {"id": room}).first()
+        room_type = self.conn.execute(
             BookingAddonProcessor.roomtype_q,
             {"_id": room_stg[0], "created_at": payload["updated_at"]},
         ).first()
@@ -62,4 +58,4 @@ class BookingAddonProcessor(Processor):
             "addon": addon[0],
             "addon_quantity": payload["quantity"],
         }
-        super().upsert_to_db("fct_purchase", data, BookingAddonProcessor.fct_columns)
+        self.upsert_to_db("fct_purchase", data, BookingAddonProcessor.fct_columns)

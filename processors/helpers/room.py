@@ -12,4 +12,4 @@ class RoomProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        super().upsert_to_db("stg_room", payload, RoomProcessor.columns)
+        self.upsert_to_db("stg_room", payload, RoomProcessor.columns)
