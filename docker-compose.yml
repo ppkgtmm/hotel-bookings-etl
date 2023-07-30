@@ -33,9 +33,7 @@ services:
       CONFIG_STORAGE_TOPIC: 'hotel-config'
       OFFSET_STORAGE_TOPIC: 'hotel-offset'
       STATUS_STORAGE_TOPIC: 'hotel-status'
-      # ADVERTISED_HOST_NAME: 'kafka-connect'
 
-  
   mysql:
     image: mysql:8.0.33
     container_name: mysql
