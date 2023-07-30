@@ -31,10 +31,6 @@ def get_config(**kwargs):
     config["config"][
         "schema.history.internal.kafka.topic"
     ] = f"schema-changes.{kwargs.get('DB_NAME')}"
-    config["config"][
-        "transforms.Reroute.topic.regex"
-    ] = f'(.*){kwargs.get("DB_NAME")}(.*)'
-    config["config"]["transforms.Reroute.topic.replacement"] = "$1data"
     return config
 
 
