@@ -23,13 +23,18 @@ source venv/bin/activate
 python3 kafka_connect/register_mysql.py
 ```
 
-3. Insert generated data to OLTP database
+3. Generate fake hotel booking data (can skip after first run)
+```
+
+```
+
+4. Insert generated data to OLTP database
    
 ```
 python3 seed_oltp.py
 ``` 
 
-4. You are all set ! after a few minutes, data will start appearing in OLAP database
+5. You are all set ! after a few minutes, data will start appearing in OLAP database
 
 ### Tear down
 
