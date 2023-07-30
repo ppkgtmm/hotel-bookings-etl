@@ -3,24 +3,6 @@ CREATE DATABASE IF NOT EXISTS olap_hotel;
 
 USE olap_hotel;
 
--- CREATE TABLE `stg_location` (
---   `id` integer PRIMARY KEY,
---   `state` varchar(255),
---   `country` varchar(255),
---   `created_at` timestamp,
---   `updated_at` timestamp
--- );
-
--- CREATE TABLE `stg_users` (
---   `id` integer PRIMARY KEY,
---   `firstname` varchar(255),
---   `lastname` varchar(255),
---   `email` varchar(255),
---   `location` integer,
---   `created_at` timestamp,
---   `updated_at` timestamp
--- );
-
 CREATE TABLE `stg_guest` (
   `id` integer PRIMARY KEY,
   `email` varchar(255),
@@ -28,22 +10,6 @@ CREATE TABLE `stg_guest` (
   `gender` varchar(25),
   `location` integer
 );
-
--- CREATE TABLE `stg_addons` (
---   `id` integer PRIMARY KEY,
---   `name` varchar(255),
---   `price` float,
---   `created_at` timestamp,
---   `updated_at` timestamp
--- );
-
--- CREATE TABLE `stg_roomtypes` (
---   `id` integer PRIMARY KEY,
---   `name` varchar(255),
---   `price` float,
---   `created_at` timestamp,
---   `updated_at` timestamp
--- );
 
 CREATE TABLE `stg_room` (
   `id` integer PRIMARY KEY,
@@ -61,19 +27,17 @@ CREATE TABLE `stg_booking_room` (
   `booking` integer,
   `room` integer,
   `guest` integer,
-  -- `created_at` timestamp,
   `updated_at` timestamp
 );
 
--- CREATE TABLE `stg_booking_addon` (
---   `id` integer PRIMARY KEY,
---   `booking_room` integer,
---   `addon` integer,
---   `quantity` integer,
---   `datetime` timestamp,
---   `created_at` timestamp,
---   `updated_at` timestamp
--- );
+CREATE TABLE `stg_booking_addon` (
+  `id` integer PRIMARY KEY,
+  `booking_room` integer,
+  `addon` integer,
+  `quantity` integer,
+  `datetime` timestamp,
+  `updated_at` timestamp
+);
 
 CREATE TABLE `dim_date` (
   `id` bigint PRIMARY KEY,
