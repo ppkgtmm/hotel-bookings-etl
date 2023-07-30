@@ -25,7 +25,7 @@ python3 kafka_connect/register_mysql.py
 
 3. Generate fake hotel booking data (can skip after first run)
 ```
-
+chmod +x generators/run.sh && ./generators/run.sh
 ```
 
 4. Insert generated data to OLTP database
