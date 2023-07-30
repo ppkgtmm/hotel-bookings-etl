@@ -14,7 +14,7 @@ OLAP_DB = os.getenv("OLAP_DB")
 KAFKA_CONNECT_SERVER = os.getenv("KAFKA_CONNECT_SERVER")
 KAFKA_INTERNAL = os.getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 
-config_path = f"{os.path.dirname(__file__)}/register_mysql.json"
+config_path = f"{os.path.dirname(__file__)}/config.json"
 
 
 def get_config(**kwargs):
