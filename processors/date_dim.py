@@ -27,7 +27,7 @@ while curr_date <= max_date:
     curr_date += timedelta(minutes=30)
 
 processor = Processor()
-
+processor.open(None, None)
 processor.conn.execute(
     text(
         "INSERT INTO dim_date VALUES (:id, :datetime, :date, DATE(:month), :quarter, :year)"
