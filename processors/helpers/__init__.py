@@ -6,3 +6,4 @@ from helpers.processor import Processor
 from helpers.room import RoomProcessor
 from helpers.booking import BookingProcessor
 from helpers.booking_room import BookingRoomProcessor
+from helpers.booking_addon import BookingAddonProcessor
