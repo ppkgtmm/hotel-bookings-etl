@@ -30,7 +30,7 @@ if __name__ == "__main__":
     location = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", f"{oltp_db}.{oltp_db}.location")
+        .option("subscribe", "location")
         .option("startingOffsets", "earliest")
         .load()
     )
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     guests = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", f"{oltp_db}.{oltp_db}.guests")
+        .option("subscribe", "guests")
         .option("startingOffsets", "earliest")
         .load()
     )
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     addons = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", f"{oltp_db}.{oltp_db}.addons")
+        .option("subscribe", "addons")
         .option("startingOffsets", "earliest")
         .load()
     )
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     roomtypes = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", f"{oltp_db}.{oltp_db}.roomtypes")
+        .option("subscribe", "roomtypes")
         .option("startingOffsets", "earliest")
         .load()
     )
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     rooms = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", f"{oltp_db}.{oltp_db}.rooms")
+        .option("subscribe", "rooms")
         .option("startingOffsets", "earliest")
         .load()
     )
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     bookings = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", f"{oltp_db}.{oltp_db}.bookings")
+        .option("subscribe", "bookings")
         .option("startingOffsets", "earliest")
         .load()
     )
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     booking_rooms = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", f"{oltp_db}.{oltp_db}.booking_rooms")
+        .option("subscribe", "booking_rooms")
         .option("startingOffsets", "earliest")
         .load()
     )
