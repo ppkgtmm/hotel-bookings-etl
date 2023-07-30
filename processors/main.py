@@ -82,7 +82,6 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", "bookings")
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", 20)
         .load()
     )
     bookings.writeStream.foreach(BookingProcessor()).start()
@@ -92,12 +91,8 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", "booking_rooms")
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", 10)
         .load()
     )
-    booking_rooms = booking_rooms.withColumn(
-        "current_timestamp", current_timestamp()
-    ).withWatermark("current_timestamp", "30 seconds")
     booking_rooms.writeStream.foreach(BookingRoomProcessor()).start()
 
     booking_addons = (
@@ -108,9 +103,6 @@ if __name__ == "__main__":
         .option("maxOffsetsPerTrigger", 10)
         .load()
     )
-    booking_addons = booking_addons.withColumn(
-        "current_timestamp", current_timestamp()
-    ).withWatermark("current_timestamp", "2 minutes")
     booking_addons.writeStream.foreach(BookingAddonProcessor()).start()
 
     spark.streams.awaitAnyTermination()
