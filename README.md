@@ -18,25 +18,19 @@ chmod +x setup.sh && ./setup.sh
 source venv/bin/activate
 ```
 
-2. Register OLTP database to kafka connect
-
-```
-python3 kafka_connect/register_mysql.py
-```
-
-3. Generate fake hotel booking data (can skip after first run)
+2. Generate fake hotel booking data (can skip after first run)
 
 ```
 chmod +x generators/run.sh && ./generators/run.sh
 ```
 
-4. Insert generated data to OLTP database
+3. Insert generated data to OLTP database
    
 ```
 python3 seed_oltp.py
 ``` 
 
-5. You are all set ! after a few minutes, data will start appearing in OLAP database
+4. You are all set ! after a few minutes, data will start appearing in OLAP database
 
 ### Tear down
 
