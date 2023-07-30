@@ -9,6 +9,7 @@ from helpers import (
     RoomProcessor,
     BookingProcessor,
     BookingRoomProcessor,
+    BookingAddonProcessor,
 )
 
 load_dotenv()
@@ -93,5 +94,15 @@ if __name__ == "__main__":
     )
     booking_rooms = booking_rooms.withWatermark("timestamp", "5 minutes")
     booking_rooms.writeStream.foreach(BookingRoomProcessor()).start()
+
+    booking_addons = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", "booking_addons")
+        .option("startingOffsets", "earliest")
+        .load()
+    )
+    booking_addons = booking_addons.withWatermark("timestamp", "5 minutes")
+    booking_addons.writeStream.foreach(BookingAddonProcessor()).start()
 
     spark.streams.awaitAnyTermination()
