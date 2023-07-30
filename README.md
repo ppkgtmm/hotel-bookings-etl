@@ -6,6 +6,7 @@
 2. In `.env` file created, replace `<YOUR DB PASSWORD>` with wanted password 
 
 3. Allow set up script execution and run the set up script
+
 ```
 chmod +x setup.sh && ./setup.sh
 ```
@@ -24,6 +25,7 @@ python3 kafka_connect/register_mysql.py
 ```
 
 3. Generate fake hotel booking data (can skip after first run)
+
 ```
 chmod +x generators/run.sh && ./generators/run.sh
 ```
