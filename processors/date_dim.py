@@ -26,14 +26,13 @@ while curr_date <= max_date:
     )
     curr_date += timedelta(minutes=30)
 
-Processor.load_envars()
-Processor.setup_db_conn()
+processor = Processor()
 
-Processor.conn.execute(
+processor.conn.execute(
     text(
         "INSERT INTO dim_date VALUES (:id, :datetime, :date, DATE(:month), :quarter, :year)"
     ),
     data,
 )
-Processor.conn.commit()
-Processor.teardown_db_conn()
+processor.conn.commit()
+processor.close(None)
