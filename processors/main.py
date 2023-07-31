@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 
-# from pyspark.sql.functions import when, max
+from pyspark.sql.functions import current_timestamp
 from dotenv import load_dotenv
 from os import getenv
 from helpers import (
@@ -18,14 +18,22 @@ load_dotenv()
 
 OLTP_DB = getenv("OLTP_DB")
 BROKER = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
-LOCATION_TABLE = OLTP_DB + "-" + getenv("LOCATION_TABLE")
-GUESTS_TABLE = OLTP_DB + "-" + getenv("GUESTS_TABLE")
-ADDONS_TABLE = OLTP_DB + "-" + getenv("ADDONS_TABLE")
-ROOMTYPES_TABLE = OLTP_DB + "-" + getenv("ROOMTYPES_TABLE")
-ROOMS_TABLE = OLTP_DB + "-" + getenv("ROOMS_TABLE")
-BOOKINGS_TABLE = OLTP_DB + "-" + getenv("BOOKINGS_TABLE")
-BOOKING_ROOMS_TABLE = OLTP_DB + "-" + getenv("BOOKING_ROOMS_TABLE")
-BOOKING_ADDONS_TABLE = OLTP_DB + "-" + getenv("BOOKING_ADDONS_TABLE")
+# LOCATION_TABLE = OLTP_DB + "-" + getenv("LOCATION_TABLE")
+# GUESTS_TABLE = OLTP_DB + "-" + getenv("GUESTS_TABLE")
+# ADDONS_TABLE = OLTP_DB + "-" + getenv("ADDONS_TABLE")
+# ROOMTYPES_TABLE = OLTP_DB + "-" + getenv("ROOMTYPES_TABLE")
+# ROOMS_TABLE = OLTP_DB + "-" + getenv("ROOMS_TABLE")
+# BOOKINGS_TABLE = OLTP_DB + "-" + getenv("BOOKINGS_TABLE")
+# BOOKING_ROOMS_TABLE = OLTP_DB + "-" + getenv("BOOKING_ROOMS_TABLE")
+# BOOKING_ADDONS_TABLE = OLTP_DB + "-" + getenv("BOOKING_ADDONS_TABLE")
+LOCATION_TABLE = getenv("LOCATION_TABLE")
+GUESTS_TABLE = getenv("GUESTS_TABLE")
+ADDONS_TABLE = getenv("ADDONS_TABLE")
+ROOMTYPES_TABLE = getenv("ROOMTYPES_TABLE")
+ROOMS_TABLE = getenv("ROOMS_TABLE")
+BOOKINGS_TABLE = getenv("BOOKINGS_TABLE")
+BOOKING_ROOMS_TABLE = getenv("BOOKING_ROOMS_TABLE")
+BOOKING_ADDONS_TABLE = getenv("BOOKING_ADDONS_TABLE")
 
 if __name__ == "__main__":
     # location_topic = f"{oltp_db}.{oltp_db}.location"
@@ -144,7 +152,9 @@ if __name__ == "__main__":
         .option("startingOffsets", "earliest")
         .load()
     )
-    booking_rooms.writeStream.foreach(BookingRoomProcessor()).start()
+    booking_rooms.withColumn("time", current_timestamp()).withWatermark(
+        "time", "5 minutes"
+    ).writeStream.foreach(BookingRoomProcessor()).start()
 
     booking_addons = (
         spark.readStream.format("kafka")
@@ -153,6 +163,8 @@ if __name__ == "__main__":
         .option("startingOffsets", "earliest")
         .load()
     )
-    booking_addons.writeStream.foreach(BookingAddonProcessor()).start()
+    booking_addons.withColumn("time", current_timestamp()).withWatermark(
+        "time", "10 minutes"
+    ).writeStream.foreach(BookingAddonProcessor()).start()
 
     spark.streams.awaitAnyTermination()
