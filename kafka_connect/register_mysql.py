@@ -37,7 +37,7 @@ OLTP_TABLES = [
 config_path = f"{os.path.dirname(__file__)}/config.json"
 
 
-def get_config(table_name, **kwargs):
+def get_config(id, table_name, **kwargs):
     with open(config_path, "r") as fp:
         config = json.load(fp)
     config["name"] = kwargs.get("DB_NAME") + "." + table_name
@@ -45,13 +45,14 @@ def get_config(table_name, **kwargs):
     config["config"]["database.port"] = kwargs.get("DB_PORT")
     config["config"]["database.user"] = kwargs.get("DB_USER")
     config["config"]["database.password"] = kwargs.get("DB_PASSWORD")
-    config["config"]["topic.prefix"] = kwargs.get("DB_NAME")
+    config["config"]["database.server.id"] = id
+    config["config"]["topic.prefix"] = kwargs.get("DB_NAME") + "-" + table_name
     config["config"]["database.include.list"] = kwargs.get("DB_NAME")
     config["config"]["table.include.list"] = kwargs.get("DB_NAME") + "." + table_name
     config["config"]["schema.history.internal.kafka.bootstrap.servers"] = KAFKA_INTERNAL
     config["config"][
         "schema.history.internal.kafka.topic"
-    ] = f"schema-changes.{kwargs.get('DB_NAME')}.{table_name}"
+    ] = f"schema-changes.{kwargs.get('DB_NAME')}-{table_name}"
     return config
 
 
@@ -59,8 +60,9 @@ if __name__ == "__main__":
     mysql_kwargs = dict(
         DB_HOST=DB_HOST, DB_USER=DB_USER, DB_PASSWORD=DB_PASSWORD, DB_PORT=DB_PORT
     )
-    for table_name in OLTP_TABLES:
-        config = get_config(table_name, **dict(**mysql_kwargs, DB_NAME=OLTP_DB))
+    for idx, table_name in enumerate(OLTP_TABLES):
+        id = idx + 1
+        config = get_config(id, table_name, **dict(**mysql_kwargs, DB_NAME=OLTP_DB))
         response = requests.post(
             f"{KAFKA_CONNECT_SERVER}/connectors/",
             headers={
