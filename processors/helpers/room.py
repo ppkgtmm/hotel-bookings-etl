@@ -9,7 +9,8 @@ class RoomProcessor(ProcessingHelper):
         super().__init__()
 
     def process(self, row):
-        payload = json.loads(row.value)["payload"]["after"]
+        payload = json.loads(row.value)["payload"]
+        payload = payload.get("after")
         if not payload:
             return
         self.upsert_to_db("stg_room", payload, RoomProcessor.columns)

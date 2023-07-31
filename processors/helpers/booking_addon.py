@@ -27,7 +27,8 @@ class BookingAddonProcessor(ProcessingHelper):
         super().__init__()
 
     def process(self, row):
-        payload = json.loads(row.value)["payload"]["after"]
+        payload = json.loads(row.value)["payload"]
+        payload = payload.get("after")
         if not payload:
             return
         payload["updated_at"] = ProcessingHelper.to_datetime(payload["updated_at"])

@@ -9,7 +9,8 @@ class AddonProcessor(ProcessingHelper):
         super().__init__()
 
     def process(self, row):
-        payload = json.loads(row.value)["payload"]["after"]
+        payload = json.loads(row.value)["payload"]
+        payload = payload.get("after")
         if not payload:
             return
         payload.pop("created_at")
