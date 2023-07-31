@@ -23,34 +23,36 @@ class ProcessingHelper:
         connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
             db_user, db_password, db_host, db_port, db_name
         )
-        self.engine = create_engine(connection_string)
-        self.conn = self.engine.connect()
+        ProcessingHelper.engine = create_engine(connection_string)
+        ProcessingHelper.conn = ProcessingHelper.engine.connect()
         return True
 
-    def upsert_to_db(self, table_name, payload, columns):
+    @classmethod
+    def upsert_to_db(cls, table_name, payload, columns):
         query = f"""INSERT INTO {table_name} ({', '.join(columns)}) 
                     VALUES ({', '.join([':'+col for col in columns])})
                     ON DUPLICATE KEY UPDATE {', '.join([col+'=:'+col for col in columns])}
                 """
-        self.conn.execute(text(query), payload)
-        self.conn.commit()
+        cls.conn.execute(text(query), payload)
+        cls.conn.commit()
 
     @staticmethod
     def prepare_payload(payload):
         payload["_id"] = payload.pop("id")
         return payload
 
-    def insert_to_db(self, table_name, payload, columns, prepare=True):
+    @classmethod
+    def insert_to_db(cls, table_name, payload, columns, prepare=True):
         query = f"""INSERT INTO {table_name} ({', '.join(columns)}) 
                     VALUES ({', '.join([':'+col for col in columns])})
                 """
         if prepare:
             payload = ProcessingHelper.prepare_payload(payload)
-        self.conn.execute(text(query), payload)
-        self.conn.commit()
+        cls.conn.execute(text(query), payload)
+        cls.conn.commit()
 
     def close(self, error):
         if error:
             print("Closed with error: %s" % str(error))
-        self.conn.close()
-        self.engine.dispose()
+        ProcessingHelper.conn.close()
+        ProcessingHelper.engine.dispose()
