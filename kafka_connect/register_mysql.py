@@ -51,7 +51,7 @@ def get_config(table_name, **kwargs):
     config["config"]["schema.history.internal.kafka.bootstrap.servers"] = KAFKA_INTERNAL
     config["config"][
         "schema.history.internal.kafka.topic"
-    ] = f"schema-changes.{kwargs.get('DB_NAME')}"
+    ] = f"schema-changes.{kwargs.get('DB_NAME')}.{table_name}"
     return config
 
 
