@@ -1,8 +1,8 @@
 import json
-from helpers.processor import Processor
+from helpers.helper import ProcessingHelper
 
 
-class RoomProcessor(Processor):
+class RoomProcessor(ProcessingHelper):
     columns = ["id", "type"]
 
     def __init__(self):

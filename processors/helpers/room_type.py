@@ -1,8 +1,8 @@
 import json
-from helpers.processor import Processor
+from helpers.helper import ProcessingHelper
 
 
-class RoomTypeProcessor(Processor):
+class RoomTypeProcessor(ProcessingHelper):
     columns = ["_id", "name", "price", "created_at"]
 
     def __init__(self):
@@ -13,5 +13,5 @@ class RoomTypeProcessor(Processor):
         if not payload:
             return
         payload.pop("created_at")
-        payload["created_at"] = Processor.to_datetime(payload["updated_at"])
+        payload["created_at"] = ProcessingHelper.to_datetime(payload["updated_at"])
         self.insert_to_db("dim_roomtype", payload, RoomTypeProcessor.columns)

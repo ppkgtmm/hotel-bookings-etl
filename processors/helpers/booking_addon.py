@@ -1,9 +1,9 @@
 import json
-from helpers.processor import Processor
+from helpers.helper import ProcessingHelper
 from sqlalchemy import text
 
 
-class BookingAddonProcessor(Processor):
+class BookingAddonProcessor(ProcessingHelper):
     columns = ["id", "booking_room", "addon", "quantity", "datetime", "updated_at"]
     fct_columns = [
         "datetime",
@@ -30,8 +30,8 @@ class BookingAddonProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        payload["updated_at"] = Processor.to_datetime(payload["updated_at"])
-        payload["datetime"] = Processor.to_datetime(payload["datetime"])
+        payload["updated_at"] = ProcessingHelper.to_datetime(payload["updated_at"])
+        payload["datetime"] = ProcessingHelper.to_datetime(payload["datetime"])
         self.upsert_to_db("stg_booking_addon", payload, BookingAddonProcessor.columns)
         addon = self.conn.execute(
             BookingAddonProcessor.addon_q,

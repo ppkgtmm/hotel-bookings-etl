@@ -1,8 +1,8 @@
 import json
-from helpers.processor import Processor
+from helpers.helper import ProcessingHelper
 
 
-class GuestProcessor(Processor):
+class GuestProcessor(ProcessingHelper):
     columns = ["id", "email", "dob", "gender"]
     stg_columns = columns + ["location"]
 
@@ -13,6 +13,6 @@ class GuestProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        payload["dob"] = Processor.to_date(payload["dob"])
+        payload["dob"] = ProcessingHelper.to_date(payload["dob"])
         self.upsert_to_db("stg_guest", payload, GuestProcessor.stg_columns)
         self.upsert_to_db("dim_guest", payload, GuestProcessor.columns)

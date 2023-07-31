@@ -1,10 +1,10 @@
 import json
-from helpers.processor import Processor
+from helpers.helper import ProcessingHelper
 from sqlalchemy import text
 from datetime import timedelta
 
 
-class BookingRoomProcessor(Processor):
+class BookingRoomProcessor(ProcessingHelper):
     columns = ["id", "booking", "room", "guest", "updated_at"]
     fct_columns = ["datetime", "guest", "guest_location", "roomtype"]
     guest_q = text("SELECT location FROM stg_guest WHERE id = :id")
@@ -21,7 +21,7 @@ class BookingRoomProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        payload["updated_at"] = Processor.to_datetime(payload["updated_at"])
+        payload["updated_at"] = ProcessingHelper.to_datetime(payload["updated_at"])
         self.upsert_to_db("stg_booking_room", payload, BookingRoomProcessor.columns)
         guest = self.conn.execute(
             BookingRoomProcessor.guest_q, {"id": payload["guest"]}

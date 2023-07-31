@@ -1,8 +1,8 @@
 import json
-from helpers.processor import Processor
+from helpers.helper import ProcessingHelper
 
 
-class BookingProcessor(Processor):
+class BookingProcessor(ProcessingHelper):
     columns = ["id", "checkin", "checkout"]
 
     def __init__(self):
@@ -12,6 +12,6 @@ class BookingProcessor(Processor):
         payload = json.loads(row.value)["payload"]["after"]
         if not payload:
             return
-        payload["checkin"] = Processor.to_date(payload["checkin"])
-        payload["checkout"] = Processor.to_date(payload["checkout"])
+        payload["checkin"] = ProcessingHelper.to_date(payload["checkin"])
+        payload["checkout"] = ProcessingHelper.to_date(payload["checkout"])
         self.upsert_to_db("stg_booking", payload, BookingProcessor.columns)

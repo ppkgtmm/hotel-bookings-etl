@@ -1,8 +1,8 @@
 import json
-from helpers.processor import Processor
+from helpers.helper import ProcessingHelper
 
 
-class LocationProcessor(Processor):
+class LocationProcessor(ProcessingHelper):
     columns = ["id", "state", "country"]
 
     def __init__(self):

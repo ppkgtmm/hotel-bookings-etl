@@ -1,8 +1,8 @@
 import json
-from helpers.processor import Processor
+from helpers.helper import ProcessingHelper
 
 
-class AddonProcessor(Processor):
+class AddonProcessor(ProcessingHelper):
     columns = ["_id", "name", "price", "created_at"]
 
     def __init__(self):
