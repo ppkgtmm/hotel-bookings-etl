@@ -1,17 +1,8 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import when, max
 from dotenv import load_dotenv
 from os import getenv
-from helpers import (
-    LocationProcessor,
-    GuestProcessor,
-    AddonProcessor,
-    RoomTypeProcessor,
-    RoomProcessor,
-    BookingProcessor,
-    BookingRoomProcessor,
-    BookingAddonProcessor,
-)
+from helpers import Processor
 
 load_dotenv()
 
@@ -19,6 +10,15 @@ oltp_db = getenv("OLTP_DB")
 broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 
 if __name__ == "__main__":
+    location_topic = f"{oltp_db}.{oltp_db}.location"
+    guests_topic = f"{oltp_db}.{oltp_db}.guests"
+    addons_topic = f"{oltp_db}.{oltp_db}.addons"
+    roomtypes_topic = f"{oltp_db}.{oltp_db}.roomtypes"
+    rooms_topic = f"{oltp_db}.{oltp_db}.rooms"
+    bookings_topic = f"{oltp_db}.{oltp_db}.bookings"
+    booking_rooms_topic = f"{oltp_db}.{oltp_db}.booking_rooms"
+    booking_addons_topic = f"{oltp_db}.{oltp_db}.booking_addons"
+
     spark = (
         SparkSession.builder.master("local")
         .appName("hotel oltp processor")
@@ -29,80 +29,119 @@ if __name__ == "__main__":
         .getOrCreate()
     )
 
-    location = (
+    oltp_data = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", "location")
+        .option("subscribePattern", f"{oltp_db}\\.{oltp_db}.*")
         .option("startingOffsets", "earliest")
         .load()
     )
-
-    location.writeStream.foreach(LocationProcessor()).start()
-
-    guests = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", "guests")
-        .option("startingOffsets", "earliest")
-        .load()
+    # .withWatermark("timestamp", "5 seconds")
+    (
+        oltp_data.withColumn(
+            "processing_order",
+            when(oltp_data.topic == location_topic, 1)
+            .when(oltp_data.topic == roomtypes_topic, 2)
+            .when(oltp_data.topic == rooms_topic, 3)
+            .when(oltp_data.topic == guests_topic, 4)
+            .when(oltp_data.topic == addons_topic, 5)
+            .when(oltp_data.topic == bookings_topic, 6)
+            .when(oltp_data.topic == booking_rooms_topic, 7)
+            .when(oltp_data.topic == booking_addons_topic, 8)
+            .otherwise(-1),
+        )
+        .groupBy(["topic", "value"])
+        .agg(max("processing_order").alias("max_processing_order"))
+        .orderBy("max_processing_order")
+        .writeStream.outputMode("complete")
+        .foreach(Processor())
+        .start()
+        .awaitTermination()
     )
 
-    guests.writeStream.foreach(GuestProcessor()).start()
+    # location = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", broker)
+    #     .option("subscribe", "location")
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
 
-    addons = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", "addons")
-        .option("startingOffsets", "earliest")
-        .load()
-    )
+    # location.writeStream.foreach(LocationProcessingHelper()).start()
 
-    addons.writeStream.foreach(AddonProcessor()).start()
-    roomtypes = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", "roomtypes")
-        .option("startingOffsets", "earliest")
-        .load()
-    )
-    roomtypes.writeStream.foreach(RoomTypeProcessor()).start()
+    # guests = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", broker)
+    #     .option("subscribe", "guests")
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
 
-    rooms = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", "rooms")
-        .option("startingOffsets", "earliest")
-        .load()
-    )
+    # guests.writeStream.foreach(GuestProcessingHelper()).start()
 
-    rooms.writeStream.foreach(RoomProcessor()).start()
+    # addons = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", broker)
+    #     .option("subscribe", "addons")
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
 
-    bookings = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", "bookings")
-        .option("startingOffsets", "earliest")
-        .load()
-    )
-    bookings.writeStream.foreach(BookingProcessor()).start()
+    # addons.writeStream.foreach(AddonProcessingHelper()).start()
+    # roomtypes = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", broker)
+    #     .option("subscribe", "roomtypes")
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
+    # roomtypes.writeStream.foreach(RoomTypeProcessingHelper()).start()
 
-    booking_rooms = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", "booking_rooms")
-        .option("startingOffsets", "earliest")
-        .load()
-    )
-    booking_rooms.writeStream.foreach(BookingRoomProcessor()).start()
+    # rooms = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", broker)
+    #     .option("subscribe", "rooms")
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
 
-    booking_addons = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", "booking_addons")
-        .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", 10)
-        .load()
-    )
-    booking_addons.writeStream.foreach(BookingAddonProcessor()).start()
+    # rooms.writeStream.foreach(RoomProcessingHelper()).start()
 
-    spark.streams.awaitAnyTermination()
+    # bookings = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", broker)
+    #     .option("subscribePattern", "booking.*")
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
+    # bookings.where('topic == "bookings"').writeStream.foreach(
+    #     BookingProcessingHelper()
+    # ).start()
+
+    # bookings.where('topic == "booking_rooms"').writeStream.foreach(
+    #     BookingRoomProcessingHelper()
+    # ).start()
+
+    # bookings.where('topic == "booking_addons"').writeStream.foreach(
+    #     BookingAddonProcessingHelper()
+    # ).start()
+
+    # # booking_rooms = (
+    # #     spark.readStream.format("kafka")
+    # #     .option("kafka.bootstrap.servers", broker)
+    # #     .option("subscribe", "booking_rooms")
+    # #     .option("startingOffsets", "earliest")
+    # #     .load()
+    # # )
+    # # booking_rooms.writeStream.foreach(BookingRoomProcessingHelper()).start()
+
+    # # booking_addons = (
+    # #     spark.readStream.format("kafka")
+    # #     .option("kafka.bootstrap.servers", broker)
+    # #     .option("subscribe", "booking_addons")
+    # #     .option("startingOffsets", "earliest")
+    # #     .load()
+    # # )
+    # # booking_addons.writeStream.foreach(BookingAddonProcessingHelper()).start()
+
+    # spark.streams.awaitAnyTermination()
