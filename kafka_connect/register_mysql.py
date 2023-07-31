@@ -1,4 +1,5 @@
 import json
+from time import sleep
 from dotenv import load_dotenv
 import os
 import requests
@@ -39,7 +40,7 @@ config_path = f"{os.path.dirname(__file__)}/config.json"
 def get_config(table_name, **kwargs):
     with open(config_path, "r") as fp:
         config = json.load(fp)
-    config["name"] = kwargs.get("DB_NAME")
+    config["name"] = kwargs.get("DB_NAME") + "." + table_name
     config["config"]["database.hostname"] = kwargs.get("DB_HOST")
     config["config"]["database.port"] = kwargs.get("DB_PORT")
     config["config"]["database.user"] = kwargs.get("DB_USER")
@@ -69,3 +70,4 @@ if __name__ == "__main__":
             json=config,
         )
         assert response.status_code == 201
+        sleep(2)
