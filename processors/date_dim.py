@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime
-from helpers import Processor
+from helpers.processor import ProcessingHelper
 import math
 from sqlalchemy import text
 
@@ -26,7 +26,7 @@ while curr_date <= max_date:
     )
     curr_date += timedelta(minutes=30)
 
-processor = Processor()
+processor = ProcessingHelper()
 processor.open(None, None)
 processor.conn.execute(
     text(
