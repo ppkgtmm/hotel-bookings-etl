@@ -13,4 +13,4 @@ class RoomProcessor(ProcessingHelper):
         payload = payload.get("after")
         if not payload:
             return
-        self.upsert_to_db("stg_room", payload, RoomProcessor.columns)
+        ProcessingHelper.upsert_to_db("stg_room", payload, RoomProcessor.columns)

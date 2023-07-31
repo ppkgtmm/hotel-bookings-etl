@@ -13,4 +13,6 @@ class LocationProcessor(ProcessingHelper):
         payload = payload.get("after")
         if not payload:
             return
-        self.upsert_to_db("dim_location", payload, LocationProcessor.columns)
+        ProcessingHelper.upsert_to_db(
+            "dim_location", payload, LocationProcessor.columns
+        )

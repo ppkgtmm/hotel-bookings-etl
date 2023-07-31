@@ -15,4 +15,4 @@ class AddonProcessor(ProcessingHelper):
             return
         payload.pop("created_at")
         payload["created_at"] = super().to_datetime(payload["updated_at"])
-        self.insert_to_db("dim_addon", payload, AddonProcessor.columns)
+        ProcessingHelper.insert_to_db("dim_addon", payload, AddonProcessor.columns)

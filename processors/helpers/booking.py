@@ -15,4 +15,4 @@ class BookingProcessor(ProcessingHelper):
             return
         payload["checkin"] = ProcessingHelper.to_date(payload["checkin"])
         payload["checkout"] = ProcessingHelper.to_date(payload["checkout"])
-        self.upsert_to_db("stg_booking", payload, BookingProcessor.columns)
+        ProcessingHelper.upsert_to_db("stg_booking", payload, BookingProcessor.columns)

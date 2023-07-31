@@ -15,4 +15,6 @@ class RoomTypeProcessor(ProcessingHelper):
             return
         payload.pop("created_at")
         payload["created_at"] = ProcessingHelper.to_datetime(payload["updated_at"])
-        self.insert_to_db("dim_roomtype", payload, RoomTypeProcessor.columns)
+        ProcessingHelper.insert_to_db(
+            "dim_roomtype", payload, RoomTypeProcessor.columns
+        )

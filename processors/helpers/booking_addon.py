@@ -33,21 +33,25 @@ class BookingAddonProcessor(ProcessingHelper):
             return
         payload["updated_at"] = ProcessingHelper.to_datetime(payload["updated_at"])
         payload["datetime"] = ProcessingHelper.to_datetime(payload["datetime"])
-        self.upsert_to_db("stg_booking_addon", payload, BookingAddonProcessor.columns)
-        addon = self.conn.execute(
+        ProcessingHelper.upsert_to_db(
+            "stg_booking_addon", payload, BookingAddonProcessor.columns
+        )
+        addon = ProcessingHelper.conn.execute(
             BookingAddonProcessor.addon_q,
             {"_id": payload["addon"], "created_at": payload["updated_at"]},
         ).first()
 
-        booking_room = self.conn.execute(
+        booking_room = ProcessingHelper.conn.execute(
             BookingAddonProcessor.booking_room_q, {"id": payload["booking_room"]}
         ).first()
         guest, room = booking_room[0], booking_room[1]
-        guest_location = self.conn.execute(
+        guest_location = ProcessingHelper.conn.execute(
             BookingAddonProcessor.guest_q, {"id": guest}
         ).first()
-        room_stg = self.conn.execute(BookingAddonProcessor.room_q, {"id": room}).first()
-        room_type = self.conn.execute(
+        room_stg = ProcessingHelper.conn.execute(
+            BookingAddonProcessor.room_q, {"id": room}
+        ).first()
+        room_type = ProcessingHelper.conn.execute(
             BookingAddonProcessor.roomtype_q,
             {"_id": room_stg[0], "created_at": payload["updated_at"]},
         ).first()
@@ -59,4 +63,6 @@ class BookingAddonProcessor(ProcessingHelper):
             "addon": addon[0],
             "addon_quantity": payload["quantity"],
         }
-        self.upsert_to_db("fct_purchase", data, BookingAddonProcessor.fct_columns)
+        ProcessingHelper.upsert_to_db(
+            "fct_purchase", data, BookingAddonProcessor.fct_columns
+        )

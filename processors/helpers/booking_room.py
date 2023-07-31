@@ -23,18 +23,20 @@ class BookingRoomProcessor(ProcessingHelper):
         if not payload:
             return
         payload["updated_at"] = ProcessingHelper.to_datetime(payload["updated_at"])
-        self.upsert_to_db("stg_booking_room", payload, BookingRoomProcessor.columns)
-        guest = self.conn.execute(
+        ProcessingHelper.upsert_to_db(
+            "stg_booking_room", payload, BookingRoomProcessor.columns
+        )
+        guest = ProcessingHelper.conn.execute(
             BookingRoomProcessor.guest_q, {"id": payload["guest"]}
         ).first()
-        room = self.conn.execute(
+        room = ProcessingHelper.conn.execute(
             BookingRoomProcessor.room_q, {"id": payload["room"]}
         ).first()
-        room_type = self.conn.execute(
+        room_type = ProcessingHelper.conn.execute(
             BookingRoomProcessor.roomtype_q,
             {"_id": room[0], "created_at": payload["updated_at"]},
         ).first()
-        booking = self.conn.execute(
+        booking = ProcessingHelper.conn.execute(
             BookingRoomProcessor.booking_q, {"id": payload["booking"]}
         ).first()
         current_date, end_date = booking[0], booking[1]
@@ -45,5 +47,7 @@ class BookingRoomProcessor(ProcessingHelper):
                 "roomtype": room_type[0],
                 "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
             }
-            self.upsert_to_db("fct_booking", data, BookingRoomProcessor.fct_columns)
+            ProcessingHelper.upsert_to_db(
+                "fct_booking", data, BookingRoomProcessor.fct_columns
+            )
             current_date += timedelta(days=1)

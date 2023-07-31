@@ -15,5 +15,5 @@ class GuestProcessor(ProcessingHelper):
         if not payload:
             return
         payload["dob"] = ProcessingHelper.to_date(payload["dob"])
-        self.upsert_to_db("stg_guest", payload, GuestProcessor.stg_columns)
-        self.upsert_to_db("dim_guest", payload, GuestProcessor.columns)
+        ProcessingHelper.upsert_to_db("stg_guest", payload, GuestProcessor.stg_columns)
+        ProcessingHelper.upsert_to_db("dim_guest", payload, GuestProcessor.columns)
