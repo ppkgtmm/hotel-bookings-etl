@@ -1,6 +1,11 @@
 from pyspark.sql import SparkSession
 
-from pyspark.sql.functions import current_timestamp, from_json, col, timestamp_seconds
+from pyspark.sql.functions import (
+    from_json,
+    col,
+    timestamp_seconds,
+    expr,
+)
 from pyspark.sql.types import (
     IntegerType,
     LongType,
@@ -25,6 +30,7 @@ from helpers import (
 
 load_dotenv()
 
+MAX_OFFSETS = 10
 OLTP_DB = getenv("OLTP_DB")
 BROKER = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 # BROKER = getenv("KAFKA_BOOTSTRAP_SERVERS")
@@ -118,15 +124,16 @@ if __name__ == "__main__":
         .getOrCreate()
     )
 
-    # location = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", BROKER)
-    #     .option("subscribe", LOCATION_TABLE)
-    #     .option("startingOffsets", "earliest")
-    #     .load()
-    # )
+    location = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", BROKER)
+        .option("subscribe", LOCATION_TABLE)
+        .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .load()
+    )
 
-    # location.writeStream.foreach(LocationProcessor()).start()
+    location.writeStream.foreach(LocationProcessor()).start()
 
     # guests = (
     #     spark.readStream.format("kafka")
@@ -157,23 +164,46 @@ if __name__ == "__main__":
     # )
     # roomtypes.writeStream.foreach(RoomTypeProcessor()).start()
 
-    # rooms = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", BROKER)
-    #     .option("subscribe", ROOMS_TABLE)
-    #     .option("startingOffsets", "earliest")
-    #     .load()
-    # )
+    rooms = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", BROKER)
+        .option("subscribe", ROOMS_TABLE)
+        .option("startingOffsets", "earliest")
+        .load()
+        .withColumn(
+            "message",
+            from_json(col("value").cast("string"), MapType(StringType(), StringType())),
+        )
+        .withColumn(
+            "payload",
+            from_json(col("message.payload"), MapType(StringType(), StringType())),
+        )
+        .withColumn("data", from_json(col("payload.after"), r_schema))
+        .withColumn("time_s", col("data.updated_at") / 1000)
+        .select("data", timestamp_seconds("time_s").alias("time"))
+    )
 
     # rooms.writeStream.foreach(RoomProcessor()).start()
 
-    # bookings = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", BROKER)
-    #     .option("subscribePattern", BOOKINGS_TABLE)
-    #     .option("startingOffsets", "earliest")
-    #     .load()
-    # )
+    bookings = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", BROKER)
+        .option("subscribePattern", BOOKINGS_TABLE)
+        .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", 10)
+        .load()
+        .withColumn(
+            "message",
+            from_json(col("value").cast("string"), MapType(StringType(), StringType())),
+        )
+        .withColumn(
+            "payload",
+            from_json(col("message.payload"), MapType(StringType(), StringType())),
+        )
+        .withColumn("data", from_json(col("payload.after"), b_schema))
+        .withColumn("time_s", col("data.updated_at") / 1000)
+        .select("data", timestamp_seconds("time_s").alias("time"))
+    )
     # bookings.writeStream.foreach(BookingProcessor()).start()
 
     booking_rooms = (
@@ -196,9 +226,31 @@ if __name__ == "__main__":
         .select("data", timestamp_seconds("time_s").alias("time"))
     )
 
-    booking_rooms.withWatermark("time", "5 seconds").writeStream.format(
+    booking_rooms.alias("br").withWatermark("time", "60 seconds").join(
+        bookings.alias("b"),
+        expr(
+            """
+            b.data.id = br.data.booking AND
+            br.time BETWEEN b.time AND b.time + interval 15 seconds
+            """
+        ),
+    ).join(
+        rooms.alias("r"),
+        expr(
+            """
+            r.data.id = br.data.room AND
+            b.time BETWEEN r.time AND r.time + interval 15 seconds
+            """
+        ),
+    ).select(
+        "br.data", "b.data.checkin", "b.data.checkout", "r.data.type"
+    ).writeStream.format(
         "console"
-    ).outputMode("append").option("truncate", "false").start().awaitTermination()
+    ).outputMode(
+        "append"
+    ).option(
+        "truncate", "false"
+    ).start().awaitTermination()
 
     # booking_rooms.writeStream.foreach(BookingRoomProcessor()).start()
 
