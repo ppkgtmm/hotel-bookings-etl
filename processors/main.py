@@ -1,6 +1,15 @@
 from pyspark.sql import SparkSession
 
-from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import current_timestamp, from_json, col, timestamp_seconds
+from pyspark.sql.types import (
+    IntegerType,
+    LongType,
+    FloatType,
+    StringType,
+    StructField,
+    StructType,
+    MapType,
+)
 from dotenv import load_dotenv
 from os import getenv
 from helpers import (
@@ -18,14 +27,8 @@ load_dotenv()
 
 OLTP_DB = getenv("OLTP_DB")
 BROKER = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
-# LOCATION_TABLE = OLTP_DB + "-" + getenv("LOCATION_TABLE")
-# GUESTS_TABLE = OLTP_DB + "-" + getenv("GUESTS_TABLE")
-# ADDONS_TABLE = OLTP_DB + "-" + getenv("ADDONS_TABLE")
-# ROOMTYPES_TABLE = OLTP_DB + "-" + getenv("ROOMTYPES_TABLE")
-# ROOMS_TABLE = OLTP_DB + "-" + getenv("ROOMS_TABLE")
-# BOOKINGS_TABLE = OLTP_DB + "-" + getenv("BOOKINGS_TABLE")
-# BOOKING_ROOMS_TABLE = OLTP_DB + "-" + getenv("BOOKING_ROOMS_TABLE")
-# BOOKING_ADDONS_TABLE = OLTP_DB + "-" + getenv("BOOKING_ADDONS_TABLE")
+# BROKER = getenv("KAFKA_BOOTSTRAP_SERVERS")
+
 LOCATION_TABLE = getenv("LOCATION_TABLE")
 GUESTS_TABLE = getenv("GUESTS_TABLE")
 ADDONS_TABLE = getenv("ADDONS_TABLE")
@@ -35,16 +38,76 @@ BOOKINGS_TABLE = getenv("BOOKINGS_TABLE")
 BOOKING_ROOMS_TABLE = getenv("BOOKING_ROOMS_TABLE")
 BOOKING_ADDONS_TABLE = getenv("BOOKING_ADDONS_TABLE")
 
-if __name__ == "__main__":
-    # location_topic = f"{oltp_db}.{oltp_db}.location"
-    # guests_topic = f"{oltp_db}.{oltp_db}.guests"
-    # addons_topic = f"{oltp_db}.{oltp_db}.addons"
-    # roomtypes_topic = f"{oltp_db}.{oltp_db}.roomtypes"
-    # rooms_topic = f"{oltp_db}.{oltp_db}.rooms"
-    # bookings_topic = f"{oltp_db}.{oltp_db}.bookings"
-    # booking_rooms_topic = f"{oltp_db}.{oltp_db}.booking_rooms"
-    # booking_addons_topic = f"{oltp_db}.{oltp_db}.booking_addons"
 
+br_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("booking", IntegerType()),
+        StructField("room", IntegerType()),
+        StructField("guest", IntegerType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
+
+ba_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("booking_room", IntegerType()),
+        StructField("addon", IntegerType()),
+        StructField("quantity", IntegerType()),
+        StructField("datetime", LongType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
+
+g_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("firstname", StringType()),
+        StructField("lastname", StringType()),
+        StructField("gender", StringType()),
+        StructField("email", StringType()),
+        StructField("dob", IntegerType()),
+        StructField("location", IntegerType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
+
+r_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("floor", IntegerType()),
+        StructField("number", IntegerType()),
+        StructField("type", IntegerType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
+
+rt_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("name", StringType()),
+        StructField("price", FloatType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
+b_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("user", IntegerType()),
+        StructField("checkin", IntegerType()),
+        StructField("checkout", IntegerType()),
+        StructField("payment", LongType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
+if __name__ == "__main__":
     spark = (
         SparkSession.builder.master("local")
         .appName("hotel oltp processor")
@@ -55,122 +118,97 @@ if __name__ == "__main__":
         .getOrCreate()
     )
 
-    # oltp_data = (
+    # location = (
     #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", broker)
-    #     .option("subscribePattern", f"{oltp_db}\\.{oltp_db}.*")
+    #     .option("kafka.bootstrap.servers", BROKER)
+    #     .option("subscribe", LOCATION_TABLE)
     #     .option("startingOffsets", "earliest")
     #     .load()
     # )
-    # # .withWatermark("timestamp", "5 seconds")
-    # (
-    #     oltp_data.withColumn(
-    #         "processing_order",
-    #         when(oltp_data.topic == location_topic, 1)
-    #         .when(oltp_data.topic == roomtypes_topic, 2)
-    #         .when(oltp_data.topic == rooms_topic, 3)
-    #         .when(oltp_data.topic == guests_topic, 4)
-    #         .when(oltp_data.topic == addons_topic, 5)
-    #         .when(oltp_data.topic == bookings_topic, 6)
-    #         .when(oltp_data.topic == booking_rooms_topic, 7)
-    #         .when(oltp_data.topic == booking_addons_topic, 8)
-    #         .otherwise(-1),
-    #     )
-    #     .groupBy(["topic", "value"])
-    #     .agg(max("processing_order").alias("max_processing_order"))
-    #     .orderBy("max_processing_order")
-    #     .writeStream.outputMode("complete")
-    #     .foreach(Processor())
-    #     .start()
-    #     .awaitTermination()
+
+    # location.writeStream.foreach(LocationProcessor()).start()
+
+    # guests = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", BROKER)
+    #     .option("subscribe", GUESTS_TABLE)
+    #     .option("startingOffsets", "earliest")
+    #     .load()
     # )
 
-    location = (
+    # guests.writeStream.foreach(GuestProcessor()).start()
+
+    # addons = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", BROKER)
+    #     .option("subscribe", ADDONS_TABLE)
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
+
+    # addons.writeStream.foreach(AddonProcessor()).start()
+
+    # roomtypes = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", BROKER)
+    #     .option("subscribe", ROOMTYPES_TABLE)
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
+    # roomtypes.writeStream.foreach(RoomTypeProcessor()).start()
+
+    # rooms = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", BROKER)
+    #     .option("subscribe", ROOMS_TABLE)
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
+
+    # rooms.writeStream.foreach(RoomProcessor()).start()
+
+    # bookings = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", BROKER)
+    #     .option("subscribePattern", BOOKINGS_TABLE)
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
+    # bookings.writeStream.foreach(BookingProcessor()).start()
+
+    booking_rooms = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", LOCATION_TABLE)
+        .option("subscribe", BOOKING_ROOMS_TABLE)
         .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", 10)
         .load()
-    )
-
-    location = location.writeStream.foreach(LocationProcessor()).start()
-
-    guests = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", GUESTS_TABLE)
-        .option("startingOffsets", "earliest")
-        .load()
-    )
-
-    guests = guests.writeStream.foreach(GuestProcessor()).start()
-
-    addons = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", ADDONS_TABLE)
-        .option("startingOffsets", "earliest")
-        .load()
-    )
-
-    addons = addons.writeStream.foreach(AddonProcessor()).start()
-
-    roomtypes = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", ROOMTYPES_TABLE)
-        .option("startingOffsets", "earliest")
-        .load()
-    )
-    roomtypes = roomtypes.writeStream.foreach(RoomTypeProcessor()).start()
-
-    rooms = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", ROOMS_TABLE)
-        .option("startingOffsets", "earliest")
-        .load()
-    )
-
-    rooms = rooms.writeStream.foreach(RoomProcessor()).start()
-
-    bookings = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribePattern", BOOKINGS_TABLE)
-        .option("startingOffsets", "earliest")
-        .load()
-    )
-    bookings = bookings.writeStream.foreach(BookingProcessor()).start()
-
-    pending = (
-        bookings.status["isDataAvailable"]
-        or rooms.status["isDataAvailable"]
-        or roomtypes.status["isDataAvailable"]
-        or guests.status["isDataAvailable"]
-        or location.status["isDataAvailable"],
-    )
-
-    if not pending:
-        booking_rooms = (
-            spark.readStream.format("kafka")
-            .option("kafka.bootstrap.servers", BROKER)
-            .option("subscribe", BOOKING_ROOMS_TABLE)
-            .option("startingOffsets", "earliest")
-            .load()
+        .withColumn(
+            "message",
+            from_json(col("value").cast("string"), MapType(StringType(), StringType())),
         )
-        booking_rooms = booking_rooms.writeStream.foreach(
-            BookingRoomProcessor()
-        ).start()
-
-    if not pending and not addons.status["isDataAvailable"]:
-        booking_addons = (
-            spark.readStream.format("kafka")
-            .option("kafka.bootstrap.servers", BROKER)
-            .option("subscribe", BOOKING_ADDONS_TABLE)
-            .option("startingOffsets", "earliest")
-            .load()
+        .withColumn(
+            "payload",
+            from_json(col("message.payload"), MapType(StringType(), StringType())),
         )
-        booking_addons.writeStream.foreach(BookingAddonProcessor()).start()
+        .withColumn("data", from_json(col("payload.after"), br_schema))
+        .withColumn("time_s", col("data.updated_at") / 1000)
+        .select("data", timestamp_seconds("time_s").alias("time"))
+    )
 
-    spark.streams.awaitAnyTermination()
+    booking_rooms.withWatermark("time", "5 seconds").writeStream.format(
+        "console"
+    ).outputMode("append").option("truncate", "false").start().awaitTermination()
+
+    # booking_rooms.writeStream.foreach(BookingRoomProcessor()).start()
+
+    # booking_addons = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", BROKER)
+    #     .option("subscribe", BOOKING_ADDONS_TABLE)
+    #     .option("startingOffsets", "earliest")
+    #     .load()
+    # )
+    # booking_addons.writeStream.foreach(BookingAddonProcessor()).start()
+
+    # spark.streams.awaitAnyTermination()
