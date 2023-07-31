@@ -93,7 +93,7 @@ if __name__ == "__main__":
         .load()
     )
 
-    location.writeStream.foreach(LocationProcessor()).start()
+    location = location.writeStream.foreach(LocationProcessor()).start()
 
     guests = (
         spark.readStream.format("kafka")
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         .load()
     )
 
-    guests.writeStream.foreach(GuestProcessor()).start()
+    guests = guests.writeStream.foreach(GuestProcessor()).start()
 
     addons = (
         spark.readStream.format("kafka")
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         .load()
     )
 
-    addons.writeStream.foreach(AddonProcessor()).start()
+    addons = addons.writeStream.foreach(AddonProcessor()).start()
 
     roomtypes = (
         spark.readStream.format("kafka")
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         .option("startingOffsets", "earliest")
         .load()
     )
-    roomtypes.writeStream.foreach(RoomTypeProcessor()).start()
+    roomtypes = roomtypes.writeStream.foreach(RoomTypeProcessor()).start()
 
     rooms = (
         spark.readStream.format("kafka")
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         .load()
     )
 
-    rooms.writeStream.foreach(RoomProcessor()).start()
+    rooms = rooms.writeStream.foreach(RoomProcessor()).start()
 
     bookings = (
         spark.readStream.format("kafka")
@@ -141,30 +141,36 @@ if __name__ == "__main__":
         .option("startingOffsets", "earliest")
         .load()
     )
-    bookings.where('topic == "bookings"').writeStream.foreach(
-        BookingProcessor()
-    ).start()
+    bookings = bookings.writeStream.foreach(BookingProcessor()).start()
 
-    booking_rooms = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", BOOKING_ROOMS_TABLE)
-        .option("startingOffsets", "earliest")
-        .load()
+    pending = (
+        bookings.status["isDataAvailable"]
+        or rooms.status["isDataAvailable"]
+        or roomtypes.status["isDataAvailable"]
+        or guests.status["isDataAvailable"]
+        or location.status["isDataAvailable"],
     )
-    booking_rooms.withColumn("time", current_timestamp()).withWatermark(
-        "time", "5 minutes"
-    ).writeStream.foreach(BookingRoomProcessor()).start()
 
-    booking_addons = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", BOOKING_ADDONS_TABLE)
-        .option("startingOffsets", "earliest")
-        .load()
-    )
-    booking_addons.withColumn("time", current_timestamp()).withWatermark(
-        "time", "10 minutes"
-    ).writeStream.foreach(BookingAddonProcessor()).start()
+    if not pending:
+        booking_rooms = (
+            spark.readStream.format("kafka")
+            .option("kafka.bootstrap.servers", BROKER)
+            .option("subscribe", BOOKING_ROOMS_TABLE)
+            .option("startingOffsets", "earliest")
+            .load()
+        )
+        booking_rooms = booking_rooms.writeStream.foreach(
+            BookingRoomProcessor()
+        ).start()
+
+    if not pending and not addons.status["isDataAvailable"]:
+        booking_addons = (
+            spark.readStream.format("kafka")
+            .option("kafka.bootstrap.servers", BROKER)
+            .option("subscribe", BOOKING_ADDONS_TABLE)
+            .option("startingOffsets", "earliest")
+            .load()
+        )
+        booking_addons.writeStream.foreach(BookingAddonProcessor()).start()
 
     spark.streams.awaitAnyTermination()
