@@ -1,69 +1,46 @@
-from dotenv import load_dotenv
-from os import getenv
-from sqlalchemy import create_engine, text
-from datetime import datetime, timedelta
+from helpers.location import LocationProcessor
+from helpers.guest import GuestProcessor
+from helpers.addon import AddonProcessor
+from helpers.room_type import RoomTypeProcessor
+from helpers.room import RoomProcessor
+from helpers.booking import BookingProcessor
+from helpers.booking_room import BookingRoomProcessor
+from helpers.booking_addon import BookingAddonProcessor
+from helpers.helper import ProcessingHelper
 
 
-class Processor:
-    # def __init__(self):
-    # load_dotenv()
-    # db_host = getenv("DB_HOST_INTERNAL")
-    # db_port = getenv("DB_PORT")
-    # db_user = getenv("DB_USER")
-    # db_password = getenv("DB_PASSWORD")
-    # db_name = getenv("OLAP_DB")
-    # connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
-    #     db_user, db_password, db_host, db_port, db_name
-    # )
-    # self.engine = create_engine(connection_string)
-    # self.conn = self.engine.connect()
-
-    @staticmethod
-    def to_datetime(date_time):
-        return datetime.fromtimestamp(date_time / 1000)
-
-    @staticmethod
-    def to_date(days):
-        return datetime(1970, 1, 1) + timedelta(days=days)
-
+class Processor(ProcessingHelper):
     def open(self, partition_id, epoch_id):
-        load_dotenv()
-        db_host = getenv("DB_HOST_INTERNAL")
-        db_port = getenv("DB_PORT")
-        db_user = getenv("DB_USER")
-        db_password = getenv("DB_PASSWORD")
-        db_name = getenv("OLAP_DB")
-        connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
-            db_user, db_password, db_host, db_port, db_name
-        )
-        self.engine = create_engine(connection_string)
-        self.conn = self.engine.connect()
-        return True
+        super().open(partition_id, epoch_id)
+        self.location = LocationProcessor()
+        self.guest = GuestProcessor()
+        self.room = RoomProcessor()
+        self.addon = AddonProcessor()
+        self.roomtype = RoomTypeProcessor()
+        self.booking = BookingProcessor()
+        self.booking_room = BookingRoomProcessor()
+        self.booking_addon = BookingAddonProcessor()
 
-    def upsert_to_db(self, table_name, payload, columns):
-        query = f"""INSERT INTO {table_name} ({', '.join(columns)}) 
-                    VALUES ({', '.join([':'+col for col in columns])})
-                    ON DUPLICATE KEY UPDATE {', '.join([col+'=:'+col for col in columns])}
-                """
-        self.conn.execute(text(query), payload)
-        self.conn.commit()
-
-    @staticmethod
-    def prepare_payload(payload):
-        payload["_id"] = payload.pop("id")
-        return payload
-
-    def insert_to_db(self, table_name, payload, columns, prepare=True):
-        query = f"""INSERT INTO {table_name} ({', '.join(columns)}) 
-                    VALUES ({', '.join([':'+col for col in columns])})
-                """
-        if prepare:
-            payload = Processor.prepare_payload(payload)
-        self.conn.execute(text(query), payload)
-        self.conn.commit()
+    def process(self, row):
+        topic = str(row.topic)
+        if topic.endswith("location"):
+            self.location.process(row)
+        elif topic.endswith("guests"):
+            self.guest.process(row)
+        elif topic.endswith("addons"):
+            self.addon.process(row)
+        elif topic.endswith("roomtypes"):
+            self.roomtype.process(row)
+        elif topic.endswith("rooms"):
+            self.room.process(row)
+        elif topic.endswith("bookings"):
+            self.booking.process(row)
+        elif topic.endswith("booking_rooms"):
+            self.booking_room.process(row)
+        elif topic.endswith("booking_addons"):
+            self.booking_addon.process(row)
+        else:
+            pass
 
     def close(self, error):
-        if error:
-            print("Closed with error: %s" % str(error))
-        self.conn.close()
-        self.engine.dispose()
+        return super().close(error)
