@@ -34,6 +34,16 @@ addon_schema = StructType(
         StructField("updated_at", LongType()),
     ]
 )
+roomtype_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("name", StringType()),
+        StructField("price", FloatType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
+
 json_schema = MapType(StringType(), StringType())
 
 
@@ -41,6 +51,16 @@ def write_addons(row: Row):
     payload = row.asDict()
     query = """
                 INSERT INTO dim_addon (_id, name, price, created_at)
+                VALUES (:id, :name, :price, :updated_at)
+            """
+    conn.execute(text(query), payload)
+    conn.commit()
+
+
+def write_roomtypes(row: Row):
+    payload = row.asDict()
+    query = """
+                INSERT INTO dim_roomtype (_id, name, price, created_at)
                 VALUES (:id, :name, :price, :updated_at)
             """
     conn.execute(text(query), payload)
@@ -65,3 +85,23 @@ def process_addons(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     data.foreach(write_addons)
+
+
+def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
+    data: DataFrame = (
+        micro_batch_df.withColumn(
+            "message", from_json(col("value").cast(StringType()), json_schema)
+        )
+        .withColumn("payload", from_json("message.payload", json_schema))
+        .withColumn("data", from_json("payload.after", roomtype_schema))
+        .filter("data IS NOT NULL")
+        .select(
+            [
+                "data.id",
+                "data.name",
+                "data.price",
+                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+            ]
+        )
+    )
+    data.foreach(write_roomtypes)
