@@ -14,7 +14,8 @@ CREATE TABLE `stg_guest` (
 
 CREATE TABLE `stg_room` (
   `id` integer PRIMARY KEY,
-  `type` integer
+  `type` integer,
+  `updated_at` datetime
 );
 
 CREATE TABLE `stg_booking` (
