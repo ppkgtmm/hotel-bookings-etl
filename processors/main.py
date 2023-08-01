@@ -122,7 +122,9 @@ if __name__ == "__main__":
         .load()
     )
 
-    bookings.writeStream.foreachBatch(process_bookings).start()
+    bookings.writeStream.option(
+        "checkpointLocation", "/tmp/delta/bookings/_checkpoints/"
+    ).foreachBatch(process_bookings).start()
 
     booking_rooms = (
         spark.readStream.format("kafka")
@@ -133,7 +135,9 @@ if __name__ == "__main__":
         .load()
     )
 
-    booking_rooms.writeStream.foreachBatch(process_booking_rooms).start()
+    booking_rooms.writeStream.option(
+        "checkpointLocation", "/tmp/delta/booking_rooms/_checkpoints/"
+    ).foreachBatch(process_booking_rooms).start()
 
     booking_addons = (
         spark.readStream.format("kafka")
@@ -143,7 +147,9 @@ if __name__ == "__main__":
         .option("maxOffsetsPerTrigger", MAX_OFFSETS)
         .load()
     )
-    booking_addons.writeStream.foreachBatch(process_booking_addons).start()
+    booking_addons.option(
+        "checkpointLocation", "/tmp/delta/booking_addons/_checkpoints/"
+    ).writeStream.foreachBatch(process_booking_addons).start()
 
     try:
         spark.streams.awaitAnyTermination()
