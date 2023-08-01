@@ -18,7 +18,7 @@ class BookingRoomProcessor(ProcessingHelper):
         super().__init__()
 
     def process(self, row):
-        payload = json.loads(row.value)["payload"]
+        payload = json.loads(row.value).get(["payload"], {})
         payload = payload.get("after")
         if not payload:
             return
@@ -26,28 +26,55 @@ class BookingRoomProcessor(ProcessingHelper):
         ProcessingHelper.upsert_to_db(
             "stg_booking_room", payload, BookingRoomProcessor.columns
         )
-        guest = ProcessingHelper.conn.execute(
-            BookingRoomProcessor.guest_q, {"id": payload["guest"]}
-        ).first()
-        room = ProcessingHelper.conn.execute(
-            BookingRoomProcessor.room_q, {"id": payload["room"]}
-        ).first()
-        room_type = ProcessingHelper.conn.execute(
-            BookingRoomProcessor.roomtype_q,
-            {"_id": room[0], "created_at": payload["updated_at"]},
-        ).first()
-        booking = ProcessingHelper.conn.execute(
-            BookingRoomProcessor.booking_q, {"id": payload["booking"]}
-        ).first()
-        current_date, end_date = booking[0], booking[1]
-        while current_date <= end_date:
-            data = {
-                "guest": payload["guest"],
-                "guest_location": guest[0],
-                "roomtype": room_type[0],
-                "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
-            }
-            ProcessingHelper.upsert_to_db(
-                "fct_booking", data, BookingRoomProcessor.fct_columns
-            )
-            current_date += timedelta(days=1)
+        data = ProcessingHelper.conn.execute(
+            text(
+                """
+                SELECT 
+                    br.id, 
+                    b.checkin, 
+                    b.checkout, 
+                    br.guest, 
+                    g.location guest_location, 
+                    g.updated_at g_updated_at, 
+                    r.updated_at r_updated_at,
+                    (
+                        SELECT MAX(id) id
+                        FROM dim_roomtype
+                        WHERE _id = r.type AND created_at <= br.updated_at
+                    ) room_type
+                FROM stg_booking_room br
+                INNER JOIN stg_booking b
+                ON br.id = :id AND br.booking = b.id
+                INNER JOIN (
+                    SELECT id, location, updated_at
+                    FROM stg_guest
+                    WHERE id = :guest AND updated_at < br.updated_at
+                    ORDER BY updated_at DESC
+                    LIMIT 1
+                ) g
+                ON br.guest = g.id
+                INNER JOIN (
+                    SELECT id, type, updated_at
+                    FROM stg_room
+                    WHERE id = :room AND updated_at < br.updated_at
+                    ORDER BY updated_at DESC
+                    LIMIT 1
+                ) r
+                ON br.room = r.id
+                """
+            ),
+            {"id": payload["id"], "guest": payload["guest"], "room": payload["room"]},
+        )
+        if not data:
+            return
+        # while current_date <= end_date:
+        #     data = {
+        #         "guest": payload["guest"],
+        #         "guest_location": guest[0],
+        #         "roomtype": room_type[0],
+        #         "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
+        #     }
+        #     ProcessingHelper.upsert_to_db(
+        #         "fct_booking", data, BookingRoomProcessor.fct_columns
+        #     )
+        #     current_date += timedelta(days=1)
