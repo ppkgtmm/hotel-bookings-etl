@@ -82,7 +82,7 @@ def write_locations(row: Row):
                 VALUES (:id, :state, :country)
                 ON DUPLICATE KEY UPDATE
                     state=:state,
-                    country:country
+                    country=:country
             """
     conn.execute(text(query), payload)
     conn.commit()
