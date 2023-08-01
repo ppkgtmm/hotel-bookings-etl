@@ -85,6 +85,11 @@ class BookingRoomProcessor(ProcessingHelper):
                 )
                 current_date += timedelta(days=1)
             ProcessingHelper.conn.execute(
+                text("UPDATE stg_booking_room SET processed = true WHERE id = :id"),
+                {"id": id},
+            )
+            ProcessingHelper.conn.commit()
+            ProcessingHelper.conn.execute(
                 text(
                     "DELETE FROM stg_room WHERE id = :id AND updated_at < :updated_at"
                 ),
