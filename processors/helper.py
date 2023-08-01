@@ -69,6 +69,19 @@ room_schema = StructType(
         StructField("updated_at", LongType()),
     ]
 )
+guest_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("firstname", StringType()),
+        StructField("lastname", StringType()),
+        StructField("gender", StringType()),
+        StructField("email", StringType()),
+        StructField("dob", IntegerType()),
+        StructField("location", IntegerType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
 json_schema = MapType(StringType(), StringType())
 
 
