@@ -103,6 +103,17 @@ booking_room_schema = StructType(
         StructField("updated_at", LongType()),
     ]
 )
+booking_addon_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("booking_room", IntegerType()),
+        StructField("addon", IntegerType()),
+        StructField("quantity", IntegerType()),
+        StructField("datetime", LongType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
 json_schema = MapType(StringType(), StringType())
 
 
