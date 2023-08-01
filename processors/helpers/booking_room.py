@@ -7,12 +7,6 @@ from datetime import timedelta
 class BookingRoomProcessor(ProcessingHelper):
     columns = ["id", "booking", "room", "guest", "updated_at"]
     fct_columns = ["datetime", "guest", "guest_location", "roomtype"]
-    guest_q = text("SELECT location FROM stg_guest WHERE id = :id")
-    booking_q = text("SELECT checkin, checkout FROM stg_booking WHERE id = :id")
-    room_q = text("SELECT type FROM stg_room WHERE id = :id")
-    roomtype_q = text(
-        "SELECT max(id) FROM dim_roomtype WHERE _id = :_id AND created_at <= :created_at"
-    )
 
     def __init__(self):
         super().__init__()
