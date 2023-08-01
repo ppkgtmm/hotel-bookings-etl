@@ -82,6 +82,17 @@ guest_schema = StructType(
         StructField("updated_at", LongType()),
     ]
 )
+booking_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("user", IntegerType()),
+        StructField("checkin", IntegerType()),
+        StructField("checkout", IntegerType()),
+        StructField("payment", LongType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
 json_schema = MapType(StringType(), StringType())
 
 
@@ -224,3 +235,26 @@ def process_guests(micro_batch_df: DataFrame, batch_id: int):
     )
     data.select(["id", "email", "dob", "gender"]).foreach(write_guests)
     data.write.format("delta").mode("append").save("/data/delta/guests/")
+
+
+def process_bookings(micro_batch_df: DataFrame, batch_id: int):
+    data: DataFrame = (
+        micro_batch_df.withColumn(
+            "message", from_json(col("value").cast(StringType()), json_schema)
+        )
+        .withColumn("payload", from_json("message.payload", json_schema))
+        .withColumn("data", from_json("payload.after", booking_schema))
+        .filter("data IS NOT NULL")
+        .select(
+            [
+                "data.id",
+                date_add(
+                    to_date(lit("1970-01-01"), "yyyy-MM-dd"), col("data.checkin")
+                ).alias("checkin"),
+                date_add(
+                    to_date(lit("1970-01-01"), "yyyy-MM-dd"), col("data.checkout")
+                ).alias("checkout"),
+            ]
+        )
+    )
+    data.write.format("delta").mode("append").save("/data/delta/bookings/")
