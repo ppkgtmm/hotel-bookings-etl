@@ -1,7 +1,20 @@
 from datetime import timedelta, datetime
-from helpers.helper import ProcessingHelper
+from sqlalchemy import create_engine, text
 import math
-from sqlalchemy import text
+from dotenv import load_dotenv
+from os import getenv
+
+load_dotenv()
+
+db_host = getenv("DB_HOST_INTERNAL")
+db_port = getenv("DB_PORT")
+db_user = getenv("DB_USER")
+db_password = getenv("DB_PASSWORD")
+db_name = getenv("OLAP_DB")
+connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
+    db_user, db_password, db_host, db_port, db_name
+)
+
 
 start_date = datetime.strptime("2021-01-01 00:00:00", "%Y-%m-%d %H:%M:%S") + timedelta(
     days=-90
@@ -26,13 +39,14 @@ while curr_date <= max_date:
     )
     curr_date += timedelta(minutes=30)
 
-processor = ProcessingHelper()
-processor.open(None, None)
-processor.conn.execute(
+engine = create_engine(connection_string)
+conn = engine.connect()
+conn.execute(
     text(
         "INSERT INTO dim_date VALUES (:id, :datetime, :date, DATE(:month), :quarter, :year)"
     ),
     data,
 )
-processor.conn.commit()
-processor.close(None)
+conn.commit()
+conn.close()
+engine.dispose()
