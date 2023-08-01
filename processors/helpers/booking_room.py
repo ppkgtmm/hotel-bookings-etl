@@ -48,22 +48,21 @@ class BookingRoomProcessor(ProcessingHelper):
                 INNER JOIN stg_booking b
                 ON br.booking = b.id
                 INNER JOIN (
-                    SELECT id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rank
+                    SELECT id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
                     FROM stg_guest
-                    WHERE updated_at <= ':g_updated_at'
+                    WHERE updated_at <= :updated_at
                 ) g
-                ON br.guest = g.id AND g.rank = 1
+                ON br.guest = g.id AND g.rnk = 1
                 INNER JOIN (
-                    SELECT id, type, updated_at,  ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rank
+                    SELECT id, type, updated_at,  ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
                     FROM stg_room
-                    WHERE updated_at <= ':r_updated_at'
+                    WHERE updated_at <= :updated_at
                 ) r
-                ON br.room = r.id AND r.rank = 1
+                ON br.room = r.id AND r.rnk = 1
                 """,
             ),
             {
-                "g_updated_at": payload["updated_at"].strftime("%Y-%m-%d %H:%M:%S"),
-                "r_updated_at": payload["updated_at"].strftime("%Y-%m-%d %H:%M:%S"),
+                "updated_at": payload["updated_at"],
             },
         )
         for row in data:
@@ -91,14 +90,6 @@ class BookingRoomProcessor(ProcessingHelper):
                     "fct_booking", data, BookingRoomProcessor.fct_columns
                 )
                 current_date += timedelta(days=1)
-            ProcessingHelper.conn.execute(
-                text("DELETE FROM stg_booking_room WHERE id = :id"), {"id": id}
-            )
-            ProcessingHelper.conn.commit()
-            ProcessingHelper.conn.execute(
-                text("DELETE FROM stg_booking WHERE id = :id"), {"id": booking}
-            )
-            ProcessingHelper.conn.commit()
             ProcessingHelper.conn.execute(
                 text(
                     "DELETE FROM stg_room WHERE id = :id AND updated_at < :updated_at"
