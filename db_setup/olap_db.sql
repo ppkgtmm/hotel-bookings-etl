@@ -13,7 +13,7 @@ CREATE TABLE `stg_guest` (
 );
 
 CREATE TABLE `stg_room` (
-  `id` integer PRIMARY KEY,
+  `id` integer,
   `type` integer,
   `updated_at` datetime
 );
@@ -29,7 +29,7 @@ CREATE TABLE `stg_booking_room` (
   `booking` integer,
   `room` integer,
   `guest` integer,
-  `updated_at` timestamp
+  `updated_at` datetime
 );
 
 CREATE TABLE `stg_booking_addon` (
