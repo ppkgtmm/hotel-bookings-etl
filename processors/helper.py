@@ -43,7 +43,15 @@ roomtype_schema = StructType(
         StructField("updated_at", LongType()),
     ]
 )
-
+location_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("state", StringType()),
+        StructField("country", StringType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
 json_schema = MapType(StringType(), StringType())
 
 
@@ -62,6 +70,19 @@ def write_roomtypes(row: Row):
     query = """
                 INSERT INTO dim_roomtype (_id, name, price, created_at)
                 VALUES (:id, :name, :price, :updated_at)
+            """
+    conn.execute(text(query), payload)
+    conn.commit()
+
+
+def write_locations(row: Row):
+    payload = row.asDict()
+    query = """
+                INSERT INTO dim_location (id, state, country)
+                VALUES (:id, :state, :country)
+                ON DUPLICATE KEY UPDATE
+                    state=:state,
+                    country:country
             """
     conn.execute(text(query), payload)
     conn.commit()
@@ -105,3 +126,16 @@ def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     data.foreach(write_roomtypes)
+
+
+def process_locations(micro_batch_df: DataFrame, batch_id: int):
+    data: DataFrame = (
+        micro_batch_df.withColumn(
+            "message", from_json(col("value").cast(StringType()), json_schema)
+        )
+        .withColumn("payload", from_json("message.payload", json_schema))
+        .withColumn("data", from_json("payload.after", location_schema))
+        .filter("data IS NOT NULL")
+        .select(["data.id", "data.state", "data.country"])
+    )
+    data.foreach(write_locations)
