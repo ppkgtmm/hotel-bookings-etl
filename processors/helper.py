@@ -117,6 +117,18 @@ def write_locations(row: Row):
     conn.commit()
 
 
+def write_guests(row: Row):
+    payload = row.asDict()
+    query = """
+                INSERT INTO dim_guest (id, email, dob, gender)
+                VALUES (:id, :email, :dob, :gender)
+                ON DUPLICATE KEY 
+                UPDATE email=:email, dob=:dob, gender=:gender
+            """
+    conn.execute(text(query), payload)
+    conn.commit()
+
+
 def process_addons(micro_batch_df: DataFrame, batch_id: int):
     data: DataFrame = (
         micro_batch_df.withColumn(
