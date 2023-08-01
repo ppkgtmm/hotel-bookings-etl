@@ -30,7 +30,8 @@ class BookingRoomProcessor(ProcessingHelper):
             text(
                 """
                 SELECT 
-                    br.id, 
+                    br.id,
+                    br.booking,
                     b.checkin, 
                     b.checkout, 
                     br.guest, 
@@ -63,15 +64,49 @@ class BookingRoomProcessor(ProcessingHelper):
             )
         )
         for row in data:
-            pass
-        # while current_date <= end_date:
-        #     data = {
-        #         "guest": payload["guest"],
-        #         "guest_location": guest[0],
-        #         "roomtype": room_type[0],
-        #         "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
-        #     }
-        #     ProcessingHelper.upsert_to_db(
-        #         "fct_booking", data, BookingRoomProcessor.fct_columns
-        #     )
-        #     current_date += timedelta(days=1)
+            (
+                id,
+                booking,
+                checkin,
+                checkout,
+                guest,
+                guest_location,
+                g_updated_at,
+                room,
+                r_updated_at,
+                room_type,
+            ) = row
+            current_date = checkin
+            while current_date <= checkout:
+                data = {
+                    "guest": guest,
+                    "guest_location": guest_location,
+                    "roomtype": room_type,
+                    "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
+                }
+                ProcessingHelper.upsert_to_db(
+                    "fct_booking", data, BookingRoomProcessor.fct_columns
+                )
+                current_date += timedelta(days=1)
+            ProcessingHelper.conn.execute(
+                text("DELETE FROM stg_booking_room WHERE id = :id", {"id": id})
+            )
+            ProcessingHelper.conn.commit()
+            ProcessingHelper.conn.execute(
+                text("DELETE FROM stg_booking WHERE id = :id", {"id": booking})
+            )
+            ProcessingHelper.conn.commit()
+            ProcessingHelper.conn.execute(
+                text(
+                    "DELETE FROM stg_room WHERE id = :id AND updated_at < :updated_at"
+                ),
+                {"id": room, "updated_at": r_updated_at},
+            )
+            ProcessingHelper.conn.commit()
+            ProcessingHelper.conn.execute(
+                text(
+                    "DELETE FROM stg_guest WHERE id = :id AND updated_at < :updated_at"
+                ),
+                {"id": guest, "updated_at": g_updated_at},
+            )
+            ProcessingHelper.conn.commit()
