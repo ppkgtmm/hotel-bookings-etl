@@ -36,6 +36,7 @@ class BookingRoomProcessor(ProcessingHelper):
                     br.guest, 
                     g.location guest_location, 
                     g.updated_at g_updated_at, 
+                    br.room,
                     r.updated_at r_updated_at,
                     (
                         SELECT MAX(id) id
@@ -44,29 +45,25 @@ class BookingRoomProcessor(ProcessingHelper):
                     ) room_type
                 FROM stg_booking_room br
                 INNER JOIN stg_booking b
-                ON br.id = :id AND br.booking = b.id
+                ON br.booking = b.id
                 INNER JOIN (
-                    SELECT id, location, updated_at
+                    SELECT id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rank
                     FROM stg_guest
-                    WHERE id = :guest AND updated_at < br.updated_at
-                    ORDER BY updated_at DESC
-                    LIMIT 1
+                    WHERE updated_at <= :updated_at
                 ) g
-                ON br.guest = g.id
+                ON br.guest = g.id AND rank = 1
                 INNER JOIN (
-                    SELECT id, type, updated_at
+                    SELECT id, type, updated_at,  ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rank
                     FROM stg_room
-                    WHERE id = :room AND updated_at < br.updated_at
-                    ORDER BY updated_at DESC
-                    LIMIT 1
+                    WHERE updated_at <= :updated_at
                 ) r
-                ON br.room = r.id
-                """
-            ),
-            {"id": payload["id"], "guest": payload["guest"], "room": payload["room"]},
+                ON br.room = r.id AND rank = 1
+                """,
+                {"updated_at": payload["updated_at"]},
+            )
         )
-        if not data:
-            return
+        for row in data:
+            pass
         # while current_date <= end_date:
         #     data = {
         #         "guest": payload["guest"],
