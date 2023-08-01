@@ -14,4 +14,4 @@ class RoomProcessor(ProcessingHelper):
         if not payload:
             return
         payload["updated_at"] = ProcessingHelper.to_datetime(payload["updated_at"])
-        ProcessingHelper.upsert_to_db("stg_room", payload, RoomProcessor.columns)
+        ProcessingHelper.insert_to_db("stg_room", payload, RoomProcessor.columns, False)
