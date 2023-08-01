@@ -3,46 +3,6 @@ CREATE DATABASE IF NOT EXISTS olap_hotel;
 
 USE olap_hotel;
 
-CREATE TABLE `stg_guest` (
-  `id` integer,
-  `email` varchar(255),
-  `dob` date,
-  `gender` varchar(25),
-  `location` integer,
-  `updated_at` datetime
-);
-
-CREATE TABLE `stg_room` (
-  `id` integer,
-  `type` integer,
-  `updated_at` datetime
-);
-
-CREATE TABLE `stg_booking` (
-  `id` integer PRIMARY KEY,
-  `checkin` date,
-  `checkout` date
-);
-
-CREATE TABLE `stg_booking_room` (
-  `id` integer PRIMARY KEY,
-  `booking` integer,
-  `room` integer,
-  `guest` integer,
-  `updated_at` datetime,
-  `processed` boolean DEFAULT false
-);
-
-CREATE TABLE `stg_booking_addon` (
-  `id` integer PRIMARY KEY,
-  `booking_room` integer,
-  `addon` integer,
-  `quantity` integer,
-  `datetime` timestamp,
-  `updated_at` datetime,
-  `processed` boolean DEFAULT false
-);
-
 CREATE TABLE `dim_date` (
   `id` bigint PRIMARY KEY,
   `datetime` datetime,
