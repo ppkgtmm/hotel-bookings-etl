@@ -18,7 +18,7 @@ class BookingRoomProcessor(ProcessingHelper):
         super().__init__()
 
     def process(self, row):
-        payload = json.loads(row.value).get(["payload"], {})
+        payload = json.loads(row.value).get("payload", {})
         payload = payload.get("after")
         if not payload:
             return
@@ -60,8 +60,8 @@ class BookingRoomProcessor(ProcessingHelper):
                 ) r
                 ON br.room = r.id AND rank = 1
                 """,
-                {"updated_at": payload["updated_at"]},
-            )
+            ),
+            {"updated_at": payload["updated_at"]},
         )
         for row in data:
             (
@@ -89,11 +89,11 @@ class BookingRoomProcessor(ProcessingHelper):
                 )
                 current_date += timedelta(days=1)
             ProcessingHelper.conn.execute(
-                text("DELETE FROM stg_booking_room WHERE id = :id", {"id": id})
+                text("DELETE FROM stg_booking_room WHERE id = :id"), {"id": id}
             )
             ProcessingHelper.conn.commit()
             ProcessingHelper.conn.execute(
-                text("DELETE FROM stg_booking WHERE id = :id", {"id": booking})
+                text("DELETE FROM stg_booking WHERE id = :id"), {"id": booking}
             )
             ProcessingHelper.conn.commit()
             ProcessingHelper.conn.execute(
