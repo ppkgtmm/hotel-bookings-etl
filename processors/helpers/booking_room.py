@@ -50,18 +50,21 @@ class BookingRoomProcessor(ProcessingHelper):
                 INNER JOIN (
                     SELECT id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rank
                     FROM stg_guest
-                    WHERE updated_at <= CAST(':updated_at' AS DATETIME)
+                    WHERE updated_at <= ':g_updated_at'
                 ) g
                 ON br.guest = g.id AND g.rank = 1
                 INNER JOIN (
                     SELECT id, type, updated_at,  ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rank
                     FROM stg_room
-                    WHERE updated_at <= CAST(':updated_at' AS DATETIME)
+                    WHERE updated_at <= ':r_updated_at'
                 ) r
                 ON br.room = r.id AND r.rank = 1
                 """,
             ),
-            {"updated_at": payload["updated_at"].isoformat()},
+            {
+                "g_updated_at": payload["updated_at"].strftime("%Y-%m-%d %H:%M:%S"),
+                "r_updated_at": payload["updated_at"].strftime("%Y-%m-%d %H:%M:%S"),
+            },
         )
         for row in data:
             (
