@@ -40,7 +40,7 @@ class BookingRoomProcessor(ProcessingHelper):
                     ) room_type
                 FROM stg_booking_room br
                 INNER JOIN stg_booking b
-                ON br.booking = b.id
+                ON br.processed = false AND br.booking = b.id
                 INNER JOIN (
                     SELECT id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
                     FROM stg_guest
