@@ -268,3 +268,25 @@ def process_bookings(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     data.write.format("delta").mode("append").save("/data/delta/bookings/")
+
+
+def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
+    data: DataFrame = (
+        micro_batch_df.withColumn(
+            "message", from_json(col("value").cast(StringType()), json_schema)
+        )
+        .withColumn("payload", from_json("message.payload", json_schema))
+        .withColumn("data", from_json("payload.after", booking_room_schema))
+        .filter("data IS NOT NULL")
+        .select(
+            [
+                "data.id",
+                "data.booking",
+                "data.room",
+                "data.guest",
+                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+                lit(False).alias("processed"),
+            ]
+        )
+    )
+    data.write.format("delta").mode("append").save("/data/delta/booking_rooms/")
