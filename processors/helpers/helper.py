@@ -17,7 +17,7 @@ class ProcessingHelper:
         self.connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
             db_user, db_password, db_host, db_port, db_name
         )
-        self.json_schema = MapType(StringType, StringType)
+        self.json_schema = MapType(StringType(), StringType())
 
     # @staticmethod
     # def to_datetime(date_time):
