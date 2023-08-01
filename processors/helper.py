@@ -301,3 +301,26 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     data.write.format("delta").mode("append").save("/data/delta/booking_rooms/")
+
+
+def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
+    data: DataFrame = (
+        micro_batch_df.withColumn(
+            "message", from_json(col("value").cast(StringType()), json_schema)
+        )
+        .withColumn("payload", from_json("message.payload", json_schema))
+        .withColumn("data", from_json("payload.after", booking_addon_schema))
+        .filter("data IS NOT NULL")
+        .select(
+            [
+                "data.id",
+                "data.booking_room",
+                "data.addon",
+                "data.quantity",
+                timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
+                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+                lit(False).alias("processed"),
+            ]
+        )
+    )
+    data.write.format("delta").mode("append").save("/data/delta/booking_addons/")
