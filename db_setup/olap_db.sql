@@ -29,7 +29,8 @@ CREATE TABLE `stg_booking_room` (
   `booking` integer,
   `room` integer,
   `guest` integer,
-  `updated_at` datetime
+  `updated_at` datetime,
+  `processed` boolean DEFAULT false
 );
 
 CREATE TABLE `stg_booking_addon` (
@@ -38,7 +39,8 @@ CREATE TABLE `stg_booking_addon` (
   `addon` integer,
   `quantity` integer,
   `datetime` timestamp,
-  `updated_at` timestamp
+  `updated_at` datetime,
+  `processed` boolean DEFAULT false
 );
 
 CREATE TABLE `dim_date` (
