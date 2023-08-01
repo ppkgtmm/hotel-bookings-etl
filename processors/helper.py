@@ -80,9 +80,8 @@ def write_locations(row: Row):
     query = """
                 INSERT INTO dim_location (id, state, country)
                 VALUES (:id, :state, :country)
-                ON DUPLICATE KEY UPDATE
-                    state=:state,
-                    country=:country
+                ON DUPLICATE KEY 
+                UPDATE state=:state, country=:country
             """
     conn.execute(text(query), payload)
     conn.commit()
