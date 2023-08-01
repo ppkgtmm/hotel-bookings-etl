@@ -52,6 +52,16 @@ location_schema = StructType(
         StructField("updated_at", LongType()),
     ]
 )
+room_schema = StructType(
+    [
+        StructField("id", IntegerType()),
+        StructField("floor", IntegerType()),
+        StructField("number", IntegerType()),
+        StructField("type", IntegerType()),
+        StructField("created_at", LongType()),
+        StructField("updated_at", LongType()),
+    ]
+)
 json_schema = MapType(StringType(), StringType())
 
 
@@ -138,3 +148,22 @@ def process_locations(micro_batch_df: DataFrame, batch_id: int):
         .select(["data.id", "data.state", "data.country"])
     )
     data.foreach(write_locations)
+
+
+def process_rooms(micro_batch_df: DataFrame, batch_id: int):
+    data: DataFrame = (
+        micro_batch_df.withColumn(
+            "message", from_json(col("value").cast(StringType()), json_schema)
+        )
+        .withColumn("payload", from_json("message.payload", json_schema))
+        .withColumn("data", from_json("payload.after", room_schema))
+        .filter("data IS NOT NULL")
+        .select(
+            [
+                "data.id",
+                "data.type",
+                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+            ]
+        )
+    )
+    data.write.format("delta").outputMode("append").save("/data/delta/rooms/")
