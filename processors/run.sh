@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sleep 50
+sleep 30
 
 python3 date_dim.py
 
