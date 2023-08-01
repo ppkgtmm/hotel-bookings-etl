@@ -11,7 +11,14 @@ from pyspark.sql.types import (
     StructType,
 )
 from pyspark.sql import DataFrame, Row
-from pyspark.sql.functions import from_json, col, timestamp_seconds
+from pyspark.sql.functions import (
+    from_json,
+    col,
+    timestamp_seconds,
+    date_add,
+    to_date,
+    lit,
+)
 
 load_dotenv()
 db_host = getenv("DB_HOST_INTERNAL")
