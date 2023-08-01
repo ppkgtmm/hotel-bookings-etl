@@ -198,4 +198,29 @@ def process_rooms(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    data.write.format("delta").outputMode("append").save("/data/delta/rooms/")
+    data.write.format("delta").mode("append").save("/data/delta/rooms/")
+
+
+def process_guests(micro_batch_df: DataFrame, batch_id: int):
+    data: DataFrame = (
+        micro_batch_df.withColumn(
+            "message", from_json(col("value").cast(StringType()), json_schema)
+        )
+        .withColumn("payload", from_json("message.payload", json_schema))
+        .withColumn("data", from_json("payload.after", guest_schema))
+        .filter("data IS NOT NULL")
+        .select(
+            [
+                "data.id",
+                "data.email",
+                date_add(
+                    to_date(lit("1970-01-01"), "yyyy-MM-dd"), col("data.dob")
+                ).alias("dob"),
+                "data.gender",
+                "data.location",
+                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+            ]
+        )
+    )
+    data.select(["id", "email", "dob", "gender"]).foreach(write_guests)
+    data.write.format("delta").mode("append").save("/data/delta/guests/")
