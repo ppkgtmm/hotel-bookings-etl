@@ -20,7 +20,7 @@ from pyspark.sql.functions import (
     to_date,
     lit,
     max,
-    date_format,
+    date_trunc,
 )
 
 load_dotenv()
@@ -396,9 +396,9 @@ def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
                 timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
                 lit(False).alias("processed"),
-                date_format(
-                    timestamp_seconds(col("data.datetime") / 1000), "yyyy-MM-dd"
-                ).alias("date"),
+                date_trunc("day", timestamp_seconds(col("data.datetime") / 1000)).alias(
+                    "date"
+                ),
             ]
         )
     )
