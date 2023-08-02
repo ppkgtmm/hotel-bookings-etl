@@ -10,7 +10,6 @@ from pyspark.sql.types import (
     StringType,
     StructField,
     StructType,
-    BooleanType,
 )
 from pyspark.sql import DataFrame, Row
 from pyspark.sql.functions import (
@@ -118,10 +117,63 @@ booking_addon_schema = StructType(
         StructField("updated_at", LongType()),
     ]
 )
-# booking_addon_stg_schema = StructType(
-#     booking_addon_schema.fields + [StructField("processed", BooleanType())]
-# )
 json_schema = MapType(StringType(), StringType())
+create_rooms_delta = """
+CREATE TABLE IF NOT EXISTS delta.`/data/delta/rooms/` (
+    id INT,
+    type INT,
+    updated_at TIMESTAMP  
+) USING DELTA;
+"""
+create_guests_delta = """
+CREATE TABLE IF NOT EXISTS delta.`/data/delta/guests/` (
+    id INT,
+    email STRING,
+    dob DATE,
+    gender STRING,
+    location INT,
+    updated_at TIMESTAMP  
+) USING DELTA;
+"""
+
+create_bookings_delta = """
+CREATE TABLE IF NOT EXISTS delta.`/data/delta/bookings/` (
+    id INT,
+    checkin DATE,
+    checkout DATE 
+) USING DELTA;
+"""
+create_booking_rooms_delta = """
+CREATE TABLE IF NOT EXISTS delta.`/data/delta/booking_rooms/` (
+    id INT,
+    booking INT,
+    room INT,
+    guest INT,
+    updated_at TIMESTAMP,
+    processed BOOLEAN
+
+) USING DELTA;
+"""
+create_booking_addons_delta = """
+CREATE TABLE IF NOT EXISTS delta.`/data/delta/booking_addons/` (
+    id INT,
+    booking_room INT,
+    addon INT,
+    quantity INT,
+    datetime TIMESTAMP,
+    updated_at TIMESTAMP,
+    processed BOOLEAN
+
+) USING DELTA;
+"""
+
+create_delta_queries = [
+    create_rooms_delta,
+    create_guests_delta,
+    create_bookings_delta,
+    create_booking_rooms_delta,
+    create_booking_addons_delta,
+]
 
 
 def write_addons(row: Row):
