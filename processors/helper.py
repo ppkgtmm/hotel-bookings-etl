@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from dotenv import load_dotenv
 from os import getenv
 from pyspark.sql.types import StringType, MapType
@@ -9,6 +10,7 @@ from pyspark.sql.types import (
     StringType,
     StructField,
     StructType,
+    BooleanType,
 )
 from pyspark.sql import DataFrame, Row
 from pyspark.sql.functions import (
@@ -32,6 +34,8 @@ connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
 )
 engine = create_engine(connection_string)
 conn = engine.connect()
+jdbc_mysql_url = f"jdbc:mysql://{db_host}:{db_port}/{db_name}"
+jdbc_properties = {"user": db_user, "password": db_password}
 addon_schema = StructType(
     [
         StructField("id", IntegerType()),
@@ -114,6 +118,9 @@ booking_addon_schema = StructType(
         StructField("updated_at", LongType()),
     ]
 )
+# booking_addon_stg_schema = StructType(
+#     booking_addon_schema.fields + [StructField("processed", BooleanType())]
+# )
 json_schema = MapType(StringType(), StringType())
 
 
@@ -156,6 +163,17 @@ def write_guests(row: Row):
                 VALUES (:id, :email, :dob, :gender)
                 ON DUPLICATE KEY 
                 UPDATE email=:email, dob=:dob, gender=:gender
+            """
+    conn.execute(text(query), payload)
+    conn.commit()
+
+
+def write_purchases(payload: Dict[str, Any]):
+    query = """
+                INSERT INTO fct_purchase (datetime, guest, guest_location, roomtype, addon, addon_quantity)
+                VALUES (:datetime, :guest, :guest_location, :roomtype, :addon, :addon_quantity)
+                ON DUPLICATE KEY 
+                UPDATE addon_quantity = :addon_quantity
             """
     conn.execute(text(query), payload)
     conn.commit()
@@ -324,3 +342,46 @@ def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     data.write.format("delta").mode("append").save("/data/delta/booking_addons/")
+
+
+def process_fct_purchase(micro_batch_df: DataFrame, batch_id: int):
+    micro_batch_df.sparkSession.read.jdbc(
+        jdbc_mysql_url,
+        "SELECT _id, MAX(id) AS latest_addon_id FROM dim_addon",
+        properties=jdbc_properties,
+    ).createOrReplaceTempView("dim_addon")
+
+    micro_batch_df.createOrReplaceTempView("booking_addons_stg")
+    rows = micro_batch_df.sparkSession.sql(
+        """
+        SELECT
+            ba.id,
+            ba.datetime,
+            br.guest AS guest,
+            g.location AS guest_location,
+            r.type AS roomtype,
+            da.latest_addon_id addon,
+            ba.quantity
+        FROM booking_addons_stg ba
+        INNER JOIN delta.`/data/delta/booking_rooms/` br
+        ON ba.booking_room = br.id
+        INNER JOIN delta.`/data/delta/guests/` g
+        ON br.guest = g.id
+        INNER JOIN delta.`/data/delta/rooms/` r
+        ON br.room = r.id
+        INNER JOIN dim_addon da
+        ON ba.addon = da._id
+        """
+    ).collect()
+    for row in rows:
+        payload = row.asDict()
+        booking_addon_id = payload.pop("id")
+        write_purchases(payload)
+        micro_batch_df.sparkSession.sql(
+            """
+            UPDATE delta.`/data/delta/booking_addons/`
+            SET processed = true
+            WHERE id = {id}
+            """,
+            id=booking_addon_id,
+        )
