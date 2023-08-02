@@ -165,10 +165,11 @@ CREATE TABLE IF NOT EXISTS delta.`/data/delta/booking_addons/` (
     datetime TIMESTAMP,
     updated_at TIMESTAMP,
     processed BOOLEAN,
+    modulus INT,
     date DATE
 
 ) USING DELTA
-PARTITIONED BY(addon, date);
+PARTITIONED BY(modulus, date);
 """
 
 create_delta_queries = [
@@ -395,6 +396,7 @@ def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
                 timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
                 lit(False).alias("processed"),
+                (col("data.id") % 15).alias("modulus"),
                 timestamp_seconds(col("data.datetime") / 1000)
                 .cast("date")
                 .alias("date"),
@@ -442,6 +444,7 @@ def process_fct_purchase(micro_batch_df: DataFrame, batch_id: int):
         ON br.room = r.id
         INNER JOIN dim_addon da
         ON ba.addon = da._id
+        ORDER BY ba.id
         """
     ).collect()
     for row in rows:
