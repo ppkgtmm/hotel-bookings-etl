@@ -10,6 +10,8 @@ from helper import (
     process_bookings,
     process_booking_rooms,
     process_booking_addons,
+    process_fct_purchase,
+    create_delta_queries,
     engine,
     conn,
 )
@@ -19,6 +21,7 @@ from delta import configure_spark_with_delta_pip
 load_dotenv()
 
 MAX_OFFSETS = 10
+MAX_FILES = 1
 
 OLTP_DB = getenv("OLTP_DB")
 BROKER = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
@@ -47,7 +50,8 @@ if __name__ == "__main__":
         )
     )
     spark = configure_spark_with_delta_pip(builder, EXTRA_PACKAGES).getOrCreate()
-
+    for query in create_delta_queries:
+        spark.sql(query)
     location = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", BROKER)
@@ -147,10 +151,17 @@ if __name__ == "__main__":
         .option("maxOffsetsPerTrigger", MAX_OFFSETS)
         .load()
     )
-    booking_addons.option(
+    booking_addons.writeStream.option(
         "checkpointLocation", "/tmp/delta/booking_addons/_checkpoints/"
-    ).writeStream.foreachBatch(process_booking_addons).start()
+    ).foreachBatch(process_booking_addons).start()
 
+    booking_addons_stg = (
+        spark.readStream.format("delta")
+        .option("maxFilesPerTrigger", MAX_FILES)
+        .load("/data/delta/booking_addons/")
+        .filter("NOT processed")
+    )
+    booking_addons_stg.writeStream.foreachBatch(process_fct_purchase).start()
     try:
         spark.streams.awaitAnyTermination()
     except Exception as e:
