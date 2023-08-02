@@ -20,7 +20,7 @@ from delta import configure_spark_with_delta_pip
 
 load_dotenv()
 
-MAX_OFFSETS = 10
+MAX_OFFSETS = 100
 MAX_FILES = 1
 
 OLTP_DB = getenv("OLTP_DB")
