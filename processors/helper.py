@@ -20,6 +20,7 @@ from pyspark.sql.functions import (
     to_date,
     lit,
     max,
+    date_format,
 )
 
 load_dotenv()
@@ -150,9 +151,11 @@ CREATE TABLE IF NOT EXISTS delta.`/data/delta/booking_rooms/` (
     room INT,
     guest INT,
     updated_at TIMESTAMP,
-    processed BOOLEAN
+    processed BOOLEAN,
+    modulus INT
 
-) USING DELTA;
+) USING DELTA
+PARTITIONED BY(modulus);
 """
 create_booking_addons_delta = """
 CREATE TABLE IF NOT EXISTS delta.`/data/delta/booking_addons/` (
@@ -162,9 +165,11 @@ CREATE TABLE IF NOT EXISTS delta.`/data/delta/booking_addons/` (
     quantity INT,
     datetime TIMESTAMP,
     updated_at TIMESTAMP,
-    processed BOOLEAN
+    processed BOOLEAN,
+    date DATE
 
-) USING DELTA;
+) USING DELTA
+PARTITIONED BY(addon, date);
 """
 
 create_delta_queries = [
@@ -367,6 +372,7 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
                 "data.guest",
                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
                 lit(False).alias("processed"),
+                (col("data.id") % 15).alias("modulus"),
             ]
         )
     )
@@ -390,6 +396,9 @@ def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
                 timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
                 lit(False).alias("processed"),
+                date_format(
+                    timestamp_seconds(col("data.datetime") / 1000), "yyyy-MM-dd"
+                ).alias("date"),
             ]
         )
     )
