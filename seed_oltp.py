@@ -89,7 +89,7 @@ def load_bookings():
     bookings["payment"] = pd.to_datetime(bookings["payment"])
 
     merged = bookings.merge(users, left_on="user", right_on="email")[columns]
-    merged = merged.rename(columns={"id": "user"})
+    merged = merged.rename(columns={"id": "user"}).sort_values(by=["checkin"])
 
     room_types = pd.read_sql("SELECT id FROM roomtypes", conn)["id"].tolist()
     guests = pd.read_sql("SELECT id FROM guests", conn)["id"].tolist()
