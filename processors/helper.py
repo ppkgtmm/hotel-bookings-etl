@@ -19,6 +19,7 @@ from pyspark.sql.functions import (
     date_add,
     to_date,
     lit,
+    max,
 )
 
 load_dotenv()
@@ -34,7 +35,6 @@ connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
 engine = create_engine(connection_string)
 conn = engine.connect()
 jdbc_mysql_url = f"jdbc:mysql://{db_host}:{db_port}/{db_name}"
-jdbc_properties = {"user": db_user, "password": db_password}
 addon_schema = StructType(
     [
         StructField("id", IntegerType()),
@@ -223,7 +223,7 @@ def write_guests(row: Row):
 def write_purchases(payload: Dict[str, Any]):
     query = """
                 INSERT INTO fct_purchase (datetime, guest, guest_location, roomtype, addon, addon_quantity)
-                VALUES (:datetime, :guest, :guest_location, :roomtype, :addon, :addon_quantity)
+                VALUES (DATE_FORMAT(:datetime, '%Y%m%d%H%i%S'), :guest, :guest_location, :roomtype, :addon, :addon_quantity)
                 ON DUPLICATE KEY 
                 UPDATE addon_quantity = :addon_quantity
             """
@@ -397,11 +397,22 @@ def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
 
 
 def process_fct_purchase(micro_batch_df: DataFrame, batch_id: int):
-    micro_batch_df.sparkSession.read.jdbc(
-        jdbc_mysql_url,
-        "SELECT _id, MAX(id) AS latest_addon_id FROM dim_addon",
-        properties=jdbc_properties,
-    ).createOrReplaceTempView("dim_addon")
+    max_dt = micro_batch_df.select(max("updated_at").alias("max")).collect()[0].max
+    micro_batch_df.sparkSession.read.format("jdbc").option(
+        "driver", "com.mysql.cj.jdbc.Driver"
+    ).option("url", jdbc_mysql_url).option("user", db_user).option(
+        "password", db_password
+    ).option(
+        "query",
+        f"""
+            SELECT _id, MAX(id) AS latest_addon_id
+            FROM dim_addon
+            WHERE created_at <= CAST('{max_dt.strftime("%Y-%m-%d %H:%M:%S")}' AS DATETIME)
+            GROUP BY 1
+        """,
+    ).load().createOrReplaceTempView(
+        "dim_addon"
+    )
 
     micro_batch_df.createOrReplaceTempView("booking_addons_stg")
     rows = micro_batch_df.sparkSession.sql(
@@ -413,7 +424,7 @@ def process_fct_purchase(micro_batch_df: DataFrame, batch_id: int):
             g.location AS guest_location,
             r.type AS roomtype,
             da.latest_addon_id addon,
-            ba.quantity
+            ba.quantity addon_quantity
         FROM booking_addons_stg ba
         INNER JOIN delta.`/data/delta/booking_rooms/` br
         ON ba.booking_room = br.id
