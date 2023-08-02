@@ -48,6 +48,10 @@ if __name__ == "__main__":
             "spark.sql.catalog.spark_catalog",
             "org.apache.spark.sql.delta.catalog.DeltaCatalog",
         )
+        .config(
+            "spark.jars",
+            "/mysql-connector-j-8.0.33/mysql-connector-j-8.0.33.jar",
+        )
     )
     spark = configure_spark_with_delta_pip(builder, EXTRA_PACKAGES).getOrCreate()
     for query in create_delta_queries:
