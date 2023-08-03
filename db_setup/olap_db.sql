@@ -3,6 +3,13 @@ CREATE DATABASE IF NOT EXISTS olap_hotel;
 
 USE olap_hotel;
 
+CREATE TABLE `stg_location` (
+  `id` integer PRIMARY KEY,
+  `state` varchar(255),
+  `country` varchar(255),
+  `updated_at` datetime
+);
+
 CREATE TABLE `stg_guest` (
   `id` integer,
   `email` varchar(255),
