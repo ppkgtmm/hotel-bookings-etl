@@ -21,6 +21,7 @@ from pyspark.sql.functions import (
     lit,
     max,
 )
+from datetime import timedelta
 
 load_dotenv()
 db_host = getenv("DB_HOST_INTERNAL")
@@ -35,6 +36,12 @@ connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
 engine = create_engine(connection_string)
 conn = engine.connect()
 jdbc_mysql_url = f"jdbc:mysql://{db_host}:{db_port}/{db_name}"
+jdbc_driver = "com.mysql.cj.jdbc.Driver"
+stg_location_table = "stg_location"
+stg_room_table = "stg_room"
+stg_guest_table = "stg_guest"
+stg_booking_table = "stg_booking"
+stg_booking_room_table = "stg_booking_room"
 addon_schema = StructType(
     [
         StructField("id", IntegerType()),
@@ -118,67 +125,6 @@ booking_addon_schema = StructType(
     ]
 )
 json_schema = MapType(StringType(), StringType())
-create_rooms_delta = """
-CREATE TABLE IF NOT EXISTS delta.`/data/delta/rooms/` (
-    id INT,
-    type INT,
-    updated_at TIMESTAMP  
-) USING DELTA;
-"""
-create_guests_delta = """
-CREATE TABLE IF NOT EXISTS delta.`/data/delta/guests/` (
-    id INT,
-    email STRING,
-    dob DATE,
-    gender STRING,
-    location INT,
-    updated_at TIMESTAMP  
-) USING DELTA;
-"""
-
-create_bookings_delta = """
-CREATE TABLE IF NOT EXISTS delta.`/data/delta/bookings/` (
-    id INT,
-    checkin DATE,
-    checkout DATE 
-) USING DELTA;
-"""
-create_booking_rooms_delta = """
-CREATE TABLE IF NOT EXISTS delta.`/data/delta/booking_rooms/` (
-    id INT,
-    booking INT,
-    room INT,
-    guest INT,
-    updated_at TIMESTAMP,
-    processed BOOLEAN,
-    modulus INT
-
-) USING DELTA
-PARTITIONED BY(modulus);
-"""
-create_booking_addons_delta = """
-CREATE TABLE IF NOT EXISTS delta.`/data/delta/booking_addons/` (
-    id INT,
-    booking_room INT,
-    addon INT,
-    quantity INT,
-    datetime TIMESTAMP,
-    updated_at TIMESTAMP,
-    processed BOOLEAN,
-    partition_num INT,
-    date DATE
-
-) USING DELTA
-PARTITIONED BY(partition_num, date);
-"""
-
-create_delta_queries = [
-    create_rooms_delta,
-    create_guests_delta,
-    create_bookings_delta,
-    create_booking_rooms_delta,
-    create_booking_addons_delta,
-]
 
 
 def write_addons(row: Row):
@@ -201,27 +147,27 @@ def write_roomtypes(row: Row):
     conn.commit()
 
 
-def write_locations(row: Row):
-    payload = row.asDict()
-    query = """
+def write_locations():
+    query = f"""
                 INSERT INTO dim_location (id, state, country)
-                VALUES (:id, :state, :country)
+                SELECT id, state, country
+                FROM {stg_location_table} stg
                 ON DUPLICATE KEY 
-                UPDATE state=:state, country=:country
+                UPDATE state=stg.state, country=stg.country
             """
-    conn.execute(text(query), payload)
+    conn.execute(text(query))
     conn.commit()
 
 
-def write_guests(row: Row):
-    payload = row.asDict()
-    query = """
+def write_guests():
+    query = f"""
                 INSERT INTO dim_guest (id, email, dob, gender)
-                VALUES (:id, :email, :dob, :gender)
+                SELECT id, email, dob, gender
+                FROM {stg_guest_table} stg
                 ON DUPLICATE KEY 
-                UPDATE email=:email, dob=:dob, gender=:gender
+                UPDATE email=stg.email, dob=stg.dob, gender=stg.gender
             """
-    conn.execute(text(query), payload)
+    conn.execute(text(query))
     conn.commit()
 
 
@@ -246,14 +192,23 @@ def process_addons(micro_batch_df: DataFrame, batch_id: int):
         .filter("data IS NOT NULL")
         .select(
             [
-                "data.id",
+                col("data.id").alias("_id"),
                 "data.name",
                 "data.price",
-                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+                timestamp_seconds(col("data.updated_at") / 1000).alias("created_at"),
             ]
         )
     )
-    data.foreach(write_addons)
+    (
+        data.write.format("jdbc")
+        .option("driver", jdbc_driver)
+        .option("url", jdbc_mysql_url)
+        .option("user", db_user)
+        .option("password", db_password)
+        .option("dbtable", "dim_addon")
+        .mode("append")
+        .save()
+    )
 
 
 def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
@@ -266,14 +221,23 @@ def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
         .filter("data IS NOT NULL")
         .select(
             [
-                "data.id",
+                col("data.id").alias("_id"),
                 "data.name",
                 "data.price",
-                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+                timestamp_seconds(col("data.updated_at") / 1000).alias("created_at"),
             ]
         )
     )
-    data.foreach(write_roomtypes)
+    (
+        data.write.format("jdbc")
+        .option("driver", jdbc_driver)
+        .option("url", jdbc_mysql_url)
+        .option("user", db_user)
+        .option("password", db_password)
+        .option("dbtable", "dim_roomtype")
+        .mode("append")
+        .save()
+    )
 
 
 def process_locations(micro_batch_df: DataFrame, batch_id: int):
@@ -286,7 +250,17 @@ def process_locations(micro_batch_df: DataFrame, batch_id: int):
         .filter("data IS NOT NULL")
         .select(["data.id", "data.state", "data.country"])
     )
-    data.foreach(write_locations)
+    (
+        data.write.format("jdbc")
+        .option("driver", jdbc_driver)
+        .option("url", jdbc_mysql_url)
+        .option("user", db_user)
+        .option("password", db_password)
+        .option("dbtable", stg_location_table)
+        .mode("overwrite")
+        .save()
+    )
+    write_locations()
 
 
 def process_rooms(micro_batch_df: DataFrame, batch_id: int):
@@ -305,7 +279,16 @@ def process_rooms(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    data.write.format("delta").mode("append").save("/data/delta/rooms/")
+    (
+        data.write.format("jdbc")
+        .option("driver", jdbc_driver)
+        .option("url", jdbc_mysql_url)
+        .option("user", db_user)
+        .option("password", db_password)
+        .option("dbtable", stg_room_table)
+        .mode("append")
+        .save()
+    )
 
 
 def process_guests(micro_batch_df: DataFrame, batch_id: int):
@@ -329,8 +312,17 @@ def process_guests(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    data.select(["id", "email", "dob", "gender"]).foreach(write_guests)
-    data.write.format("delta").mode("append").save("/data/delta/guests/")
+    (
+        data.write.format("jdbc")
+        .option("driver", jdbc_driver)
+        .option("url", jdbc_mysql_url)
+        .option("user", db_user)
+        .option("password", db_password)
+        .option("dbtable", stg_guest_table)
+        .mode("append")
+        .save()
+    )
+    write_guests()
 
 
 def process_bookings(micro_batch_df: DataFrame, batch_id: int):
@@ -353,7 +345,16 @@ def process_bookings(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    data.write.format("delta").mode("append").save("/data/delta/bookings/")
+    (
+        data.write.format("jdbc")
+        .option("driver", jdbc_driver)
+        .option("url", jdbc_mysql_url)
+        .option("user", db_user)
+        .option("password", db_password)
+        .option("dbtable", stg_booking_table)
+        .mode("append")
+        .save()
+    )
 
 
 def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
@@ -371,92 +372,169 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
                 "data.room",
                 "data.guest",
                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
-                lit(False).alias("processed"),
-                (col("data.id") % 15).alias("modulus"),
             ]
         )
     )
-    data.write.format("delta").mode("append").save("/data/delta/booking_rooms/")
-
-
-def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
-    data: DataFrame = (
-        micro_batch_df.withColumn(
-            "message", from_json(col("value").cast(StringType()), json_schema)
-        )
-        .withColumn("payload", from_json("message.payload", json_schema))
-        .withColumn("data", from_json("payload.after", booking_addon_schema))
-        .filter("data IS NOT NULL")
-        .select(
-            [
-                "data.id",
-                "data.booking_room",
-                "data.addon",
-                "data.quantity",
-                timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
-                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
-                lit(False).alias("processed"),
-                (col("data.id") % 15).alias("partition_num"),
-                timestamp_seconds(col("data.datetime") / 1000)
-                .cast("date")
-                .alias("date"),
-            ]
-        )
+    (
+        data.write.format("jdbc")
+        .option("driver", jdbc_driver)
+        .option("url", jdbc_mysql_url)
+        .option("user", db_user)
+        .option("password", db_password)
+        .option("dbtable", stg_booking_room_table)
+        .mode("append")
+        .save()
     )
-    data.write.format("delta").mode("append").save("/data/delta/booking_addons/")
+    process_fct_bookings()
 
 
-def process_fct_purchase(micro_batch_df: DataFrame, batch_id: int):
-    max_dt = micro_batch_df.select(max("updated_at").alias("max")).collect()[0].max
-    micro_batch_df.sparkSession.read.format("jdbc").option(
-        "driver", "com.mysql.cj.jdbc.Driver"
-    ).option("url", jdbc_mysql_url).option("user", db_user).option(
-        "password", db_password
-    ).option(
-        "query",
-        f"""
-            SELECT _id, MAX(id) AS latest_addon_id
-            FROM dim_addon
-            WHERE created_at <= CAST('{max_dt.strftime("%Y-%m-%d %H:%M:%S")}' AS DATETIME)
-            GROUP BY 1
-        """,
-    ).load().createOrReplaceTempView(
-        "dim_addon"
+def process_fct_bookings():
+    query = f"""
+    WITH max_date AS (
+        SELECT MAX(updated_at)
+        FROM {stg_booking_room_table}
     )
+    SELECT
+        br.id,
+        b.checkin, 
+        b.checkout, 
+        br.guest, 
+        g.location guest_location,
+        (
+            SELECT MAX(id) id
+            FROM dim_roomtype
+            WHERE _id = r.type AND created_at <= br.updated_at
+        ) room_type
+    FROM {stg_booking_room_table} br
+    INNER JOIN {stg_booking_table} b
+    ON br.processed = false AND br.booking = b.id
+    INNER JOIN (
+        SELECT id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
+        FROM {stg_guest_table}
+        WHERE updated_at <= (SELECT * FROM max_date)
+    ) g
+    ON br.guest = g.id AND g.rnk = 1
+    INNER JOIN (
+        SELECT id, type, updated_at,  ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
+        FROM {stg_room_table}
+        WHERE updated_at <= (SELECT * FROM max_date)
+    ) r
+    ON br.room = r.id AND r.rnk = 1
+    """
+    for row in conn.execute(text(query)):
+        (
+            id,
+            checkin,
+            checkout,
+            guest,
+            guest_location,
+            room_type,
+        ) = row
+        current_date = checkin
+        while current_date <= checkout:
+            data = {
+                "guest": guest,
+                "guest_location": guest_location,
+                "roomtype": room_type,
+                "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
+            }
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO fct_booking (datetime, guest, guest_location, roomtype)
+                    VALUES (:datetime, :guest, :guest_location, :roomtype)
+                    ON DUPLICATE KEY
+                    UPDATE datetime=:datetime, guest=:guest, guest_location=:guest_location, roomtype=:roomtype
+                    """
+                ),
+                data,
+            )
+            conn.commit()
+            conn.execute(
+                text(
+                    f"UPDATE {stg_booking_room_table} SET processed = true WHERE id = :id"
+                ),
+                {"id": id},
+            )
+            conn.commit()
+            current_date += timedelta(days=1)
 
-    micro_batch_df.createOrReplaceTempView("booking_addons_stg")
-    rows = micro_batch_df.sparkSession.sql(
-        """
-        SELECT
-            ba.id,
-            ba.datetime,
-            br.guest AS guest,
-            g.location AS guest_location,
-            r.type AS roomtype,
-            da.latest_addon_id addon,
-            ba.quantity addon_quantity
-        FROM booking_addons_stg ba
-        INNER JOIN delta.`/data/delta/booking_rooms/` br
-        ON ba.booking_room = br.id
-        INNER JOIN delta.`/data/delta/guests/` g
-        ON br.guest = g.id
-        INNER JOIN delta.`/data/delta/rooms/` r
-        ON br.room = r.id
-        INNER JOIN dim_addon da
-        ON ba.addon = da._id
-        ORDER BY ba.id
-        """
-    ).collect()
-    for row in rows:
-        payload = row.asDict()
-        booking_addon_id = payload.pop("id")
-        write_purchases(payload)
-        micro_batch_df.sparkSession.sql(
-            """
-            UPDATE delta.`/data/delta/booking_addons/`
-            SET processed = true
-            WHERE id = {id} AND partition_num = MOD({id}, 15) AND date = DATE('{datetime}')
-            """,
-            id=booking_addon_id,
-            datetime=payload["datetime"],
-        )
+
+# def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
+#     data: DataFrame = (
+#         micro_batch_df.withColumn(
+#             "message", from_json(col("value").cast(StringType()), json_schema)
+#         )
+#         .withColumn("payload", from_json("message.payload", json_schema))
+#         .withColumn("data", from_json("payload.after", booking_addon_schema))
+#         .filter("data IS NOT NULL")
+#         .select(
+#             [
+#                 "data.id",
+#                 "data.booking_room",
+#                 "data.addon",
+#                 "data.quantity",
+#                 timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
+#                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+#             ]
+#         )
+#     )
+# data.write.format("delta").mode("append").save("/data/delta/booking_addons/")
+# process_fct_purchase()
+
+
+# def process_fct_purchase(micro_batch_df: DataFrame):
+#     max_dt = micro_batch_df.select(max("updated_at").alias("max")).collect()[0].max
+#     micro_batch_df.sparkSession.read.format("jdbc").option(
+#         "driver", "com.mysql.cj.jdbc.Driver"
+#     ).option("url", jdbc_mysql_url).option("user", db_user).option(
+#         "password", db_password
+#     ).option(
+#         "query",
+#         f"""
+#             SELECT _id, MAX(id) AS latest_addon_id
+#             FROM dim_addon
+#             WHERE created_at <= CAST('{max_dt.strftime("%Y-%m-%d %H:%M:%S")}' AS DATETIME)
+#             GROUP BY 1
+#         """,
+#     ).load().createOrReplaceTempView(
+#         "dim_addon"
+#     )
+#     micro_batch_df.createOrReplaceTempView("booking_addons")
+#     rows = micro_batch_df.sparkSession.sql(
+#         """
+#         SELECT
+#             ba.id,
+#             ba.datetime,
+#             br.guest AS guest,
+#             g.location AS guest_location,
+#             r.type AS roomtype,
+#             da.latest_addon_id addon,
+#             ba.quantity addon_quantity
+#         FROM booking_addons ba
+#         INNER JOIN delta.`/data/delta/booking_rooms/` br
+#         ON ba.booking_room = br.id
+#         INNER JOIN delta.`/data/delta/guests/` g
+#         ON br.guest = g.id
+#         INNER JOIN delta.`/data/delta/rooms/` r
+#         ON br.room = r.id
+#         INNER JOIN dim_addon da
+#         ON ba.addon = da._id
+#         ORDER BY ba.id
+#         """
+#     ).collect()
+
+
+#     for row in rows:
+#         payload = row.asDict()
+#         booking_addon_id = payload.pop("id")
+#         write_purchases(payload)
+#         micro_batch_df.sparkSession.sql(
+#             """
+#             UPDATE delta.`/data/delta/booking_addons/`
+#             SET processed = true
+#             WHERE id = {id} AND partition_num = MOD({id}, 15) AND date = DATE('{datetime}')
+#             """,
+#             id=booking_addon_id,
+#             datetime=payload["datetime"],
+#         )
