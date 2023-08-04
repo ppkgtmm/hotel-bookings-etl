@@ -42,6 +42,7 @@ stg_room_table = "stg_room"
 stg_guest_table = "stg_guest"
 stg_booking_table = "stg_booking"
 stg_booking_room_table = "stg_booking_room"
+stg_booking_addon_table = "stg_booking_addon"
 addon_schema = StructType(
     [
         StructField("id", IntegerType()),
@@ -168,17 +169,6 @@ def write_guests():
                 UPDATE email=stg.email, dob=stg.dob, gender=stg.gender
             """
     conn.execute(text(query))
-    conn.commit()
-
-
-def write_purchases(payload: Dict[str, Any]):
-    query = """
-                INSERT INTO fct_purchase (datetime, guest, guest_location, roomtype, addon, addon_quantity)
-                VALUES (DATE_FORMAT(:datetime, '%Y%m%d%H%i%S'), :guest, :guest_location, :roomtype, :addon, :addon_quantity)
-                ON DUPLICATE KEY 
-                UPDATE addon_quantity = :addon_quantity
-            """
-    conn.execute(text(query), payload)
     conn.commit()
 
 
@@ -385,10 +375,10 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
         .mode("append")
         .save()
     )
-    process_fct_bookings()
+    write_bookings()
 
 
-def process_fct_bookings():
+def write_bookings():
     query = f"""
     WITH max_date AS (
         SELECT MAX(updated_at)
@@ -460,27 +450,105 @@ def process_fct_bookings():
             current_date += timedelta(days=1)
 
 
-# def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
-#     data: DataFrame = (
-#         micro_batch_df.withColumn(
-#             "message", from_json(col("value").cast(StringType()), json_schema)
-#         )
-#         .withColumn("payload", from_json("message.payload", json_schema))
-#         .withColumn("data", from_json("payload.after", booking_addon_schema))
-#         .filter("data IS NOT NULL")
-#         .select(
-#             [
-#                 "data.id",
-#                 "data.booking_room",
-#                 "data.addon",
-#                 "data.quantity",
-#                 timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
-#                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
-#             ]
-#         )
-#     )
-# data.write.format("delta").mode("append").save("/data/delta/booking_addons/")
-# process_fct_purchase()
+def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
+    data: DataFrame = (
+        micro_batch_df.withColumn(
+            "message", from_json(col("value").cast(StringType()), json_schema)
+        )
+        .withColumn("payload", from_json("message.payload", json_schema))
+        .withColumn("data", from_json("payload.after", booking_addon_schema))
+        .filter("data IS NOT NULL")
+        .select(
+            [
+                "data.id",
+                "data.booking_room",
+                "data.addon",
+                "data.quantity",
+                timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
+                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+            ]
+        )
+    )
+    (
+        data.write.format("jdbc")
+        .option("driver", jdbc_driver)
+        .option("url", jdbc_mysql_url)
+        .option("user", db_user)
+        .option("password", db_password)
+        .option("dbtable", stg_booking_addon_table)
+        .mode("append")
+        .save()
+    )
+    write_purchases()
+
+
+def write_purchases():
+    query = f"""
+    WITH max_date AS (
+        SELECT MAX(updated_at)
+        FROM {stg_booking_addon_table}
+    )
+    SELECT
+        ba.id,
+        ba.datetime, 
+        br.guest, 
+        g.location guest_location,
+        (
+            SELECT MAX(id) id
+            FROM dim_roomtype
+            WHERE _id = r.type AND created_at <= ba.updated_at
+        ) room_type,
+        (
+            SELECT MAX(id) id
+            FROM dim_addon
+            WHERE _id = ba.addon AND created_at <= ba.updated_at
+        ) addon,
+        ba.quantity
+    FROM {stg_booking_addon_table} ba
+    INNER JOIN {stg_booking_room_table} br
+    ON ba.processed = false AND ba.booking_room = br.id
+    INNER JOIN (
+        SELECT id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
+        FROM {stg_guest_table}
+        WHERE updated_at <= (SELECT * FROM max_date)
+    ) g
+    ON br.guest = g.id AND g.rnk = 1
+    INNER JOIN (
+        SELECT id, type, updated_at,  ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
+        FROM {stg_room_table}
+        WHERE updated_at <= (SELECT * FROM max_date)
+    ) r
+    ON br.room = r.id AND r.rnk = 1
+    """
+    for row in conn.execute(text(query)):
+        (id, datetime, guest, guest_location, room_type, addon, quantity) = row
+        data = {
+            "guest": guest,
+            "guest_location": guest_location,
+            "roomtype": room_type,
+            "datetime": int(datetime.strftime("%Y%m%d%H%M%S")),
+            "addon": addon,
+            "addon_quantity": quantity,
+        }
+        conn.execute(
+            text(
+                """
+                    INSERT INTO fct_purchase (datetime, guest, guest_location, roomtype, addon, addon_quantity)
+                    VALUES (:datetime, :guest, :guest_location, :roomtype, :addon, :addon_quantity)
+                    ON DUPLICATE KEY
+                    UPDATE addon_quantity=:addon_quantity
+                    """
+            ),
+            data,
+        )
+        conn.commit()
+        conn.execute(
+            text(
+                f"UPDATE {stg_booking_addon_table} SET processed = true WHERE id = :id"
+            ),
+            {"id": id},
+        )
+        conn.commit()
 
 
 # def process_fct_purchase(micro_batch_df: DataFrame):
