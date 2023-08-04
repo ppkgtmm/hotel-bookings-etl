@@ -9,6 +9,7 @@ from helper import (
     process_guests,
     process_bookings,
     process_booking_rooms,
+    process_booking_addons,
     engine,
     conn,
 )
@@ -143,25 +144,18 @@ if __name__ == "__main__":
         "checkpointLocation", "/tmp/booking_rooms/_checkpoints/"
     ).foreachBatch(process_booking_rooms).start()
 
-    # booking_addons = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", BROKER)
-    #     .option("subscribe", BOOKING_ADDONS_TABLE)
-    #     .option("startingOffsets", "earliest")
-    #     .option("maxOffsetsPerTrigger", MAX_OFFSETS)
-    #     .load()
-    # )
-    # booking_addons.writeStream.option(
-    #     "checkpointLocation", "/tmp/delta/booking_addons/_checkpoints/"
-    # ).foreachBatch(process_booking_addons).start()
+    booking_addons = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", BROKER)
+        .option("subscribe", BOOKING_ADDONS_TABLE)
+        .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .load()
+    )
+    booking_addons.writeStream.option(
+        "checkpointLocation", "/tmp/booking_addons/_checkpoints/"
+    ).foreachBatch(process_booking_addons).start()
 
-    # booking_addons_stg = (
-    #     spark.readStream.format("delta")
-    #     .option("maxFilesPerTrigger", MAX_FILES)
-    #     .load("/data/delta/booking_addons/")
-    #     .filter("NOT processed")
-    # )
-    # booking_addons_stg.writeStream.foreachBatch(process_fct_purchase).start()
     try:
         spark.streams.awaitAnyTermination()
     except Exception as e:
