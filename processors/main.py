@@ -58,7 +58,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", BROKER)
         .option("subscribe", LOCATION_TABLE)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .option("maxOffsetsPerTrigger", MAX_OFFSETS * 5)
         .load()
     )
 
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", BROKER)
         .option("subscribe", ROOMS_TABLE)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .option("maxOffsetsPerTrigger", MAX_OFFSETS * 5)
         .load()
     )
 
