@@ -399,8 +399,8 @@ def write_bookings():
     INNER JOIN {stg_booking_table} b
     ON br.processed = false AND br.booking = b.id
     INNER JOIN (
-        SELECT id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
-        FROM {stg_guest_table}
+        SELECT g.id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY g.id ORDER BY updated_at DESC) rnk
+        FROM {stg_guest_table} g
         INNER JOIN dim_location l
         ON g.location = l.id
         WHERE updated_at <= (SELECT * FROM max_date)
@@ -510,7 +510,7 @@ def write_purchases():
     INNER JOIN {stg_booking_room_table} br
     ON ba.processed = false AND ba.booking_room = br.id
     INNER JOIN (
-        SELECT id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
+        SELECT g.id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY g.id ORDER BY updated_at DESC) rnk
         FROM {stg_guest_table}
         INNER JOIN dim_location l
         ON g.location = l.id
