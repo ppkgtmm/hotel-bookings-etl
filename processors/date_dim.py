@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
 import math
-
+from db_writer import write_dim_date, tear_down
 
 start_date = datetime.strptime("2021-01-01 00:00:00", "%Y-%m-%d %H:%M:%S") + timedelta(
     days=-90
@@ -26,12 +26,5 @@ while curr_date <= max_date:
     curr_date += timedelta(minutes=30)
 
 
-# conn.execute(
-#     text(
-#         "INSERT INTO dim_date VALUES (:id, :datetime, :date, DATE(:month), :quarter, :year)"
-#     ),
-#     data,
-# )
-# conn.commit()
-# conn.close()
-# engine.dispose()
+write_dim_date(data)
+tear_down()
