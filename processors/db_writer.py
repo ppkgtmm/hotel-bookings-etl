@@ -41,6 +41,19 @@ FactBooking = Table(fct_booking_table, metadata, autoload_with=engine)
 FactPurchase = Table(fct_purchase_table, metadata, autoload_with=engine)
 
 
+def write_dim_date(rows: list[Dict[str, Any]]):
+    query = insert(DimDate).values(rows)
+    query = query.on_duplicate_key_update(
+        datetime=query.inserted.datetime,
+        date=query.inserted.date,
+        month=query.inserted.month,
+        quarter=query.inserted.quarter,
+        year=query.inserted.year,
+    )
+    conn.execute(query)
+    conn.commit()
+
+
 def write_dim_addons(rows: list[Dict[str, Any]]):
     query = insert(DimAddon).values(rows)
     conn.execute(query)
