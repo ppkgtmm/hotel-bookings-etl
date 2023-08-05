@@ -40,7 +40,7 @@ CREATE TABLE `stg_booking_room` (
 );
 
 CREATE TABLE `stg_booking_addon` (
-  `id` integer PRIMARY KEY,
+  `id` integer,
   `booking_room` integer,
   `addon` integer,
   `quantity` integer,
