@@ -92,8 +92,9 @@ class DatabaseWriter:
 
     def stage_rooms(self, rows: list[Dict[str, Any]]):
         query = insert(self.Room).values(rows)
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
 
     def stage_guests(self, rows: list[Dict[str, Any]]):
         query = insert(self.Guest).values(rows)
