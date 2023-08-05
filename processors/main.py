@@ -47,7 +47,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", BROKER)
         .option("subscribe", LOCATION_TABLE)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .option("maxOffsetsPerTrigger", MAX_OFFSETS * 2)
         .load()
     )
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", BROKER)
         .option("subscribe", BOOKING_ROOMS_TABLE)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", 1)
+        .option("maxOffsetsPerTrigger", 10)
         .load()
     )
 
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", BROKER)
         .option("subscribe", BOOKING_ADDONS_TABLE)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", 50)
+        .option("maxOffsetsPerTrigger", 10)
         .load()
     )
     booking_addons.writeStream.option(
