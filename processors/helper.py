@@ -302,35 +302,28 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
     db_writer.write_fct_bookings()
 
 
-# def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
-#     data: DataFrame = (
-#         micro_batch_df.withColumn(
-#             "message", from_json(col("value").cast(StringType()), json_schema)
-#         )
-#         .withColumn("payload", from_json("message.payload", json_schema))
-#         .withColumn("data", from_json("payload.after", booking_addon_schema))
-#         .filter("data IS NOT NULL")
-#         .select(
-#             [
-#                 "data.id",
-#                 "data.booking_room",
-#                 "data.addon",
-#                 "data.quantity",
-#                 timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
-#                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
-#             ]
-#         )
-#     )
-#     (
-#         data.write.format("jdbc")
-#         .option("driver", jdbc_driver)
-#         .option("url", jdbc_mysql_url)
-#         .option("user", db_user)
-#         .option("password", db_password)
-#         .option("dbtable", stg_booking_addon_table)
-#         .mode("append")
-#         .save()
-#     )
+def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
+    data: DataFrame = (
+        micro_batch_df.withColumn(
+            "message", from_json(col("value").cast(StringType()), json_schema)
+        )
+        .withColumn("payload", from_json("message.payload", json_schema))
+        .withColumn("data", from_json("payload.after", booking_addon_schema))
+        .filter("data IS NOT NULL")
+        .select(
+            [
+                "data.id",
+                "data.booking_room",
+                "data.addon",
+                "data.quantity",
+                timestamp_seconds(col("data.datetime") / 1000).alias("datetime"),
+                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
+            ]
+        )
+    )
+    rows = df_to_list(data)
+
+
 #     write_purchases()
 
 
