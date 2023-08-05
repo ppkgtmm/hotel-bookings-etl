@@ -56,3 +56,51 @@ bookings_query = """
     ON b.guest_location = l.id
     WHERE b.room_type IS NOT NULL
 """
+purchases_query = """
+    with purchases AS (
+        SELECT
+            ba.id,
+            ba.datetime,
+            br.guest,
+            (
+                SELECT location
+                FROM {stg_guest_table} g
+                WHERE g.id = br.guest AND g.updated_at <= ba.updated_at
+                ORDER BY g.updated_at DESC
+                LIMIT 1
+            ) guest_location,
+            (
+                SELECT type
+                FROM {stg_room_table} r
+                WHERE r.id = br.room AND r.updated_at <= ba.updated_at
+                ORDER BY r.updated_at DESC
+                LIMIT 1
+            ) room_type,
+            (
+                SELECT MAX(id)
+                FROM dim_addon
+                WHERE _id = ba.addon AND created_at <= ba.updated_at
+            ) addon,
+            ba.quantity,
+            ba.updated_at
+        FROM {stg_booking_addon_table} ba
+        INNER JOIN {stg_booking_room_table} br
+        ON ba.processed = false AND ba.booking_room = br.id
+    )
+    SELECT
+        p.id,
+        p.datetime,
+        p.guest,
+        p.guest_location,
+        (
+            SELECT MAX(id)
+            FROM dim_roomtype
+            WHERE _id = p.room_type AND created_at <= p.updated_at
+        ) room_type,
+        p.addon,
+        p.quantity AS addon_quantity
+    FROM purchases p
+    INNER JOIN dim_location l
+    ON p.guest_location = l.id
+    WHERE p.room_type IS NOT NULL AND p.addon IS NOT NULL
+"""
