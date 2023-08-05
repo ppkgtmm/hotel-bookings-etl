@@ -342,7 +342,7 @@ def process_bookings(micro_batch_df: DataFrame, batch_id: int):
         .option("user", db_user)
         .option("password", db_password)
         .option("dbtable", stg_booking_table)
-        .mode("ignore")
+        .mode("append")
         .save()
     )
 
@@ -372,7 +372,7 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
         .option("user", db_user)
         .option("password", db_password)
         .option("dbtable", stg_booking_room_table)
-        .mode("ignore")
+        .mode("append")
         .save()
     )
     write_bookings()
