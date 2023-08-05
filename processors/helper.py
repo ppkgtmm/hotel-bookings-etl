@@ -2,7 +2,8 @@ from typing import Any, Dict
 from dotenv import load_dotenv
 from os import getenv
 from pyspark.sql.types import StringType, MapType
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, Table, MetaData
+from sqlalchemy.dialects.mysql import insert
 from pyspark.sql.types import (
     IntegerType,
     LongType,
@@ -43,6 +44,9 @@ stg_guest_table = "stg_guest"
 stg_booking_table = "stg_booking"
 stg_booking_room_table = "stg_booking_room"
 stg_booking_addon_table = "stg_booking_addon"
+metadata = MetaData()
+Booking = Table(stg_booking_table, metadata, autoload_with=engine)
+BookingRoom = Table(stg_booking_room_table, metadata, autoload_with=engine)
 addon_schema = StructType(
     [
         StructField("id", IntegerType()),
@@ -335,16 +339,13 @@ def process_bookings(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    (
-        data.write.format("jdbc")
-        .option("driver", jdbc_driver)
-        .option("url", jdbc_mysql_url)
-        .option("user", db_user)
-        .option("password", db_password)
-        .option("dbtable", stg_booking_table)
-        .mode("append")
-        .save()
+    rows = [row.asDict() for row in data.collect()]
+    query = insert(Booking).values(rows)
+    query = query.on_duplicate_key_update(
+        checkin=query.inserted.checkin, checkout=query.inserted.checkout
     )
+    conn.execute(query)
+    conn.commit()
 
 
 def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
@@ -365,17 +366,16 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    (
-        data.write.format("jdbc")
-        .option("driver", jdbc_driver)
-        .option("url", jdbc_mysql_url)
-        .option("user", db_user)
-        .option("password", db_password)
-        .option("dbtable", stg_booking_room_table)
-        .mode("append")
-        .save()
+    rows = [row.asDict() for row in data.collect()]
+    query = insert(BookingRoom).values(rows)
+    query = query.on_duplicate_key_update(
+        booking=query.inserted.booking,
+        room=query.inserted.room,
+        guest=query.inserted.guest,
+        updated_at=query.inserted.updated_at,
     )
-    write_bookings()
+    conn.execute(query)
+    conn.commit()
 
 
 def write_bookings():
