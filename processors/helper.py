@@ -380,38 +380,46 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
 
 def write_bookings():
     query = f"""
-    WITH max_date AS (
-        SELECT MAX(updated_at)
-        FROM {stg_booking_room_table}
+    WITH bookings AS (
+        SELECT
+            br.id,
+            b.checkin, 
+            b.checkout,
+            br.guest,
+            br.updated_at,
+            (
+                SELECT location
+                FROM {stg_guest_table} g
+                WHERE g.id = br.guest AND g.updated_at <= br.updated_at
+                ORDER BY g.updated_at DESC
+                LIMIT 1
+            ) guest_location,
+            (
+                SELECT type
+                FROM {stg_room_table} r
+                WHERE r.id = br.room AND r.updated_at <= br.updated_at
+                ORDER BY r.updated_at DESC
+                LIMIT 1
+            ) room_type
+        FROM {stg_booking_room_table} br
+        INNER JOIN {stg_booking_table} b
+        ON br.processed = false AND br.booking = b.id
     )
     SELECT
-        br.id,
+        b.id,
         b.checkin, 
-        b.checkout, 
-        br.guest, 
-        g.location guest_location,
+        b.checkout,
+        b.guest,
+        b.guest_location,
         (
-            SELECT MAX(id) id
+            SELECT MAX(id)
             FROM dim_roomtype
-            WHERE _id = r.type AND created_at <= br.updated_at
+            WHERE _id = b.room_type AND created_at <= b.updated_at
+
         ) room_type
-    FROM {stg_booking_room_table} br
-    INNER JOIN {stg_booking_table} b
-    ON br.processed = false AND br.booking = b.id
-    INNER JOIN (
-        SELECT g.id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY g.id ORDER BY updated_at DESC) rnk
-        FROM {stg_guest_table} g
-        INNER JOIN dim_location l
-        ON g.location = l.id
-        WHERE updated_at <= (SELECT * FROM max_date)
-    ) g
-    ON br.guest = g.id AND g.rnk = 1
-    INNER JOIN (
-        SELECT id, type, updated_at,  ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnk
-        FROM {stg_room_table}
-        WHERE updated_at <= (SELECT * FROM max_date)
-    ) r
-    ON br.room = r.id AND r.rnk = 1
+    FROM bookings b
+    INNER JOIN dim_location l
+    ON b.guest_location = l.id
     """
     for row in conn.execute(text(query)):
         (
