@@ -151,12 +151,10 @@ def write_roomtypes(row: Row):
 def write_locations():
     query = f"""
                 INSERT INTO dim_location (id, state, country)
-                SELECT * FROM (
-                    SELECT id AS _id, state AS _state, country AS _country
-                    FROM {stg_location_table}
-                ) AS t
+                SELECT id, state, country
+                FROM {stg_location_table} stg
                 ON DUPLICATE KEY 
-                UPDATE state=_state, country=_country
+                UPDATE state=stg.state, country=stg.country
             """
     conn.execute(text(query))
     conn.commit()
@@ -165,12 +163,10 @@ def write_locations():
 def write_guests():
     query = f"""
                 INSERT INTO dim_guest (id, email, dob, gender)
-                SELECT * FROM (
-                    SELECT id AS _id, email AS _email, dob AS _dob, gender AS _gender
-                    FROM {stg_guest_table}
-                ) AS t
+                SELECT id, email, dob, gender
+                FROM {stg_guest_table} stg
                 ON DUPLICATE KEY 
-                UPDATE email=_email, dob=_dob, gender=_gender
+                UPDATE email=stg.email, dob=stg.dob, gender=stg.gender
             """
     conn.execute(text(query))
     conn.commit()
