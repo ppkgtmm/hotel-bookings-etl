@@ -138,7 +138,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", BROKER)
         .option("subscribe", BOOKING_ADDONS_TABLE)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", 1)
+        .option("maxOffsetsPerTrigger", 50)
         .load()
     )
     booking_addons.writeStream.option(
