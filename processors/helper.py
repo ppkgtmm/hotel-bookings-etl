@@ -322,9 +322,8 @@ def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-
-
-#     write_purchases()
+    db_writer.stage_booking_addons(rows)
+    db_writer.write_fct_purchases()
 
 
 # def write_purchases():
