@@ -186,5 +186,36 @@ class DatabaseWriter:
                     conn.commit()
                     current_date += timedelta(days=1)
 
+    def write_fct_purchases(self):
+        query = purchases_query.format(
+            stg_guest_table=stg_guest_table,
+            stg_room_table=stg_room_table,
+            stg_booking_addon_table=stg_booking_addon_table,
+            stg_booking_room_table=stg_booking_room_table,
+        )
+        with self.engine.connect() as conn:
+            for row in conn.execute(text(query)):
+                (id, datetime, guest, guest_location, room_type, addon, quantity) = row
+                query = insert(self.FactPurchase).values(
+                    guest=guest,
+                    guest_location=guest_location,
+                    roomtype=room_type,
+                    datetime=datetime,
+                    addon=addon,
+                    addon_quantity=quantity,
+                )
+                query = query.on_duplicate_key_update(
+                    addon_quantity=query.inserted.quantity
+                )
+                conn.execute(query)
+                conn.commit()
+                mark_processed = (
+                    update(self.BookingAddon)
+                    .where(self.BookingAddon.c.id == id)
+                    .values(processed=True)
+                )
+                conn.execute(mark_processed)
+                conn.commit()
+
     def tear_down(self):
         self.engine.dispose()
