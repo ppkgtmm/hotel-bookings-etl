@@ -2,7 +2,7 @@ from typing import Any, Dict
 from dotenv import load_dotenv
 from os import getenv
 from pyspark.sql.types import StringType, MapType
-from sqlalchemy import create_engine, text, Table, MetaData
+from sqlalchemy import create_engine, text, Table, MetaData, update
 from sqlalchemy.dialects.mysql import insert
 from pyspark.sql.types import (
     IntegerType,
@@ -44,9 +44,13 @@ stg_guest_table = "stg_guest"
 stg_booking_table = "stg_booking"
 stg_booking_room_table = "stg_booking_room"
 stg_booking_addon_table = "stg_booking_addon"
+fct_booking_table = "fct_booking"
+
 metadata = MetaData()
 Booking = Table(stg_booking_table, metadata, autoload_with=engine)
 BookingRoom = Table(stg_booking_room_table, metadata, autoload_with=engine)
+FactBooking = Table(fct_booking_table, metadata, autoload_with=engine)
+
 addon_schema = StructType(
     [
         StructField("id", IntegerType()),
@@ -420,6 +424,7 @@ def write_bookings():
     FROM bookings b
     INNER JOIN dim_location l
     ON b.guest_location = l.id
+    WHERE b.room_type IS NOT NULL
     """
     for row in conn.execute(text(query)):
         (
@@ -438,24 +443,14 @@ def write_bookings():
                 "roomtype": room_type,
                 "datetime": int(current_date.strftime("%Y%m%d%H%M%S")),
             }
-            conn.execute(
-                text(
-                    """
-                    INSERT INTO fct_booking (datetime, guest, guest_location, roomtype)
-                    VALUES (:datetime, :guest, :guest_location, :roomtype)
-                    ON DUPLICATE KEY
-                    UPDATE datetime=:datetime, guest=:guest, guest_location=:guest_location, roomtype=:roomtype
-                    """
-                ),
-                data,
-            )
+            query = insert(FactBooking).values(**data)
+            query = query.on_duplicate_key_update(**data)
+            conn.execute(query)
             conn.commit()
-            conn.execute(
-                text(
-                    f"UPDATE {stg_booking_room_table} SET processed = true WHERE id = :id"
-                ),
-                {"id": id},
+            mark_processed = (
+                update(BookingRoom).where(BookingRoom.c.id == id).values(processed=True)
             )
+            conn.execute(mark_processed)
             conn.commit()
             current_date += timedelta(days=1)
 
