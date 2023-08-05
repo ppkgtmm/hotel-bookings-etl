@@ -1,7 +1,7 @@
 from typing import Any, Dict
 from dotenv import load_dotenv
 from os import getenv
-from sqlalchemy import create_engine, text, Table, MetaData, update
+from sqlalchemy import create_engine, text, Table, MetaData, update, NullPool
 from sqlalchemy.dialects.mysql import insert
 from constants import *
 from datetime import timedelta
@@ -20,8 +20,7 @@ connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
 
 class DatabaseWriter:
     def __init__(self) -> None:
-        self.engine = create_engine(connection_string, pool_recycle=3600)
-        self.conn = self.engine.connect()
+        self.engine = create_engine(connection_string, poolclass=NullPool)
 
         self.metadata = MetaData()
 
@@ -66,26 +65,30 @@ class DatabaseWriter:
             quarter=query.inserted.quarter,
             year=query.inserted.year,
         )
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
 
     def write_dim_addons(self, rows: list[Dict[str, Any]]):
         query = insert(self.DimAddon).values(rows)
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
 
     def write_dim_roomtypes(self, rows: list[Dict[str, Any]]):
         query = insert(self.DimRoomType).values(rows)
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
 
     def write_dim_locations(self, rows: list[Dict[str, Any]]):
         query = insert(self.DimLocation).values(rows)
         query = query.on_duplicate_key_update(
             state=query.inserted.state, country=query.inserted.country
         )
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
 
     def stage_rooms(self, rows: list[Dict[str, Any]]):
         query = insert(self.Room).values(rows)
@@ -94,8 +97,9 @@ class DatabaseWriter:
 
     def stage_guests(self, rows: list[Dict[str, Any]]):
         query = insert(self.Guest).values(rows)
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
 
     def write_dim_guests(self, rows: list[Dict[str, Any]]):
         query = insert(self.DimGuest).values(rows)
@@ -104,16 +108,18 @@ class DatabaseWriter:
             dob=query.inserted.dob,
             gender=query.inserted.gender,
         )
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
 
     def stage_bookings(self, rows: list[Dict[str, Any]]):
         query = insert(self.Booking).values(rows)
         query = query.on_duplicate_key_update(
             checkin=query.inserted.checkin, checkout=query.inserted.checkout
         )
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
 
     def stage_booking_rooms(self, rows: list[Dict[str, Any]]):
         query = insert(self.BookingRoom).values(rows)
@@ -123,8 +129,9 @@ class DatabaseWriter:
             guest=query.inserted.guest,
             updated_at=query.inserted.updated_at,
         )
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
 
     def write_fct_bookings(self):
         query = bookings_query.format(
@@ -133,35 +140,37 @@ class DatabaseWriter:
             stg_booking_table=stg_booking_table,
             stg_booking_room_table=stg_booking_room_table,
         )
-        for row in self.conn.execute(text(query)):
-            (
-                id,
-                checkin,
-                checkout,
-                guest,
-                guest_location,
-                room_type,
-            ) = row
-            current_date = checkin
-            while current_date <= checkout:
-                query = insert(self.FactBooking).values(
-                    guest=guest,
-                    guest_location=guest_location,
-                    roomtype=room_type,
-                    datetime=int(current_date.strftime("%Y%m%d%H%M%S")),
-                )
-                query = query.on_duplicate_key_update(datetime=query.inserted.datetime)
-                self.conn.execute(query)
-                self.conn.commit()
-                mark_processed = (
-                    update(self.BookingRoom)
-                    .where(self.BookingRoom.c.id == id)
-                    .values(processed=True)
-                )
-                self.conn.execute(mark_processed)
-                self.conn.commit()
-                current_date += timedelta(days=1)
+        with self.engine.connect() as conn:
+            for row in conn.execute(text(query)):
+                (
+                    id,
+                    checkin,
+                    checkout,
+                    guest,
+                    guest_location,
+                    room_type,
+                ) = row
+                current_date = checkin
+                while current_date <= checkout:
+                    query = insert(self.FactBooking).values(
+                        guest=guest,
+                        guest_location=guest_location,
+                        roomtype=room_type,
+                        datetime=int(current_date.strftime("%Y%m%d%H%M%S")),
+                    )
+                    query = query.on_duplicate_key_update(
+                        datetime=query.inserted.datetime
+                    )
+                    conn.execute(query)
+                    conn.commit()
+                    mark_processed = (
+                        update(self.BookingRoom)
+                        .where(self.BookingRoom.c.id == id)
+                        .values(processed=True)
+                    )
+                    conn.execute(mark_processed)
+                    conn.commit()
+                    current_date += timedelta(days=1)
 
     def tear_down(self):
-        self.conn.close()
         self.engine.dispose()
