@@ -20,7 +20,6 @@ from pyspark.sql.functions import (
     date_add,
     to_date,
     lit,
-    max,
 )
 from datetime import timedelta
 
