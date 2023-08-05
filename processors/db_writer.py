@@ -134,6 +134,19 @@ class DatabaseWriter:
             conn.execute(query)
             conn.commit()
 
+    def stage_booking_addons(self, rows: list[Dict[str, Any]]):
+        query = insert(self.BookingAddon).values(rows)
+        query = query.on_duplicate_key_update(
+            booking_room=query.inserted.booking_room,
+            addon=query.inserted.addon,
+            quantity=query.inserted.quantity,
+            datetime=query.inserted.datetime,
+            updated_at=query.inserted.updated_at,
+        )
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
+
     def write_fct_bookings(self):
         query = bookings_query.format(
             stg_guest_table=stg_guest_table,
