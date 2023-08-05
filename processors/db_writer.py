@@ -25,9 +25,6 @@ class DatabaseWriter:
         self.metadata = MetaData()
 
         # staging tables
-        self.Location = Table(
-            stg_location_table, self.metadata, autoload_with=self.engine
-        )
         self.Room = Table(stg_room_table, self.metadata, autoload_with=self.engine)
         self.Guest = Table(stg_guest_table, self.metadata, autoload_with=self.engine)
         self.Booking = Table(
@@ -200,12 +197,12 @@ class DatabaseWriter:
                     guest=guest,
                     guest_location=guest_location,
                     roomtype=room_type,
-                    datetime=datetime,
+                    datetime=int(datetime.strftime("%Y%m%d%H%M%S")),
                     addon=addon,
                     addon_quantity=quantity,
                 )
                 query = query.on_duplicate_key_update(
-                    addon_quantity=query.inserted.quantity
+                    addon_quantity=query.inserted.addon_quantity
                 )
                 conn.execute(query)
                 conn.commit()
