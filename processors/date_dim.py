@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
 import math
-from db_writer import write_dim_date, tear_down
+from db_writer import DatabaseWriter
 
 start_date = datetime.strptime("2021-01-01 00:00:00", "%Y-%m-%d %H:%M:%S") + timedelta(
     days=-90
@@ -25,6 +25,6 @@ while curr_date <= max_date:
     )
     curr_date += timedelta(minutes=30)
 
-
-write_dim_date(data)
-tear_down()
+db_writer = DatabaseWriter()
+db_writer.write_dim_date(data)
+db_writer.tear_down()
