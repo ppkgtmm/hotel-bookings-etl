@@ -6,8 +6,7 @@ USE olap_hotel;
 CREATE TABLE `stg_location` (
   `id` integer PRIMARY KEY,
   `state` varchar(255),
-  `country` varchar(255),
-  `updated_at` datetime
+  `country` varchar(255)
 );
 
 CREATE TABLE `stg_guest` (
