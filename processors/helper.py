@@ -17,17 +17,7 @@ from pyspark.sql.functions import (
     to_date,
     lit,
 )
-from db_writer import (
-    write_dim_addons,
-    write_dim_roomtypes,
-    write_dim_locations,
-    stage_rooms,
-    stage_guests,
-    write_dim_guests,
-    stage_bookings,
-    stage_booking_rooms,
-    write_fct_bookings,
-)
+from db_writer import DatabaseWriter
 
 addon_schema = StructType(
     [
@@ -112,8 +102,7 @@ booking_addon_schema = StructType(
     ]
 )
 json_schema = MapType(StringType(), StringType())
-
-
+db_writer = DatabaseWriter()
 # def write_addons(row: Row):
 #     payload = row.asDict()
 #     query = """
@@ -180,7 +169,7 @@ def process_addons(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    write_dim_addons(rows)
+    db_writer.write_dim_addons(rows)
 
 
 def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
@@ -201,7 +190,7 @@ def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    write_dim_roomtypes(rows)
+    db_writer.write_dim_roomtypes(rows)
 
 
 def process_locations(micro_batch_df: DataFrame, batch_id: int):
@@ -216,7 +205,7 @@ def process_locations(micro_batch_df: DataFrame, batch_id: int):
     )
 
     rows = df_to_list(data)
-    write_dim_locations(rows)
+    db_writer.write_dim_locations(rows)
 
 
 def process_rooms(micro_batch_df: DataFrame, batch_id: int):
@@ -236,7 +225,7 @@ def process_rooms(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    stage_rooms(rows)
+    db_writer.stage_rooms(rows)
 
 
 def process_guests(micro_batch_df: DataFrame, batch_id: int):
@@ -261,8 +250,9 @@ def process_guests(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    stage_guests(rows)
-    write_dim_guests(rows)
+    db_writer.stage_guests(rows)
+    rows = df_to_list(data.select(["id", "email", "dob", "gender"]))
+    db_writer.write_dim_guests(rows)
 
 
 def process_bookings(micro_batch_df: DataFrame, batch_id: int):
@@ -286,7 +276,7 @@ def process_bookings(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    stage_bookings(rows)
+    db_writer.stage_bookings(rows)
 
 
 def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
@@ -308,8 +298,8 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    stage_booking_rooms(rows)
-    write_fct_bookings()
+    db_writer.stage_booking_rooms(rows)
+    db_writer.write_fct_bookings()
 
 
 # def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
