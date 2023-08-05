@@ -511,7 +511,7 @@ def write_purchases():
     ON ba.processed = false AND ba.booking_room = br.id
     INNER JOIN (
         SELECT g.id, location, updated_at, ROW_NUMBER() OVER(PARTITION BY g.id ORDER BY updated_at DESC) rnk
-        FROM {stg_guest_table}
+        FROM {stg_guest_table} g
         INNER JOIN dim_location l
         ON g.location = l.id
         WHERE updated_at <= (SELECT * FROM max_date)
