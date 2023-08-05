@@ -96,9 +96,9 @@ purchases_query = """
             SELECT MAX(id)
             FROM dim_roomtype
             WHERE _id = p.room_type AND created_at <= p.updated_at
-        ) roomtype,
+        ) room_type,
         p.addon,
-        p.quantity AS addon_quantity
+        p.quantity
     FROM purchases p
     INNER JOIN dim_location l
     ON p.guest_location = l.id
