@@ -13,12 +13,10 @@ from helper import (
 )
 from db_writer import tear_down
 import traceback
-from delta import configure_spark_with_delta_pip
 
 load_dotenv()
 
 MAX_OFFSETS = 100
-MAX_FILES = 1
 
 OLTP_DB = getenv("OLTP_DB")
 BROKER = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
@@ -33,24 +31,15 @@ BOOKINGS_TABLE = getenv("BOOKINGS_TABLE")
 BOOKING_ROOMS_TABLE = getenv("BOOKING_ROOMS_TABLE")
 BOOKING_ADDONS_TABLE = getenv("BOOKING_ADDONS_TABLE")
 
-EXTRA_PACKAGES = [
-    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1"
-]  # cr. https://stackoverflow.com/questions/54285151/kafka-structured-streaming-kafkasourceprovider-could-not-be-instantiated
 if __name__ == "__main__":
-    builder = (
+    spark = (
         SparkSession.builder.appName("hotel oltp processor")
         .config("spark.driver.memory", "1g")
-        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config(
-            "spark.sql.catalog.spark_catalog",
-            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-        )
-        .config(
-            "spark.jars",
-            "/mysql-connector-j-8.0.33/mysql-connector-j-8.0.33.jar",
-        )
+            "spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1"
+        )  # cr. https://stackoverflow.com/questions/54285151/kafka-structured-streaming-kafkasourceprovider-could-not-be-instantiated
+        .getOrCreate()
     )
-    spark = configure_spark_with_delta_pip(builder, EXTRA_PACKAGES).getOrCreate()
 
     location = (
         spark.readStream.format("kafka")
