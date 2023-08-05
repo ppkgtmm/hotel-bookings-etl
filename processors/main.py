@@ -11,7 +11,7 @@ from helper import (
     process_booking_rooms,
     # process_booking_addons,
 )
-from db_writer import tear_down
+from db_writer import DatabaseWriter
 import traceback
 
 load_dotenv()
@@ -32,6 +32,7 @@ BOOKING_ROOMS_TABLE = getenv("BOOKING_ROOMS_TABLE")
 BOOKING_ADDONS_TABLE = getenv("BOOKING_ADDONS_TABLE")
 
 if __name__ == "__main__":
+    db_writer = DatabaseWriter()
     spark = (
         SparkSession.builder.appName("hotel oltp processor")
         .config("spark.driver.memory", "1g")
@@ -149,4 +150,4 @@ if __name__ == "__main__":
     except Exception as e:
         traceback.print_exc()
     finally:
-        tear_down()
+        db_writer.tear_down()
