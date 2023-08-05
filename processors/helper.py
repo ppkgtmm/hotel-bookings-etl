@@ -1,9 +1,4 @@
-from typing import Any, Dict
-from dotenv import load_dotenv
-from os import getenv
 from pyspark.sql.types import StringType, MapType
-from sqlalchemy import create_engine, text, Table, MetaData, update
-from sqlalchemy.dialects.mysql import insert
 from pyspark.sql.types import (
     IntegerType,
     LongType,
@@ -22,33 +17,11 @@ from pyspark.sql.functions import (
     lit,
 )
 from datetime import timedelta
-
-load_dotenv()
-db_host = getenv("DB_HOST_INTERNAL")
-db_port = getenv("DB_PORT")
-db_user = getenv("DB_USER")
-db_password = getenv("DB_PASSWORD")
-db_name = getenv("OLAP_DB")
-
-connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
-    db_user, db_password, db_host, db_port, db_name
+from processors.db_writer import (
+    write_dim_addons,
+    write_dim_roomtypes,
+    write_dim_locations,
 )
-engine = create_engine(connection_string)
-conn = engine.connect()
-jdbc_mysql_url = f"jdbc:mysql://{db_host}:{db_port}/{db_name}"
-jdbc_driver = "com.mysql.cj.jdbc.Driver"
-stg_location_table = "stg_location"
-stg_room_table = "stg_room"
-stg_guest_table = "stg_guest"
-stg_booking_table = "stg_booking"
-stg_booking_room_table = "stg_booking_room"
-stg_booking_addon_table = "stg_booking_addon"
-fct_booking_table = "fct_booking"
-
-metadata = MetaData()
-Booking = Table(stg_booking_table, metadata, autoload_with=engine)
-BookingRoom = Table(stg_booking_room_table, metadata, autoload_with=engine)
-FactBooking = Table(fct_booking_table, metadata, autoload_with=engine)
 
 addon_schema = StructType(
     [
@@ -135,48 +108,52 @@ booking_addon_schema = StructType(
 json_schema = MapType(StringType(), StringType())
 
 
-def write_addons(row: Row):
-    payload = row.asDict()
-    query = """
-                INSERT INTO dim_addon (_id, name, price, created_at)
-                VALUES (:id, :name, :price, :updated_at)
-            """
-    conn.execute(text(query), payload)
-    conn.commit()
+# def write_addons(row: Row):
+#     payload = row.asDict()
+#     query = """
+#                 INSERT INTO dim_addon (_id, name, price, created_at)
+#                 VALUES (:id, :name, :price, :updated_at)
+#             """
+#     conn.execute(text(query), payload)
+#     conn.commit()
 
 
-def write_roomtypes(row: Row):
-    payload = row.asDict()
-    query = """
-                INSERT INTO dim_roomtype (_id, name, price, created_at)
-                VALUES (:id, :name, :price, :updated_at)
-            """
-    conn.execute(text(query), payload)
-    conn.commit()
+# def write_roomtypes(row: Row):
+#     payload = row.asDict()
+#     query = """
+#                 INSERT INTO dim_roomtype (_id, name, price, created_at)
+#                 VALUES (:id, :name, :price, :updated_at)
+#             """
+#     conn.execute(text(query), payload)
+#     conn.commit()
 
 
-def write_locations():
-    query = f"""
-                INSERT INTO dim_location (id, state, country)
-                SELECT id, state, country
-                FROM {stg_location_table} stg
-                ON DUPLICATE KEY 
-                UPDATE state=stg.state, country=stg.country
-            """
-    conn.execute(text(query))
-    conn.commit()
+# def write_locations():
+#     query = f"""
+#                 INSERT INTO dim_location (id, state, country)
+#                 SELECT id, state, country
+#                 FROM {stg_location_table} stg
+#                 ON DUPLICATE KEY
+#                 UPDATE state=stg.state, country=stg.country
+#             """
+#     conn.execute(text(query))
+#     conn.commit()
 
 
-def write_guests():
-    query = f"""
-                INSERT INTO dim_guest (id, email, dob, gender)
-                SELECT id, email, dob, gender
-                FROM {stg_guest_table} stg
-                ON DUPLICATE KEY 
-                UPDATE email=stg.email, dob=stg.dob, gender=stg.gender
-            """
-    conn.execute(text(query))
-    conn.commit()
+# def write_guests():
+#     query = f"""
+#                 INSERT INTO dim_guest (id, email, dob, gender)
+#                 SELECT id, email, dob, gender
+#                 FROM {stg_guest_table} stg
+#                 ON DUPLICATE KEY
+#                 UPDATE email=stg.email, dob=stg.dob, gender=stg.gender
+#             """
+#     conn.execute(text(query))
+#     conn.commit()
+
+
+def df_to_list(df: DataFrame):
+    return [row.asDict() for row in df.collect()]
 
 
 def process_addons(micro_batch_df: DataFrame, batch_id: int):
@@ -196,16 +173,8 @@ def process_addons(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    (
-        data.write.format("jdbc")
-        .option("driver", jdbc_driver)
-        .option("url", jdbc_mysql_url)
-        .option("user", db_user)
-        .option("password", db_password)
-        .option("dbtable", "dim_addon")
-        .mode("append")
-        .save()
-    )
+    rows = df_to_list(data)
+    write_dim_addons(rows)
 
 
 def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
@@ -225,16 +194,8 @@ def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    (
-        data.write.format("jdbc")
-        .option("driver", jdbc_driver)
-        .option("url", jdbc_mysql_url)
-        .option("user", db_user)
-        .option("password", db_password)
-        .option("dbtable", "dim_roomtype")
-        .mode("append")
-        .save()
-    )
+    rows = df_to_list(data)
+    write_dim_roomtypes(rows)
 
 
 def process_locations(micro_batch_df: DataFrame, batch_id: int):
@@ -247,17 +208,9 @@ def process_locations(micro_batch_df: DataFrame, batch_id: int):
         .filter("data IS NOT NULL")
         .select(["data.id", "data.state", "data.country"])
     )
-    (
-        data.write.format("jdbc")
-        .option("driver", jdbc_driver)
-        .option("url", jdbc_mysql_url)
-        .option("user", db_user)
-        .option("password", db_password)
-        .option("dbtable", stg_location_table)
-        .mode("overwrite")
-        .save()
-    )
-    write_locations()
+
+    rows = df_to_list(data)
+    write_dim_locations(rows)
 
 
 def process_rooms(micro_batch_df: DataFrame, batch_id: int):
