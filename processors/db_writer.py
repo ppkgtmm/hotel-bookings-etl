@@ -111,7 +111,7 @@ def write_fct_bookings():
         stg_booking_table=stg_booking_table,
         stg_booking_room_table=stg_booking_room_table,
     )
-    for row in conn.execute(text()):
+    for row in conn.execute(text(query)):
         (
             id,
             checkin,
