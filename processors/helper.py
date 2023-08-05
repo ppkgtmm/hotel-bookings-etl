@@ -17,7 +17,7 @@ from pyspark.sql.functions import (
     to_date,
     lit,
 )
-from processors.db_writer import (
+from db_writer import (
     write_dim_addons,
     write_dim_roomtypes,
     write_dim_locations,
