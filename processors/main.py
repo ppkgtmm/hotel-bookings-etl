@@ -9,10 +9,9 @@ from helper import (
     process_guests,
     process_bookings,
     process_booking_rooms,
-    process_booking_addons,
-    engine,
-    conn,
+    # process_booking_addons,
 )
+from db_writer import tear_down
 import traceback
 from delta import configure_spark_with_delta_pip
 
@@ -58,7 +57,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", BROKER)
         .option("subscribe", LOCATION_TABLE)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS * 5)
+        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
         .load()
     )
 
@@ -97,7 +96,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", BROKER)
         .option("subscribe", ROOMS_TABLE)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS * 5)
+        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
         .load()
     )
 
@@ -136,7 +135,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", BROKER)
         .option("subscribe", BOOKING_ROOMS_TABLE)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .option("maxOffsetsPerTrigger", 1)
         .load()
     )
 
@@ -144,22 +143,21 @@ if __name__ == "__main__":
         "checkpointLocation", "/tmp/booking_rooms/_checkpoints/"
     ).foreachBatch(process_booking_rooms).start()
 
-    booking_addons = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", BOOKING_ADDONS_TABLE)
-        .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
-        .load()
-    )
-    booking_addons.writeStream.option(
-        "checkpointLocation", "/tmp/booking_addons/_checkpoints/"
-    ).foreachBatch(process_booking_addons).start()
+    # booking_addons = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", BROKER)
+    #     .option("subscribe", BOOKING_ADDONS_TABLE)
+    #     .option("startingOffsets", "earliest")
+    #     .option("maxOffsetsPerTrigger", 1)
+    #     .load()
+    # )
+    # booking_addons.writeStream.option(
+    #     "checkpointLocation", "/tmp/booking_addons/_checkpoints/"
+    # ).foreachBatch(process_booking_addons).start()
 
     try:
         spark.streams.awaitAnyTermination()
     except Exception as e:
         traceback.print_exc()
     finally:
-        conn.close()
-        engine.dispose()
+        tear_down()
