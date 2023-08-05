@@ -5,10 +5,10 @@
    
 2. In `.env` file created, replace `<YOUR DB PASSWORD>` with wanted password 
 
-3. Allow set up script execution and run the set up script
+3. Allow set up script execution
 
 ```
-chmod +x setup.sh && ./setup.sh
+chmod +x setup.sh
 ```
 
 ### Process
@@ -24,13 +24,19 @@ source venv/bin/activate
 chmod +x generators/run.sh && ./generators/run.sh
 ```
 
-3. Insert generated data to OLTP database
+3. run the set up script
+
+```
+./setup.sh
+```
+
+4. Insert generated data to OLTP database
    
 ```
 python3 seed_oltp.py
 ``` 
 
-4. You are all set ! after a few minutes, data will start appearing in OLAP database
+5. You are all set ! after a few minutes, data will start appearing in OLAP database
 
 ### Tear down
 
