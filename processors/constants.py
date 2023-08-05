@@ -1,4 +1,3 @@
-stg_location_table = "stg_location"
 stg_room_table = "stg_room"
 stg_guest_table = "stg_guest"
 stg_booking_table = "stg_booking"
