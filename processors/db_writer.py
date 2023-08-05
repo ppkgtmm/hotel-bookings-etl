@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, text, Table, MetaData, update
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy import create_engine, text, Table, MetaData, update
 from sqlalchemy.dialects.mysql import insert
-from processors.constants import *
+from constants import *
 from datetime import timedelta
 
 load_dotenv()
