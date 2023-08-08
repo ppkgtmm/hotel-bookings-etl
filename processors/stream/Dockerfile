@@ -10,11 +10,11 @@ RUN apk add python3=3.9.17-r0 --repository=http://dl-cdn.alpinelinux.org/alpine/
 # install updated version of pip
 RUN python3 -m ensurepip && pip3 install --upgrade pip
 
-COPY ../ /processor
-WORKDIR /processor
-
 # install required libraries
 RUN apk add bash gcompat
+
+COPY .. /processor
+WORKDIR /processor
 
 # install required packages
 RUN pip3 install -r requirements.txt
