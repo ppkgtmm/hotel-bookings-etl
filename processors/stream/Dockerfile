@@ -13,10 +13,10 @@ RUN python3 -m ensurepip && pip3 install --upgrade pip
 # install required libraries
 RUN apk add bash gcompat
 
-COPY .. /processor
+COPY . /processor
 WORKDIR /processor
 
 # install required packages
-RUN pip3 --no-cache-dir install -r requirements.txt
+RUN pip3 --no-cache-dir install -r stream/requirements.txt
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
