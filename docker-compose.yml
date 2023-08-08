@@ -54,14 +54,14 @@ services:
     depends_on:
       - kafka-connect
       - mysql
-    build: processors/
+    build: 
+      context: processors/
+      dockerfile: stream/Dockerfile
     image: processor:latest
     container_name: processor
-    volumes:
-      - ./processors:/processor
     env_file:
       - '.env'
-    command: "/processor/run.sh"
+    command: "/processor/stream/run.sh"
   
   postgres:
     image: postgres:13
