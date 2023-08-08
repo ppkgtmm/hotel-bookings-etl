@@ -9,7 +9,7 @@ pip3 install -r requirements.txt
 docker-compose up -d
 
 # wait for mysql container to start properly
-sleep 25
+sleep 30
 
 # initialize oltp and olap databases
 python3 setup_dbs.py
