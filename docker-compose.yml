@@ -63,7 +63,7 @@ services:
       - '.env'
     command: "stream/run.sh"
     volumes:
-      - ./processors:/processors
+      - ./processors:/processor
   
   postgres:
     image: postgres:13
