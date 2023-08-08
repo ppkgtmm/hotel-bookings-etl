@@ -61,7 +61,9 @@ services:
     container_name: processor
     env_file:
       - '.env'
-    command: "/processor/stream/run.sh"
+    command: "stream/run.sh"
+    volumes:
+      - ./processors:/processors
   
   postgres:
     image: postgres:13
