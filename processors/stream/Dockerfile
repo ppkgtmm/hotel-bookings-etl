@@ -13,8 +13,13 @@ RUN python3 -m ensurepip && pip3 install --upgrade pip
 # install required libraries
 RUN apk add bash gcompat
 
-COPY . /processor
 WORKDIR /processor
+
+COPY constants.py .
+
+COPY date_dim.py .
+
+COPY stream stream
 
 # install required packages
 RUN pip3 --no-cache-dir install -r stream/requirements.txt
