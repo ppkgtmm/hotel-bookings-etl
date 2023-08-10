@@ -1,15 +1,12 @@
 version: '3'
-x-common:
-  &airflow-env-vars
-  environment:
-    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres/$POSTGRES_DB
-    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres/$POSTGRES_DB
 services:
   zookeeper:
     image: debezium/zookeeper:2.3
     container_name: zookeeper
     ports:
       - "2181:2181"
+    networks:
+      - hotel-stream
 
   broker:
     image: debezium/kafka:2.3
@@ -24,6 +21,8 @@ services:
       LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       LISTENERS: PLAINTEXT://:9092,PLAINTEXT_INTERNAL://:9092
       ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:9092
+    networks:
+      - hotel-stream
 
   kafka-connect:
     depends_on:
@@ -39,6 +38,8 @@ services:
       CONFIG_STORAGE_TOPIC: 'hotel-config'
       OFFSET_STORAGE_TOPIC: 'hotel-offset'
       STATUS_STORAGE_TOPIC: 'hotel-status'
+    networks:
+      - hotel-stream
 
   mysql:
     image: mysql:8.0.33
@@ -49,6 +50,9 @@ services:
       - '.env'
     environment:
       - MYSQL_ROOT_PASSWORD=$DB_PASSWORD
+    networks:
+      - hotel-batch
+      - hotel-stream
 
   processor:
     depends_on:
@@ -64,46 +68,9 @@ services:
     command: "stream/run.sh"
     volumes:
       - ./processors/stream:/processor/stream
-  
-  postgres:
-    image: postgres:13
-    container_name: postgres
-    env_file:
-      - '.env'
+    networks:
+      - hotel-stream
 
-  airflow-init:
-    build: airflow/
-    image: airflow:2.3.3
-    container_name: airflow-init
-    env_file:
-      - '.env'
-    <<: *airflow-env-vars
-    entrypoint: bash -c
-    command: /setup.sh
-    depends_on:
-      - postgres
-
-  airflow-scheduler:
-    build: airflow/
-    image: airflow:2.3.3
-    container_name: airflow-scheduler
-    command: scheduler
-    env_file:
-      - '.env'
-    <<: *airflow-env-vars
-    depends_on:
-      airflow-init:
-        condition: service_completed_successfully
-  
-  airflow-webserver:
-    build: airflow/
-    image: airflow:2.3.3
-    container_name: airflow-webserver
-    command: webserver
-    env_file:
-      - '.env'
-    <<: *airflow-env-vars
-    ports:
-      - 8080:8080
-    depends_on:
-      - airflow-scheduler
+networks:
+  hotel-batch:
+  hotel-stream:
