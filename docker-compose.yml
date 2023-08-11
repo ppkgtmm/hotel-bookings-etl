@@ -1,4 +1,11 @@
 version: '3'
+x-common:
+  &airflow-env-vars
+  environment:
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres/$POSTGRES_DB
+    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres/$POSTGRES_DB
+  env_file:
+    - '.env'
 services:
   zookeeper:
     image: debezium/zookeeper:2.3
@@ -60,3 +67,40 @@ services:
     volumes:
       - ./processors/stream:/processor/stream
 
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    env_file:
+    - '.env'
+    
+
+  airflow-init:
+    build: airflow/
+    image: airflow:2.3.3
+    container_name: airflow-init
+    <<: *airflow-env-vars
+    entrypoint: bash -c
+    command: /setup.sh
+    depends_on:
+      - postgres
+
+  airflow-scheduler:
+    build: airflow/
+    image: airflow:2.3.3
+    container_name: airflow-scheduler
+    command: scheduler
+    <<: *airflow-env-vars
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+  
+  airflow-webserver:
+    build: airflow/
+    image: airflow:2.3.3
+    container_name: airflow-webserver
+    command: webserver
+    <<: *airflow-env-vars
+    ports:
+      - 8080:8080
+    depends_on:
+      - airflow-scheduler
