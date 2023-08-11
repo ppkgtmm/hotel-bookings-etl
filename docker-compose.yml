@@ -5,8 +5,6 @@ services:
     container_name: zookeeper
     ports:
       - "2181:2181"
-    networks:
-      - hotel-stream
 
   broker:
     image: debezium/kafka:2.3
@@ -21,8 +19,6 @@ services:
       LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       LISTENERS: PLAINTEXT://:9092,PLAINTEXT_INTERNAL://:9092
       ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:9092
-    networks:
-      - hotel-stream
 
   kafka-connect:
     depends_on:
@@ -38,8 +34,6 @@ services:
       CONFIG_STORAGE_TOPIC: 'hotel-config'
       OFFSET_STORAGE_TOPIC: 'hotel-offset'
       STATUS_STORAGE_TOPIC: 'hotel-status'
-    networks:
-      - hotel-stream
 
   mysql:
     image: mysql:8.0.33
@@ -50,9 +44,6 @@ services:
       - '.env'
     environment:
       - MYSQL_ROOT_PASSWORD=$DB_PASSWORD
-    networks:
-      - hotel-batch
-      - hotel-stream
 
   processor:
     depends_on:
@@ -68,9 +59,4 @@ services:
     command: "stream/run.sh"
     volumes:
       - ./processors/stream:/processor/stream
-    networks:
-      - hotel-stream
 
-networks:
-  hotel-batch:
-  hotel-stream:
