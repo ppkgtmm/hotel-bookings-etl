@@ -103,3 +103,29 @@ purchases_query = """
     ON p.guest_location = l.id
     WHERE p.room_type IS NOT NULL AND p.addon IS NOT NULL
 """
+
+delete_rooms_query = """
+    DELETE
+    FROM stg_room
+    WHERE EXISTS (
+        SELECT *
+        FROM (
+            SELECT *, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnum
+            FROM stg_room
+        ) sub
+        WHERE rnum > 3
+    )
+"""
+
+delete_guests_query = """
+    DELETE
+    FROM stg_guest
+    WHERE EXISTS (
+        SELECT *
+        FROM (
+            SELECT *, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnum
+            FROM stg_guest
+        ) sub
+        WHERE rnum > 3
+    )
+"""
