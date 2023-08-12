@@ -247,8 +247,10 @@ class DatabaseWriter:
                 query = (
                     delete(self.FactBooking)
                     .where(self.FactBooking.c.guest == guest)
-                    .where(self.FactBooking.c.datetime >= checkin.strftime(dt_fmt))
-                    .where(self.FactBooking.c.datetime <= checkout.strftime(dt_fmt))
+                    .where(self.FactBooking.c.datetime >= int(checkin.strftime(dt_fmt)))
+                    .where(
+                        self.FactBooking.c.datetime <= int(checkout.strftime(dt_fmt))
+                    )
                 )
                 conn.execute(query)
                 conn.commit()
@@ -302,7 +304,9 @@ class DatabaseWriter:
                 query = (
                     delete(self.FactPurchase)
                     .where(self.FactPurchase.c.guest == guest)
-                    .where(self.FactPurchase.c.datetime == datetime.strftime(dt_fmt))
+                    .where(
+                        self.FactPurchase.c.datetime == int(datetime.strftime(dt_fmt))
+                    )
                     .where(self.FactPurchase.c.addon == addon)
                 )
                 conn.execute(query)
