@@ -24,6 +24,8 @@ CREATE TABLE `stg_booking` (
   `checkout` date
 );
 
+CREATE TABLE `del_booking` LIKE `stg_booking`;
+
 CREATE TABLE `stg_booking_room` (
   `id` integer PRIMARY KEY,
   `booking` integer,
@@ -33,8 +35,10 @@ CREATE TABLE `stg_booking_room` (
   `processed` boolean DEFAULT false
 );
 
+CREATE TABLE `del_booking_room` LIKE `stg_booking_room`;
+
 CREATE TABLE `stg_booking_addon` (
-  `id` integer,
+  `id` integer PRIMARY KEY,
   `booking_room` integer,
   `addon` integer,
   `quantity` integer,
@@ -42,6 +46,8 @@ CREATE TABLE `stg_booking_addon` (
   `updated_at` datetime,
   `processed` boolean DEFAULT false
 );
+
+CREATE TABLE `del_booking_addon` LIKE `stg_booking_addon`;
 
 CREATE TABLE `dim_date` (
   `id` bigint PRIMARY KEY,
