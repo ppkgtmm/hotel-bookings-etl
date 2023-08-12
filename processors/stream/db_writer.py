@@ -10,6 +10,8 @@ from sqlalchemy.dialects.mysql import insert
 from constants import *
 from datetime import timedelta
 
+dt_fmt = "%Y%m%d%H%M%S"
+
 load_dotenv()
 db_host = getenv("DB_HOST_INTERNAL")
 db_port = getenv("DB_PORT")
@@ -218,7 +220,7 @@ class DatabaseWriter:
                         guest=guest,
                         guest_location=guest_location,
                         roomtype=room_type,
-                        datetime=int(current_date.strftime("%Y%m%d%H%M%S")),
+                        datetime=int(current_date.strftime(dt_fmt)),
                     )
                     query = query.on_duplicate_key_update(
                         datetime=query.inserted.datetime
@@ -245,12 +247,8 @@ class DatabaseWriter:
                 query = (
                     delete(self.FactBooking)
                     .where(self.FactBooking.c.guest == guest)
-                    .where(
-                        self.FactBooking.c.datetime >= checkin.strftime("%Y%m%d%H%M%S")
-                    )
-                    .where(
-                        self.FactBooking.c.datetime <= checkout.strftime("%Y%m%d%H%M%S")
-                    )
+                    .where(self.FactBooking.c.datetime >= checkin.strftime(dt_fmt))
+                    .where(self.FactBooking.c.datetime <= checkout.strftime(dt_fmt))
                 )
                 conn.execute(query)
                 conn.commit()
@@ -276,7 +274,7 @@ class DatabaseWriter:
                     guest=guest,
                     guest_location=guest_location,
                     roomtype=room_type,
-                    datetime=int(datetime.strftime("%Y%m%d%H%M%S")),
+                    datetime=int(datetime.strftime(dt_fmt)),
                     addon=addon,
                     addon_quantity=quantity,
                 )
@@ -304,10 +302,7 @@ class DatabaseWriter:
                 query = (
                     delete(self.FactPurchase)
                     .where(self.FactPurchase.c.guest == guest)
-                    .where(
-                        self.FactPurchase.c.datetime
-                        == datetime.strftime("%Y%m%d%H%M%S")
-                    )
+                    .where(self.FactPurchase.c.datetime == datetime.strftime(dt_fmt))
                     .where(self.FactPurchase.c.addon == addon)
                 )
                 conn.execute(query)
