@@ -273,13 +273,9 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
     db_writer.write_fct_bookings()
 
 
-def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
-    data: DataFrame = (
-        micro_batch_df.withColumn(
-            "message", from_json(col("value").cast(StringType()), json_schema)
-        )
-        .withColumn("payload", from_json("message.payload", json_schema))
-        .withColumn("data", from_json("payload.after", booking_addon_schema))
+def transform_booking_addons(booking_addons_df: DataFrame, key: str):
+    return (
+        booking_addons_df.withColumn("data", from_json(key, booking_addon_schema))
         .filter("data IS NOT NULL")
         .select(
             [
@@ -292,6 +288,17 @@ def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    rows = df_to_list(data)
-    db_writer.stage_booking_addons(rows)
+
+
+def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
+    payload: DataFrame = micro_batch_df.withColumn(
+        "message", from_json(col("value").cast(StringType()), json_schema)
+    ).withColumn("payload", from_json("message.payload", json_schema))
+    before: DataFrame = transform_booking_addons(payload, "payload.before")
+    rows_before = df_to_list(before)
+    db_writer.del_booking_addons(rows_before)
+    db_writer.remove_fct_purchases()
+    after: DataFrame = transform_booking_addons(payload, "payload.after")
+    rows_after = df_to_list(after)
+    db_writer.stage_booking_addons(rows_after)
     db_writer.write_fct_purchases()
