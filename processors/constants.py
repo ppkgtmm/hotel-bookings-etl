@@ -119,6 +119,21 @@ purchases_query = """
     WHERE p.room_type IS NOT NULL AND p.addon IS NOT NULL
 """
 
+remove_purchases_query = """
+        SELECT
+            ba.id,
+            ba.datetime,
+            br.guest,
+            (
+                SELECT MAX(id)
+                FROM dim_addon
+                WHERE _id = ba.addon AND created_at <= ba.updated_at
+            ) addon
+        FROM {del_booking_addon_table} ba
+        INNER JOIN {del_booking_room_table} br
+        ON ba.processed = false AND ba.booking_room = br.id
+"""
+
 delete_rooms_query = """
     DELETE
     FROM stg_room
