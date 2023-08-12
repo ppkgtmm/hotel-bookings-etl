@@ -122,13 +122,6 @@ class DatabaseWriter:
 
     def stage_booking_rooms(self, rows: list[Dict[str, Any]]):
         query = insert(self.BookingRoom).values(rows)
-        query = query.on_duplicate_key_update(
-            booking=query.inserted.booking,
-            room=query.inserted.room,
-            guest=query.inserted.guest,
-            updated_at=query.inserted.updated_at,
-            processed=False,
-        )
         with self.engine.connect() as conn:
             conn.execute(query)
             conn.commit()
