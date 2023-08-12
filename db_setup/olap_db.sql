@@ -19,7 +19,7 @@ CREATE TABLE `stg_room` (
 );
 
 CREATE TABLE `stg_booking` (
-  `id` integer PRIMARY KEY,
+  `id` integer,
   `checkin` date,
   `checkout` date
 );
@@ -27,7 +27,7 @@ CREATE TABLE `stg_booking` (
 CREATE TABLE `del_booking` LIKE `stg_booking`;
 
 CREATE TABLE `stg_booking_room` (
-  `id` integer PRIMARY KEY,
+  `id` integer,
   `booking` integer,
   `room` integer,
   `guest` integer,
@@ -38,7 +38,7 @@ CREATE TABLE `stg_booking_room` (
 CREATE TABLE `del_booking_room` LIKE `stg_booking_room`;
 
 CREATE TABLE `stg_booking_addon` (
-  `id` integer PRIMARY KEY,
+  `id` integer,
   `booking_room` integer,
   `addon` integer,
   `quantity` integer,
