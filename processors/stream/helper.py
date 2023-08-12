@@ -213,13 +213,9 @@ def process_guests(micro_batch_df: DataFrame, batch_id: int):
     db_writer.write_dim_guests(rows)
 
 
-def process_bookings(micro_batch_df: DataFrame, batch_id: int):
-    data: DataFrame = (
-        micro_batch_df.withColumn(
-            "message", from_json(col("value").cast(StringType()), json_schema)
-        )
-        .withColumn("payload", from_json("message.payload", json_schema))
-        .withColumn("data", from_json("payload.after", booking_schema))
+def transform_bookings(bookings_df: DataFrame, key: str):
+    return (
+        bookings_df.withColumn("data", from_json(key, booking_schema))
         .filter("data IS NOT NULL")
         .select(
             [
@@ -233,8 +229,18 @@ def process_bookings(micro_batch_df: DataFrame, batch_id: int):
             ]
         )
     )
-    rows = df_to_list(data)
-    db_writer.stage_bookings(rows)
+
+
+def process_bookings(micro_batch_df: DataFrame, batch_id: int):
+    payload: DataFrame = micro_batch_df.withColumn(
+        "message", from_json(col("value").cast(StringType()), json_schema)
+    ).withColumn("payload", from_json("message.payload", json_schema))
+    before: DataFrame = transform_bookings(payload, "payload.before")
+    rows_before = df_to_list(before)
+    db_writer.del_bookings(rows_before)
+    after: DataFrame = transform_bookings(payload, "payload.after")
+    rows_after = df_to_list(after)
+    db_writer.stage_bookings(rows_after)
 
 
 def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
