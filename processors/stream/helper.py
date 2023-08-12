@@ -103,48 +103,6 @@ booking_addon_schema = StructType(
 )
 json_schema = MapType(StringType(), StringType())
 db_writer = DatabaseWriter()
-# def write_addons(row: Row):
-#     payload = row.asDict()
-#     query = """
-#                 INSERT INTO dim_addon (_id, name, price, created_at)
-#                 VALUES (:id, :name, :price, :updated_at)
-#             """
-#     conn.execute(text(query), payload)
-#     conn.commit()
-
-
-# def write_roomtypes(row: Row):
-#     payload = row.asDict()
-#     query = """
-#                 INSERT INTO dim_roomtype (_id, name, price, created_at)
-#                 VALUES (:id, :name, :price, :updated_at)
-#             """
-#     conn.execute(text(query), payload)
-#     conn.commit()
-
-
-# def write_locations():
-#     query = f"""
-#                 INSERT INTO dim_location (id, state, country)
-#                 SELECT id, state, country
-#                 FROM {stg_location_table} stg
-#                 ON DUPLICATE KEY
-#                 UPDATE state=stg.state, country=stg.country
-#             """
-#     conn.execute(text(query))
-#     conn.commit()
-
-
-# def write_guests():
-#     query = f"""
-#                 INSERT INTO dim_guest (id, email, dob, gender)
-#                 SELECT id, email, dob, gender
-#                 FROM {stg_guest_table} stg
-#                 ON DUPLICATE KEY
-#                 UPDATE email=stg.email, dob=stg.dob, gender=stg.gender
-#             """
-#     conn.execute(text(query))
-#     conn.commit()
 
 
 def df_to_list(df: DataFrame):
