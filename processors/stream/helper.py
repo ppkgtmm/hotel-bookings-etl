@@ -230,6 +230,7 @@ def process_bookings(micro_batch_df: DataFrame, batch_id: int):
                 date_add(
                     to_date(lit("1970-01-01"), "yyyy-MM-dd"), col("data.checkout")
                 ).alias("checkout"),
+                timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
             ]
         )
     )
