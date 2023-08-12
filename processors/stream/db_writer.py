@@ -34,6 +34,9 @@ class DatabaseWriter:
         self.Booking = Table(
             stg_booking_table, self.metadata, autoload_with=self.engine
         )
+        self.DelBooking = Table(
+            del_booking_table, self.metadata, autoload_with=self.engine
+        )
         self.BookingRoom = Table(
             stg_booking_room_table, self.metadata, autoload_with=self.engine
         )
@@ -116,6 +119,15 @@ class DatabaseWriter:
 
     def stage_bookings(self, rows: list[Dict[str, Any]]):
         query = insert(self.Booking).values(rows)
+        query = query.on_duplicate_key_update(
+            checkin=query.inserted.checkin, checkout=query.inserted.checkout
+        )
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
+
+    def del_bookings(self, rows: list[Dict[str, Any]]):
+        query = insert(self.DelBooking).values(rows)
         query = query.on_duplicate_key_update(
             checkin=query.inserted.checkin, checkout=query.inserted.checkout
         )
