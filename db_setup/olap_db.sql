@@ -21,7 +21,8 @@ CREATE TABLE `stg_room` (
 CREATE TABLE `stg_booking` (
   `id` integer,
   `checkin` date,
-  `checkout` date
+  `checkout` date,
+  `updated_at` datetime
 );
 
 CREATE TABLE `del_booking` LIKE `stg_booking`;
