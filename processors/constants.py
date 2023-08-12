@@ -57,6 +57,17 @@ bookings_query = """
     ON b.guest_location = l.id
     WHERE b.room_type IS NOT NULL
 """
+
+remove_bookings_query = """
+    SELECT 
+        b.checkin, 
+        b.checkout,
+        br.guest
+    FROM {del_booking_room_table} br
+    INNER JOIN {del_booking_table} b
+    ON br.processed = false AND br.booking = b.id
+"""
+
 purchases_query = """
     with purchases AS (
         SELECT
