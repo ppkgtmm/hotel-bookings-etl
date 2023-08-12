@@ -60,6 +60,7 @@ bookings_query = """
 
 remove_bookings_query = """
     SELECT 
+        br.id,
         b.checkin, 
         b.checkout,
         br.guest
