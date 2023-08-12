@@ -293,5 +293,32 @@ class DatabaseWriter:
                 conn.execute(mark_processed)
                 conn.commit()
 
+    def remove_fct_purchases(self):
+        query = remove_purchases_query.format(
+            del_booking_addon_table=del_booking_addon_table,
+            del_booking_room_table=del_booking_room_table,
+        )
+        with self.engine.connect() as conn:
+            for row in conn.execute(text(query)):
+                (id, datetime, guest, addon) = row
+                query = (
+                    delete(self.FactPurchase)
+                    .where(self.FactPurchase.c.guest == guest)
+                    .where(
+                        self.FactPurchase.c.datetime
+                        == datetime.strftime("%Y%m%d%H%M%S")
+                    )
+                    .where(self.FactPurchase.c.addon == addon)
+                )
+                conn.execute(query)
+                conn.commit()
+                mark_processed = (
+                    update(self.DelBookingAddon)
+                    .where(self.DelBookingAddon.c.id == id)
+                    .values(processed=True)
+                )
+                conn.execute(mark_processed)
+                conn.commit()
+
     def tear_down(self):
         self.engine.dispose()
