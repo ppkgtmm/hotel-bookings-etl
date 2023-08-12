@@ -1,6 +1,7 @@
 stg_room_table = "stg_room"
 stg_guest_table = "stg_guest"
 stg_booking_table = "stg_booking"
+del_booking_table = "del_booking"
 stg_booking_room_table = "stg_booking_room"
 stg_booking_addon_table = "stg_booking_addon"
 
