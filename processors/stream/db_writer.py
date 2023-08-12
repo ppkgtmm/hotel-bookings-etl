@@ -5,7 +5,7 @@ sys.path.append(dirname(dirname(abspath(__file__))))
 from typing import Any, Dict
 from dotenv import load_dotenv
 from os import getenv
-from sqlalchemy import create_engine, text, Table, MetaData, update, NullPool
+from sqlalchemy import create_engine, text, Table, MetaData, update, NullPool, delete
 from sqlalchemy.dialects.mysql import insert
 from constants import *
 from datetime import timedelta
@@ -216,6 +216,34 @@ class DatabaseWriter:
                     conn.execute(mark_processed)
                     conn.commit()
                     current_date += timedelta(days=1)
+
+    def remove_fct_bookings(self):
+        query = remove_bookings_query.format(
+            del_booking_room_table=del_booking_room_table,
+            del_booking_table=del_booking_table,
+        )
+        with self.engine.connect() as conn:
+            for row in conn.execute(text(query)):
+                (id, checkin, checkout, guest) = row
+                query = (
+                    delete(self.FactBooking)
+                    .where(self.FactBooking.c.guest == guest)
+                    .where(
+                        self.FactBooking.c.datetime >= checkin.strftime("%Y%m%d%H%M%S")
+                    )
+                    .where(
+                        self.FactBooking.c.datetime <= checkout.strftime("%Y%m%d%H%M%S")
+                    )
+                )
+                conn.execute(query)
+                conn.commit()
+                mark_processed = (
+                    update(self.DelBookingRoom)
+                    .where(self.DelBookingRoom.c.id == id)
+                    .values(processed=True)
+                )
+                conn.execute(mark_processed)
+                conn.commit()
 
     def write_fct_purchases(self):
         query = purchases_query.format(
