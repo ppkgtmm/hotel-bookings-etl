@@ -16,20 +16,19 @@ import traceback
 
 load_dotenv()
 
-MAX_OFFSETS = 100
+max_offsets = 100
 
-OLTP_DB = getenv("OLTP_DB")
-BROKER = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
-# BROKER = getenv("KAFKA_BOOTSTRAP_SERVERS")
+broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
+# broker = getenv("KAFKA_BOOTSTRAP_SERVERS")
 
-LOCATION_TABLE = getenv("LOCATION_TABLE")
-GUESTS_TABLE = getenv("GUESTS_TABLE")
-ADDONS_TABLE = getenv("ADDONS_TABLE")
-ROOMTYPES_TABLE = getenv("ROOMTYPES_TABLE")
-ROOMS_TABLE = getenv("ROOMS_TABLE")
-BOOKINGS_TABLE = getenv("BOOKINGS_TABLE")
-BOOKING_ROOMS_TABLE = getenv("BOOKING_ROOMS_TABLE")
-BOOKING_ADDONS_TABLE = getenv("BOOKING_ADDONS_TABLE")
+location_table = getenv("LOCATION_TABLE")
+guests_table = getenv("GUESTS_TABLE")
+addons_table = getenv("ADDONS_TABLE")
+roomtypes_table = getenv("ROOMTYPES_TABLE")
+rooms_table = getenv("ROOMS_TABLE")
+bookings_table = getenv("BOOKINGS_TABLE")
+booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
+booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
 
 if __name__ == "__main__":
     db_writer = DatabaseWriter()
@@ -44,10 +43,10 @@ if __name__ == "__main__":
 
     location = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", LOCATION_TABLE)
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", location_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS * 2)
+        .option("maxOffsetsPerTrigger", max_offsets * 2)
         .load()
     )
 
@@ -57,10 +56,10 @@ if __name__ == "__main__":
 
     addons = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", ADDONS_TABLE)
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", addons_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -70,10 +69,10 @@ if __name__ == "__main__":
 
     roomtypes = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", ROOMTYPES_TABLE)
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", roomtypes_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -83,10 +82,10 @@ if __name__ == "__main__":
 
     rooms = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", ROOMS_TABLE)
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", rooms_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -96,10 +95,10 @@ if __name__ == "__main__":
 
     guests = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", GUESTS_TABLE)
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", guests_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -109,10 +108,10 @@ if __name__ == "__main__":
 
     bookings = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribePattern", BOOKINGS_TABLE)
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribePattern", bookings_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", MAX_OFFSETS)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -122,8 +121,8 @@ if __name__ == "__main__":
 
     booking_rooms = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", BOOKING_ROOMS_TABLE)
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", booking_rooms_table)
         .option("startingOffsets", "earliest")
         .option("maxOffsetsPerTrigger", 10)
         .load()
@@ -135,8 +134,8 @@ if __name__ == "__main__":
 
     booking_addons = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", BROKER)
-        .option("subscribe", BOOKING_ADDONS_TABLE)
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", booking_addons_table)
         .option("startingOffsets", "earliest")
         .option("maxOffsetsPerTrigger", 10)
         .load()
