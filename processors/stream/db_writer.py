@@ -130,6 +130,7 @@ class DatabaseWriter:
             room=query.inserted.room,
             guest=query.inserted.guest,
             updated_at=query.inserted.updated_at,
+            processed=False,
         )
         with self.engine.connect() as conn:
             conn.execute(query)
@@ -143,6 +144,7 @@ class DatabaseWriter:
             quantity=query.inserted.quantity,
             datetime=query.inserted.datetime,
             updated_at=query.inserted.updated_at,
+            processed=False,
         )
         with self.engine.connect() as conn:
             conn.execute(query)
