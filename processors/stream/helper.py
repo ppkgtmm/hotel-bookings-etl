@@ -127,7 +127,8 @@ def process_addons(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    db_writer.write_dim_addons(rows)
+    if rows != []:
+        db_writer.write_dim_addons(rows)
 
 
 def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
@@ -148,7 +149,8 @@ def process_roomtypes(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    db_writer.write_dim_roomtypes(rows)
+    if rows != []:
+        db_writer.write_dim_roomtypes(rows)
 
 
 def process_locations(micro_batch_df: DataFrame, batch_id: int):
@@ -163,7 +165,8 @@ def process_locations(micro_batch_df: DataFrame, batch_id: int):
     )
 
     rows = df_to_list(data)
-    db_writer.write_dim_locations(rows)
+    if rows != []:
+        db_writer.write_dim_locations(rows)
 
 
 def process_rooms(micro_batch_df: DataFrame, batch_id: int):
@@ -183,7 +186,8 @@ def process_rooms(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    db_writer.stage_rooms(rows)
+    if rows != []:
+        db_writer.stage_rooms(rows)
 
 
 def process_guests(micro_batch_df: DataFrame, batch_id: int):
@@ -208,9 +212,10 @@ def process_guests(micro_batch_df: DataFrame, batch_id: int):
         )
     )
     rows = df_to_list(data)
-    db_writer.stage_guests(rows)
-    rows = df_to_list(data.select(["id", "email", "dob", "gender"]))
-    db_writer.write_dim_guests(rows)
+    if rows != []:
+        db_writer.stage_guests(rows)
+        rows = df_to_list(data.select(["id", "email", "dob", "gender"]))
+        db_writer.write_dim_guests(rows)
 
 
 def transform_bookings(bookings_df: DataFrame, key: str):
@@ -237,10 +242,12 @@ def process_bookings(micro_batch_df: DataFrame, batch_id: int):
     ).withColumn("payload", from_json("message.payload", json_schema))
     before: DataFrame = transform_bookings(payload, "payload.before")
     rows_before = df_to_list(before)
-    db_writer.del_bookings(rows_before)
+    if rows_before != []:
+        db_writer.del_bookings(rows_before)
     after: DataFrame = transform_bookings(payload, "payload.after")
     rows_after = df_to_list(after)
-    db_writer.stage_bookings(rows_after)
+    if rows_after != []:
+        db_writer.stage_bookings(rows_after)
 
 
 def transform_booking_rooms(booking_rooms_df: DataFrame, key: str):
@@ -265,12 +272,14 @@ def process_booking_rooms(micro_batch_df: DataFrame, batch_id: int):
     ).withColumn("payload", from_json("message.payload", json_schema))
     before: DataFrame = transform_booking_rooms(payload, "payload.before")
     rows_before = df_to_list(before)
-    db_writer.del_booking_rooms(rows_before)
-    db_writer.remove_fct_bookings()
+    if rows_before != []:
+        db_writer.del_booking_rooms(rows_before)
+        db_writer.remove_fct_bookings()
     after: DataFrame = transform_booking_rooms(payload, "payload.after")
     rows_after = df_to_list(after)
-    db_writer.stage_booking_rooms(rows_after)
-    db_writer.write_fct_bookings()
+    if rows_after != []:
+        db_writer.stage_booking_rooms(rows_after)
+        db_writer.write_fct_bookings()
 
 
 def transform_booking_addons(booking_addons_df: DataFrame, key: str):
@@ -296,9 +305,11 @@ def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
     ).withColumn("payload", from_json("message.payload", json_schema))
     before: DataFrame = transform_booking_addons(payload, "payload.before")
     rows_before = df_to_list(before)
-    db_writer.del_booking_addons(rows_before)
-    db_writer.remove_fct_purchases()
+    if rows_before != []:
+        db_writer.del_booking_addons(rows_before)
+        db_writer.remove_fct_purchases()
     after: DataFrame = transform_booking_addons(payload, "payload.after")
     rows_after = df_to_list(after)
-    db_writer.stage_booking_addons(rows_after)
-    db_writer.write_fct_purchases()
+    if rows_after != []:
+        db_writer.stage_booking_addons(rows_after)
+        db_writer.write_fct_purchases()
