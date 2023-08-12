@@ -46,6 +46,9 @@ class DatabaseWriter:
         self.BookingAddon = Table(
             stg_booking_addon_table, self.metadata, autoload_with=self.engine
         )
+        self.DelBookingAddon = Table(
+            del_booking_addon_table, self.metadata, autoload_with=self.engine
+        )
 
         self.DimAddon = Table(dim_addon_table, self.metadata, autoload_with=self.engine)
         self.DimRoomType = Table(
@@ -166,6 +169,20 @@ class DatabaseWriter:
 
     def stage_booking_addons(self, rows: list[Dict[str, Any]]):
         query = insert(self.BookingAddon).values(rows)
+        query = query.on_duplicate_key_update(
+            booking_room=query.inserted.booking_room,
+            addon=query.inserted.addon,
+            quantity=query.inserted.quantity,
+            datetime=query.inserted.datetime,
+            updated_at=query.inserted.updated_at,
+            processed=False,
+        )
+        with self.engine.connect() as conn:
+            conn.execute(query)
+            conn.commit()
+
+    def del_booking_addons(self, rows: list[Dict[str, Any]]):
+        query = insert(self.DelBookingAddon).values(rows)
         query = query.on_duplicate_key_update(
             booking_room=query.inserted.booking_room,
             addon=query.inserted.addon,
