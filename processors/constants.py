@@ -123,15 +123,18 @@ remove_purchases_query = """
         SELECT
             ba.id,
             ba.datetime,
-            br.guest,
+            COALESCE(dbr.guest, sbr.guest) guest,
             (
                 SELECT MAX(id)
                 FROM dim_addon
                 WHERE _id = ba.addon AND created_at <= ba.updated_at
             ) addon
         FROM {del_booking_addon_table} ba
-        INNER JOIN {del_booking_room_table} br
-        ON ba.processed = false AND ba.booking_room = br.id
+        LEFT JOIN {del_booking_room_table} dbr
+        ON ba.booking_room = dbr.id
+        LEFT JOIN {stg_booking_room_table} sbr
+        ON ba.booking_room = sbr.id
+        WHERE ba.processed = false AND COALESCE(dbr.id, sbr.id) IS NOT NULL
 """
 
 delete_rooms_query = """
