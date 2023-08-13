@@ -36,7 +36,19 @@ chmod +x generators/run.sh && ./generators/run.sh
 python3 seed_oltp.py
 ``` 
 
-5. You are all set ! after a few minutes, data will start appearing in OLAP database
+5. register OLTP database to kafka connect
+
+```
+python3 kafka_connect/register_mysql.py
+```
+
+6. start container for initial load and real-time changes sync to OLAP database
+
+```
+docker-compose up -d processor
+```
+
+7. You are all set ! after a few minutes, data will start appearing in OLAP database
 
 ### Tear down
 
