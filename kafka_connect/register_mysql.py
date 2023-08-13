@@ -11,7 +11,6 @@ DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_PORT = os.getenv("DB_PORT")
 OLTP_DB = os.getenv("OLTP_DB")
-OLAP_DB = os.getenv("OLAP_DB")
 KAFKA_CONNECT_SERVER = os.getenv("KAFKA_CONNECT_SERVER")
 KAFKA_INTERNAL = os.getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 LOCATION_TABLE = os.getenv("LOCATION_TABLE")
@@ -58,11 +57,15 @@ def get_config(id, table_name, **kwargs):
 
 if __name__ == "__main__":
     mysql_kwargs = dict(
-        DB_HOST=DB_HOST, DB_USER=DB_USER, DB_PASSWORD=DB_PASSWORD, DB_PORT=DB_PORT
+        DB_HOST=DB_HOST,
+        DB_USER=DB_USER,
+        DB_PASSWORD=DB_PASSWORD,
+        DB_PORT=DB_PORT,
+        DB_NAME=OLTP_DB,
     )
     for idx, table_name in enumerate(OLTP_TABLES):
         id = idx + 1
-        config = get_config(id, table_name, **dict(**mysql_kwargs, DB_NAME=OLTP_DB))
+        config = get_config(id, table_name, **mysql_kwargs)
         response = requests.post(
             f"{KAFKA_CONNECT_SERVER}/connectors/",
             headers={
