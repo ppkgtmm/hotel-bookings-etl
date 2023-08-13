@@ -13,3 +13,6 @@ sleep 60
 
 # initialize oltp and olap databases
 python3 setup_dbs.py
+
+# create required kafka topics
+python3 kafka-admin.py
