@@ -22,6 +22,6 @@ RUN pip3 --no-cache-dir install -r requirements.txt
 
 COPY run.sh .
 
-COPY *.py .
+COPY *.py scripts
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
