@@ -138,5 +138,6 @@ if __name__ == "__main__":
     load_rooms()
     writer.write_fct_bookings()
     writer.write_fct_purchases()
+    writer.tear_down()
     oltp_conn.close()
     oltp_engine.dispose()
