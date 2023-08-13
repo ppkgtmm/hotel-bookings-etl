@@ -6,16 +6,10 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 
 # start required containers
-docker-compose up -d mysql zookeeper broker kafka-connect processor
+docker-compose up -d mysql zookeeper broker kafka-connect
 
-# wait for mysql container to start properly
-sleep 30
+# wait for containers to start properly
+sleep 60
 
 # initialize oltp and olap databases
 python3 setup_dbs.py
-
-# wait for kafka connect container to start properly
-sleep 15
-
-# register OLTP database to kafka connect
-python3 kafka_connect/register_mysql.py
