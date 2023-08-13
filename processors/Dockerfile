@@ -7,11 +7,14 @@ RUN apk add openjdk8
 # cr. https://stackoverflow.com/questions/66221278/alpine-docker-define-specific-python-version-python3-3-8-7-r0breaks-worldpyt
 RUN apk add python3=3.9.17-r0 --repository=http://dl-cdn.alpinelinux.org/alpine/v3.15/main
 
+# required by confluent-kafka
+RUN apk add python3-dev=3.9.17-r0 --repository=http://dl-cdn.alpinelinux.org/alpine/v3.15/main
+
 # install updated version of pip
 RUN python3 -m ensurepip && pip3 install --upgrade pip
 
 # install required libraries
-RUN apk add bash gcompat
+RUN apk add bash gcc musl-dev librdkafka librdkafka-dev
 
 WORKDIR /processor
 
