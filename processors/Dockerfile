@@ -22,6 +22,6 @@ RUN pip3 install -r requirements.txt
 
 COPY run.sh .
 
-COPY *.py scripts
+COPY *.py scripts/
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
