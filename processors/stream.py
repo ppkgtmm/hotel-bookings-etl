@@ -46,7 +46,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", location_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets * 2)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", addons_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", roomtypes_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", rooms_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", guests_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets)
+        .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
