@@ -15,6 +15,17 @@ dim_location_table = "dim_location"
 fct_booking_table = "fct_booking"
 fct_purchase_table = "fct_purchase"
 
+location_query = "SELECT id, state, country FROM location"
+guest_query = "SELECT id, email, dob, gender, location, updated_at FROM guests"
+addon_query = "SELECT id, name, price, updated_at FROM addons"
+roomtype_query = "SELECT id, name, price, updated_at FROM roomtypes"
+room_query = "SELECT id, type, updated_at FROM rooms"
+booking_query = "SELECT id, checkin, checkout FROM bookings"
+booking_room_query = "SELECT id, booking, room, guest, updated_at FROM booking_rooms"
+booking_addon_query = (
+    "SELECT id, booking_room, addon, quantity, datetime, updated_at FROM booking_addons"
+)
+
 bookings_query = """
     WITH bookings AS (
         SELECT
