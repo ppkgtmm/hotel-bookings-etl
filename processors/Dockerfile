@@ -15,13 +15,13 @@ RUN apk add bash gcompat
 
 WORKDIR /processor
 
-COPY constants.py .
-
-COPY date_dim.py .
-
-COPY stream stream
+COPY requirements.txt .
 
 # install required packages
-RUN pip3 --no-cache-dir install -r stream/requirements.txt
+RUN pip3 --no-cache-dir install -r requirements.txt
+
+COPY run.sh .
+
+COPY *.py .
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
