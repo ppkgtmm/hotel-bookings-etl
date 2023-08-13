@@ -62,12 +62,15 @@ bookings_query = """
 remove_bookings_query = """
     SELECT 
         br.id,
-        b.checkin, 
-        b.checkout,
+        COALESCE(db.checkin, sb.checkin) checkin, 
+        COALESCE(db.checkout, sb.checkout) checkout,
         br.guest
     FROM {del_booking_room_table} br
-    INNER JOIN {del_booking_table} b
-    ON br.processed = false AND br.booking = b.id
+    LEFT JOIN {del_booking_table} db
+    ON br.booking = db.id
+    LEFT JOIN {stg_booking_table} sb
+    ON br.booking = sb.id
+    WHERE br.processed = false AND COALESCE(db.id, sb.id) IS NOT NULL
 """
 
 purchases_query = """
