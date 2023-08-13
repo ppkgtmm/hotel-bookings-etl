@@ -26,8 +26,11 @@ def get_config(**kwargs):
     config["config"]["database.password"] = DB_PASSWORD
     config["config"]["topic.prefix"] = DB_NAME
     config["config"]["database.include.list"] = DB_NAME
+    config["config"]["table.include.list"] = DB_NAME + ".*"
     config["config"]["schema.history.internal.kafka.bootstrap.servers"] = KAFKA_INTERNAL
-    config["config"]["schema.history.internal.kafka.topic"] = "schema-changes" + DB_NAME
+    config["config"]["schema.history.internal.kafka.topic"] = (
+        "schema-changes." + DB_NAME
+    )
     return config
 
 
