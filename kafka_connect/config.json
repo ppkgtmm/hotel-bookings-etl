@@ -13,6 +13,7 @@
     "schema.history.internal.kafka.bootstrap.servers": "",
     "schema.history.internal.kafka.topic": "",
     "min.row.count.to.stream.results": 0,
+    "snapshot.mode": "schema_only",
     "transforms": "dropPrefix",
     "transforms.dropPrefix.type": "org.apache.kafka.connect.transforms.RegexRouter",
     "transforms.dropPrefix.regex": "(.*)\\.(.*)\\.(.*)",
