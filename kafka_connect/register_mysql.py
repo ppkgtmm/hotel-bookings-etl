@@ -1,5 +1,4 @@
 import json
-from time import sleep
 from dotenv import load_dotenv
 import os
 import requests
@@ -10,69 +9,36 @@ DB_HOST = os.getenv("DB_HOST_INTERNAL")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_PORT = os.getenv("DB_PORT")
-OLTP_DB = os.getenv("OLTP_DB")
+DB_NAME = os.getenv("OLTP_DB")
 KAFKA_CONNECT_SERVER = os.getenv("KAFKA_CONNECT_SERVER")
 KAFKA_INTERNAL = os.getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
-LOCATION_TABLE = os.getenv("LOCATION_TABLE")
-GUESTS_TABLE = os.getenv("GUESTS_TABLE")
-ADDONS_TABLE = os.getenv("ADDONS_TABLE")
-ROOMTYPES_TABLE = os.getenv("ROOMTYPES_TABLE")
-ROOMS_TABLE = os.getenv("ROOMS_TABLE")
-BOOKINGS_TABLE = os.getenv("BOOKINGS_TABLE")
-BOOKING_ROOMS_TABLE = os.getenv("BOOKING_ROOMS_TABLE")
-BOOKING_ADDONS_TABLE = os.getenv("BOOKING_ADDONS_TABLE")
-
-OLTP_TABLES = [
-    LOCATION_TABLE,
-    GUESTS_TABLE,
-    ADDONS_TABLE,
-    ROOMTYPES_TABLE,
-    ROOMS_TABLE,
-    BOOKINGS_TABLE,
-    BOOKING_ROOMS_TABLE,
-    BOOKING_ADDONS_TABLE,
-]
 
 config_path = f"{os.path.dirname(__file__)}/config.json"
 
 
-def get_config(id, table_name, **kwargs):
+def get_config(**kwargs):
     with open(config_path, "r") as fp:
         config = json.load(fp)
-    config["name"] = kwargs.get("DB_NAME") + "." + table_name
-    config["config"]["database.hostname"] = kwargs.get("DB_HOST")
-    config["config"]["database.port"] = kwargs.get("DB_PORT")
-    config["config"]["database.user"] = kwargs.get("DB_USER")
-    config["config"]["database.password"] = kwargs.get("DB_PASSWORD")
-    config["config"]["database.server.id"] = id
-    config["config"]["topic.prefix"] = kwargs.get("DB_NAME") + "-" + table_name
-    config["config"]["database.include.list"] = kwargs.get("DB_NAME")
-    config["config"]["table.include.list"] = kwargs.get("DB_NAME") + "." + table_name
+    config["name"] = DB_NAME
+    config["config"]["database.hostname"] = DB_HOST
+    config["config"]["database.port"] = DB_PORT
+    config["config"]["database.user"] = DB_USER
+    config["config"]["database.password"] = DB_PASSWORD
+    config["config"]["topic.prefix"] = DB_NAME
+    config["config"]["database.include.list"] = DB_NAME
     config["config"]["schema.history.internal.kafka.bootstrap.servers"] = KAFKA_INTERNAL
-    config["config"][
-        "schema.history.internal.kafka.topic"
-    ] = f"schema-changes.{kwargs.get('DB_NAME')}-{table_name}"
+    config["config"]["schema.history.internal.kafka.topic"] = "schema-changes" + DB_NAME
     return config
 
 
 if __name__ == "__main__":
-    mysql_kwargs = dict(
-        DB_HOST=DB_HOST,
-        DB_USER=DB_USER,
-        DB_PASSWORD=DB_PASSWORD,
-        DB_PORT=DB_PORT,
-        DB_NAME=OLTP_DB,
+    config = get_config()
+    response = requests.post(
+        f"{KAFKA_CONNECT_SERVER}/connectors/",
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        json=config,
     )
-    for idx, table_name in enumerate(OLTP_TABLES):
-        id = idx + 1
-        config = get_config(id, table_name, **mysql_kwargs)
-        response = requests.post(
-            f"{KAFKA_CONNECT_SERVER}/connectors/",
-            headers={
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            },
-            json=config,
-        )
-        assert response.status_code == 201
-        sleep(2)
+    assert response.status_code == 201

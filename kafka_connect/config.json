@@ -7,7 +7,7 @@
     "database.port": "",
     "database.user": "",
     "database.password": "",
-    "database.server.id": "",
+    "database.server.id": 1,
     "topic.prefix": "",
     "database.include.list": "",
     "schema.history.internal.kafka.bootstrap.servers": "",
