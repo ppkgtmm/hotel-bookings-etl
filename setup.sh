@@ -13,6 +13,3 @@ sleep 60
 
 # initialize oltp and olap databases
 python3 setup_dbs.py
-
-# start container for initial load and real-time changes sync to olap database
-docker-compose up -d processor
