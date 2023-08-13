@@ -10,6 +10,7 @@
     "database.server.id": 1,
     "topic.prefix": "",
     "database.include.list": "",
+    "table.include.list": "",
     "schema.history.internal.kafka.bootstrap.servers": "",
     "schema.history.internal.kafka.topic": "",
     "min.row.count.to.stream.results": 0,
