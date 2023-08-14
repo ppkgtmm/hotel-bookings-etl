@@ -36,7 +36,7 @@ def get_data(query):
 
 
 def load_locations():
-    for locations in get_data(location_query):
+    for locations in get_data(location_query.format(location_table)):
         locations = [
             {"id": row[0], "state": row[1], "country": row[2]} for row in locations
         ]
@@ -44,7 +44,7 @@ def load_locations():
 
 
 def load_addons():
-    for addons in get_data(addon_query):
+    for addons in get_data(addon_query.format(addons_table)):
         addons = [
             {"_id": row[0], "name": row[1], "price": row[2], "created_at": row[3]}
             for row in addons
@@ -53,7 +53,7 @@ def load_addons():
 
 
 def load_roomtypes():
-    for roomtypes in get_data(roomtype_query):
+    for roomtypes in get_data(roomtype_query.format(roomtypes_table)):
         roomtypes = [
             {"_id": row[0], "name": row[1], "price": row[2], "created_at": row[3]}
             for row in roomtypes
@@ -62,13 +62,13 @@ def load_roomtypes():
 
 
 def load_rooms():
-    for rooms in get_data(room_query):
+    for rooms in get_data(room_query.format(rooms_table)):
         rooms = [{"id": row[0], "type": row[1], "updated_at": row[2]} for row in rooms]
         writer.stage_rooms(rooms)
 
 
 def load_guests():
-    for guests in get_data(guest_query):
+    for guests in get_data(guest_query.format(guests_table)):
         guests = [
             {
                 "id": row[0],
@@ -94,7 +94,7 @@ def load_guests():
 
 
 def stage_bookings():
-    for bookings in get_data(booking_query):
+    for bookings in get_data(booking_query.format(bookings_table)):
         bookings = [
             {"id": row[0], "checkin": row[1], "checkout": row[2]} for row in bookings
         ]
@@ -102,7 +102,7 @@ def stage_bookings():
 
 
 def stage_booking_rooms():
-    for booking_rooms in get_data(booking_room_query):
+    for booking_rooms in get_data(booking_room_query.format(booking_rooms_table)):
         booking_rooms = [
             {
                 "id": row[0],
@@ -117,7 +117,7 @@ def stage_booking_rooms():
 
 
 def stage_booking_addons():
-    for booking_addons in get_data(booking_addon_query):
+    for booking_addons in get_data(booking_addon_query.format(booking_addons_table)):
         booking_addons = [
             {
                 "id": row[0],
