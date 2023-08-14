@@ -10,6 +10,14 @@ db_port = getenv("DB_PORT")
 db_user = getenv("DB_USER")
 db_password = getenv("DB_PASSWORD")
 oltp_db = getenv("OLTP_DB")
+location_table = getenv("LOCATION_TABLE")
+guests_table = getenv("GUESTS_TABLE")
+addons_table = getenv("ADDONS_TABLE")
+roomtypes_table = getenv("ROOMTYPES_TABLE")
+rooms_table = getenv("ROOMS_TABLE")
+bookings_table = getenv("BOOKINGS_TABLE")
+booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
+booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
 
 conn_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
     db_user, db_password, db_host, db_port, oltp_db
