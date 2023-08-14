@@ -239,6 +239,7 @@ class DatabaseWriter:
         query = remove_bookings_query.format(
             del_booking_room_table=del_booking_room_table,
             del_booking_table=del_booking_table,
+            stg_booking_table=stg_booking_table,
         )
         with self.engine.connect() as conn:
             for row in conn.execute(text(query)):
@@ -296,6 +297,7 @@ class DatabaseWriter:
         query = remove_purchases_query.format(
             del_booking_addon_table=del_booking_addon_table,
             del_booking_room_table=del_booking_room_table,
+            stg_booking_room_table=stg_booking_room_table,
         )
         with self.engine.connect() as conn:
             for row in conn.execute(text(query)):
