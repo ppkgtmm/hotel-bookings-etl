@@ -1,4 +1,4 @@
-python3 scripts/kafka-admin.py
+python3 scripts/kafka_admin.py
 
 python3 scripts/date_dim.py
 
