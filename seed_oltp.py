@@ -20,6 +20,15 @@ db_user = getenv("DB_USER")
 db_password = getenv("DB_PASSWORD")
 db_port = getenv("DB_PORT")
 db_name = getenv("OLTP_DB")
+location_table = getenv("LOCATION_TABLE")
+guests_table = getenv("GUESTS_TABLE")
+users_table = getenv("USERS_TABLE")
+addons_table = getenv("ADDONS_TABLE")
+roomtypes_table = getenv("ROOMTYPES_TABLE")
+rooms_table = getenv("ROOMS_TABLE")
+bookings_table = getenv("BOOKINGS_TABLE")
+booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
+booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
 
 data_dir = getenv("SEED_DIR")
 seed = getenv("SEED")
@@ -37,52 +46,52 @@ connection_string = (
 
 def load_location():
     location = pd.read_csv(data_dir + "location.csv")
-    location.to_sql("location", conn, index=False, if_exists="append")
+    location.to_sql(location_table, conn, index=False, if_exists="append")
 
 
 def load_room_types():
     room_types = pd.read_csv(data_dir + "room_types.csv")
-    room_types.to_sql("roomtypes", conn, index=False, if_exists="append")
+    room_types.to_sql(roomtypes_table, conn, index=False, if_exists="append")
 
 
 def load_addons():
     addons = pd.read_csv(data_dir + "addons.csv")
-    addons.to_sql("addons", conn, index=False, if_exists="append")
+    addons.to_sql(addons_table, conn, index=False, if_exists="append")
 
 
 def load_users():
     columns = ["firstname", "lastname", "gender", "email", "id"]
     users = pd.read_csv(data_dir + "users.csv")
-    location = pd.read_sql_table("location", conn)
+    location = pd.read_sql_table(location_table, conn)
     merged = users.merge(location, on=["state", "country"])[columns]
     merged = merged.rename(columns={"id": "location"})
-    merged.to_sql("users", conn, index=False, if_exists="append")
+    merged.to_sql(users_table, conn, index=False, if_exists="append")
 
 
 def load_guests():
     columns = ["firstname", "lastname", "gender", "email", "dob", "id"]
     guests = pd.read_csv(data_dir + "guests.csv")
-    location = pd.read_sql_table("location", conn)
+    location = pd.read_sql_table(location_table, conn)
     merged = guests.merge(location, on=["state", "country"])[columns]
     merged = merged.rename(columns={"id": "location"})
-    merged.to_sql("guests", conn, index=False, if_exists="append")
+    merged.to_sql(guests_table, conn, index=False, if_exists="append")
 
 
 def load_rooms():
     columns = ["floor", "number", "id"]
     rooms = pd.read_csv(data_dir + "rooms.csv")
-    room_types = pd.read_sql_table("roomtypes", conn)
+    room_types = pd.read_sql_table(roomtypes_table, conn)
     merged = rooms.merge(room_types, left_on="type", right_on="name")[columns]
     merged = merged.rename(columns={"id": "type"})
-    merged.to_sql("rooms", conn, index=False, if_exists="append")
+    merged.to_sql(rooms_table, conn, index=False, if_exists="append")
 
 
 def load_bookings():
-    insert_q = "INSERT INTO bookings (user, checkin, checkout, payment) VALUES (:user, :checkin, :checkout, :payment)"
+    insert_q = f"INSERT INTO {bookings_table} (user, checkin, checkout, payment) VALUES (:user, :checkin, :checkout, :payment)"
     columns = ["id", "checkin", "checkout", "payment"]
     bookings = pd.read_csv(data_dir + "bookings.csv")
-    users = pd.read_sql_table("users", conn)
-    addons = pd.read_sql_table("addons", conn)
+    users = pd.read_sql_table(users_table, conn)
+    addons = pd.read_sql_table(addons_table, conn)
 
     bookings["checkin"] = pd.to_datetime(bookings["checkin"])
     bookings["checkout"] = pd.to_datetime(bookings["checkout"])
@@ -91,8 +100,8 @@ def load_bookings():
     merged = bookings.merge(users, left_on="user", right_on="email")[columns]
     merged = merged.rename(columns={"id": "user"}).sort_values(by=["checkin"])
 
-    room_types = pd.read_sql("SELECT id FROM roomtypes", conn)["id"].tolist()
-    guests = pd.read_sql("SELECT id FROM guests", conn)["id"].tolist()
+    room_types = pd.read_sql(f"SELECT id FROM {roomtypes_table}", conn)["id"].tolist()
+    guests = pd.read_sql(f"SELECT id FROM {guests_table}", conn)["id"].tolist()
 
     for row in merged.to_dict(orient="records"):
         result = conn.execute(text(insert_q), row)
@@ -102,16 +111,16 @@ def load_bookings():
 
 
 def load_booking_rooms(booking, room_types, guests, addons):
-    booking_room_q = "INSERT INTO booking_rooms (booking, room, guest) VALUES (:booking, :room, :guest)"
-    room_q = "SELECT id, type FROM rooms WHERE type IN ({})"
+    booking_room_q = f"INSERT INTO {booking_rooms_table} (booking, room, guest) VALUES (:booking, :room, :guest)"
+    room_q = "SELECT id, type FROM {} WHERE type IN ({})".format(rooms_table)
     checkin, checkout = booking["checkin"], booking["checkout"]
     overlapping = pd.read_sql(
         f"""
         SELECT guest, room
-        FROM booking_rooms
+        FROM {booking_rooms_table}
         WHERE booking IN (
             SELECT id
-            FROM bookings
+            FROM {bookings_table}
             WHERE (checkin <= DATE('{checkin}') AND DATE('{checkin}') <= checkout)
             OR (checkin <= DATE('{checkout}')AND DATE('{checkout}') <= checkout)
             OR (DATE('{checkin}') <= checkin AND DATE('{checkout}') >= checkout)
@@ -149,7 +158,7 @@ def load_booking_rooms(booking, room_types, guests, addons):
 
 
 def load_booking_addons(booking, booking_room, addons):
-    booking_addons_q = "INSERT INTO booking_addons (booking_room, addon, quantity, datetime) VALUES (:booking_room, :addon, :quantity, :datetime)"
+    booking_addons_q = f"INSERT INTO {booking_addons_table} (booking_room, addon, quantity, datetime) VALUES (:booking_room, :addon, :quantity, :datetime)"
     stay_duration = (booking["checkout"] - booking["checkin"]).days
     result = []
     for day in range(random.randint(0, stay_duration)):
