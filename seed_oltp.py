@@ -112,7 +112,7 @@ def load_bookings():
 
 def load_booking_rooms(booking, room_types, guests, addons):
     booking_room_q = f"INSERT INTO {booking_rooms_table} (booking, room, guest) VALUES (:booking, :room, :guest)"
-    room_q = "SELECT id, type FROM {} WHERE type IN ({})".format(rooms_table)
+    room_q = "SELECT id, type FROM {} WHERE type IN ({})"
     checkin, checkout = booking["checkin"], booking["checkout"]
     overlapping = pd.read_sql(
         f"""
@@ -135,7 +135,9 @@ def load_booking_rooms(booking, room_types, guests, addons):
     guest = random.sample(avail_guests, k=num_rooms)
 
     room_type = random.choices(room_types, k=num_rooms)
-    room_q = room_q.format(",".join(pd.Series(room_type, dtype=str).tolist()))
+    room_q = room_q.format(
+        rooms_table, ",".join(pd.Series(room_type, dtype=str).tolist())
+    )
     rooms = pd.read_sql(room_q, conn)
     room = []
     for type in room_type:
