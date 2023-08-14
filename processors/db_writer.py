@@ -1,6 +1,3 @@
-# import sys
-# from os.path import dirname, abspath
-# sys.path.append(dirname(dirname(abspath(__file__))))
 from typing import Any, Dict
 from dotenv import load_dotenv
 from os import getenv
