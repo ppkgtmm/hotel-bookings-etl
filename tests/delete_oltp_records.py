@@ -5,8 +5,6 @@ import pandas as pd
 booking_id = 1
 oltp_engine = create_engine(oltp_conn_str, poolclass=NullPool)
 oltp_conn = oltp_engine.connect()
-olap_engine = create_engine(olap_conn_str, poolclass=NullPool)
-olap_conn = olap_engine.connect()
 metadata = MetaData()
 Booking = Table(bookings_table, metadata, autoload_with=oltp_engine)
 BookingRoom = Table(booking_rooms_table, metadata, autoload_with=oltp_engine)
@@ -48,5 +46,3 @@ oltp_conn.commit()
 
 oltp_conn.close()
 oltp_engine.dispose()
-olap_conn.close()
-olap_engine.dispose()
