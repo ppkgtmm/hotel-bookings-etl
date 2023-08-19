@@ -8,6 +8,10 @@ from processors.constants import fct_booking_table, fct_purchase_table, dim_addo
 
 dt_fmt = "%Y%m%d%H%M%S"
 result_folder = join(dirname(abspath(__file__)), "results")
+booking_before = join(result_folder, "booking_before.csv")
+booking_after = join(result_folder, "booking_after.csv")
+booking_room_before = join(result_folder, "booking_room_before.csv")
+booking_room_after = join(result_folder, "booking_room_after.csv")
 deleted_booking = join(result_folder, "deleted_booking.csv")
 deleted_booking_rooms = join(result_folder, "deleted_booking_rooms.csv")
 deleted_booking_addons = join(result_folder, "deleted_booking_addons.csv")
