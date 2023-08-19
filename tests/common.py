@@ -7,8 +7,7 @@ sys.path.append(dirname(dirname(abspath(__file__))))
 from processors.constants import fct_booking_table, fct_purchase_table, dim_addon_table
 
 dt_fmt = "%Y%m%d%H%M%S"
-result_folder = "results"
-delete_md = join(dirname(abspath(__file__)), result_folder, "delete.md")
+result_folder = join(dirname(abspath(__file__)), "results")
 
 load_dotenv()
 
