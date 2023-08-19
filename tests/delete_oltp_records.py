@@ -32,14 +32,16 @@ booking_addons = [ba._asdict() for ba in oltp_conn.execute(booking_addon_q).fetc
 print("writing booking addons to be deleted")
 pd.DataFrame(booking_addons).to_csv(deleted_booking_addons, index=False)
 
-for ba in booking_addons:
-    del_booking_addon_q = delete(BookingAddon).where(BookingAddon.c.id == ba["id"])
-    oltp_conn.execute(del_booking_addon_q)
-    oltp_conn.commit()
+del_booking_addon_q = delete(BookingAddon).where(
+    BookingAddon.c.booking_room.in_(booking_rooms)
+)
+oltp_conn.execute(del_booking_addon_q)
+oltp_conn.commit()
 
 del_booking_room_q = delete(BookingRoom).where(BookingRoom.c.booking == booking_id)
 oltp_conn.execute(del_booking_room_q)
 oltp_conn.commit()
+
 del_booking_q = delete(Booking).where(Booking.c.id == booking_id)
 oltp_conn.execute(del_booking_q)
 oltp_conn.commit()
