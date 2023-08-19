@@ -20,15 +20,13 @@ booking_q = select(Booking).where(Booking.c.id == booking_id)
 booking = oltp_conn.execute(booking_q).fetchone()._asdict()
 
 print("writing booking to be deleted")
-pd.DataFrame([booking]).to_csv(result_folder + "/deleted_booking.csv", index=False)
+pd.DataFrame([booking]).to_csv(deleted_booking, index=False)
 
 booking_room_q = select(BookingRoom).where(BookingRoom.c.booking == booking_id)
 booking_rooms = [br._asdict() for br in oltp_conn.execute(booking_room_q).fetchall()]
 
 print("writing booking rooms to be deleted")
-pd.DataFrame(booking_rooms).to_csv(
-    result_folder + "/deleted_booking_rooms.csv", index=False
-)
+pd.DataFrame(booking_rooms).to_csv(deleted_booking_rooms, index=False)
 
 guests = {br["id"]: br["guest"] for br in booking_rooms}
 booking_rooms = [br["id"] for br in booking_rooms]
@@ -38,9 +36,7 @@ booking_addon_q = select(BookingAddon).where(
 booking_addons = [ba._asdict() for ba in oltp_conn.execute(booking_addon_q).fetchall()]
 
 print("writing booking addons to be deleted")
-pd.DataFrame(booking_addons).to_csv(
-    result_folder + "/deleted_booking_addons.csv", index=False
-)
+pd.DataFrame(booking_addons).to_csv(deleted_booking_addons, index=False)
 
 for ba in booking_addons:
     datetime, guest = ba["datetime"], guests[ba["booking_room"]]
