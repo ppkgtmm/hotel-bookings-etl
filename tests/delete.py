@@ -20,12 +20,14 @@ fp = open(delete_md, "w")
 booking_q = select(Booking).where(Booking.c.id == booking_id)
 booking = oltp_conn.execute(booking_q).fetchone()._asdict()
 
-fp.write("\nbooking :\n\n" + pd.DataFrame([booking]).to_markdown(index=False))
+fp.write("booking :\n\n" + pd.DataFrame([booking]).to_markdown(index=False))
 
 booking_room_q = select(BookingRoom).where(BookingRoom.c.booking == booking_id)
 booking_rooms = [br._asdict() for br in oltp_conn.execute(booking_room_q).fetchall()]
 
-fp.write("\nbooking_rooms :\n\n" + pd.DataFrame(booking_rooms).to_markdown(index=False))
+fp.write(
+    "\n\nbooking_rooms :\n\n" + pd.DataFrame(booking_rooms).to_markdown(index=False)
+)
 
 guests = {br["id"]: br["guest"] for br in booking_rooms}
 booking_rooms = [br["id"] for br in booking_rooms]
@@ -35,7 +37,7 @@ booking_addon_q = select(BookingAddon).where(
 booking_addons = [ba._asdict() for ba in oltp_conn.execute(booking_addon_q).fetchall()]
 
 fp.write(
-    "\nbooking_addons :\n\n" + pd.DataFrame(booking_addons).to_markdown(index=False)
+    "\n\nbooking_addons :\n\n" + pd.DataFrame(booking_addons).to_markdown(index=False)
 )
 
 for ba in booking_addons:
