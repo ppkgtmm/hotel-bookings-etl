@@ -51,16 +51,6 @@ for ba in booking_addons:
     del_booking_addon_q = delete(BookingAddon).where(BookingAddon.c.id == ba["id"])
     oltp_conn.execute(del_booking_addon_q)
     oltp_conn.commit()
-    # sleep(45)
-    # fct_purchase_q = (
-    #     select(FactPurchase)
-    #     .where(FactPurchase.c.guest == guest)
-    #     .where(FactPurchase.c.datetime == int(datetime.strftime(dt_fmt)))
-    #     .where(FactPurchase.c.addon == addon)
-    # )
-    # fct_purchase = olap_conn.execute(fct_purchase_q).fetchall()
-    # print("\nfct_purchase :\n\n" + pd.DataFrame(fct_purchase).to_markdown(index=False))
-    # assert len(fct_purchase) == 0
 
 del_booking_room_q = delete(BookingRoom).where(BookingRoom.c.booking == booking_id)
 oltp_conn.execute(del_booking_room_q)
@@ -68,17 +58,6 @@ oltp_conn.commit()
 del_booking_q = delete(Booking).where(Booking.c.id == booking_id)
 oltp_conn.execute(del_booking_q)
 oltp_conn.commit()
-
-# fct_booking_q = (
-#     select(FactBooking)
-#     .where(FactBooking.c.guest in guests)
-#     .where(FactBooking.c.datetime >= int(checkin.strftime(dt_fmt)))
-#     .where(FactBooking.c.datetime <= int(checkout.strftime(dt_fmt)))
-# )
-# fct_booking = olap_conn.execute(fct_booking_q).fetchall()
-# print("\nfct_booking :\n\n" + pd.DataFrame(fct_booking).to_markdown(index=False))
-
-# assert len(fct_booking) == 0
 
 fp.close()
 oltp_conn.close()
