@@ -11,7 +11,6 @@ metadata = MetaData()
 Booking = Table(bookings_table, metadata, autoload_with=oltp_engine)
 BookingRoom = Table(booking_rooms_table, metadata, autoload_with=oltp_engine)
 BookingAddon = Table(booking_addons_table, metadata, autoload_with=oltp_engine)
-DimAddon = Table(dim_addon_table, metadata, autoload_with=olap_engine)
 
 
 booking_q = select(Booking).where(Booking.c.id == booking_id)
@@ -38,12 +37,6 @@ pd.DataFrame(booking_addons).to_csv(deleted_booking_addons, index=False)
 
 for ba in booking_addons:
     datetime, guest = ba["datetime"], guests[ba["booking_room"]]
-    addon_q = (
-        select(func.max(DimAddon.c.id))
-        .where(DimAddon.c.created_at <= ba["updated_at"])
-        .where(DimAddon.c._id == ba["addon"])
-    )
-    addon = olap_conn.execute(addon_q).fetchone()[0]
     del_booking_addon_q = delete(BookingAddon).where(BookingAddon.c.id == ba["id"])
     oltp_conn.execute(del_booking_addon_q)
     oltp_conn.commit()
