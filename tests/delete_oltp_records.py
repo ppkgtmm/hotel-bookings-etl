@@ -11,8 +11,6 @@ metadata = MetaData()
 Booking = Table(bookings_table, metadata, autoload_with=oltp_engine)
 BookingRoom = Table(booking_rooms_table, metadata, autoload_with=oltp_engine)
 BookingAddon = Table(booking_addons_table, metadata, autoload_with=oltp_engine)
-FactBooking = Table(fct_booking_table, metadata, autoload_with=olap_engine)
-FactPurchase = Table(fct_purchase_table, metadata, autoload_with=olap_engine)
 DimAddon = Table(dim_addon_table, metadata, autoload_with=olap_engine)
 
 
