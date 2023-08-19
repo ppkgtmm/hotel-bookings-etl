@@ -15,18 +15,19 @@ FactBooking = Table(fct_booking_table, metadata, autoload_with=olap_engine)
 FactPurchase = Table(fct_purchase_table, metadata, autoload_with=olap_engine)
 DimAddon = Table(dim_addon_table, metadata, autoload_with=olap_engine)
 
-fp = open(delete_md, "w")
 
 booking_q = select(Booking).where(Booking.c.id == booking_id)
 booking = oltp_conn.execute(booking_q).fetchone()._asdict()
 
-fp.write("booking :\n\n" + pd.DataFrame([booking]).to_markdown(index=False))
+print("writing booking to be deleted")
+pd.DataFrame([booking]).to_csv(result_folder + "/deleted_booking.csv", index=False)
 
 booking_room_q = select(BookingRoom).where(BookingRoom.c.booking == booking_id)
 booking_rooms = [br._asdict() for br in oltp_conn.execute(booking_room_q).fetchall()]
 
-fp.write(
-    "\n\nbooking_rooms :\n\n" + pd.DataFrame(booking_rooms).to_markdown(index=False)
+print("writing booking rooms to be deleted")
+pd.DataFrame(booking_rooms).to_csv(
+    result_folder + "/deleted_booking_rooms.csv", index=False
 )
 
 guests = {br["id"]: br["guest"] for br in booking_rooms}
@@ -36,8 +37,9 @@ booking_addon_q = select(BookingAddon).where(
 )
 booking_addons = [ba._asdict() for ba in oltp_conn.execute(booking_addon_q).fetchall()]
 
-fp.write(
-    "\n\nbooking_addons :\n\n" + pd.DataFrame(booking_addons).to_markdown(index=False)
+print("writing booking addons to be deleted")
+pd.DataFrame(booking_addons).to_csv(
+    result_folder + "/deleted_booking_addons.csv", index=False
 )
 
 for ba in booking_addons:
@@ -59,7 +61,6 @@ del_booking_q = delete(Booking).where(Booking.c.id == booking_id)
 oltp_conn.execute(del_booking_q)
 oltp_conn.commit()
 
-fp.close()
 oltp_conn.close()
 oltp_engine.dispose()
 olap_conn.close()
