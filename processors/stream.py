@@ -17,7 +17,7 @@ import traceback
 load_dotenv()
 
 max_offsets = 100
-
+checkpoint_interval = "1 second"
 broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 # broker = getenv("KAFKA_BOOTSTRAP_SERVERS")
 
@@ -50,9 +50,12 @@ if __name__ == "__main__":
         .load()
     )
 
-    location.writeStream.option(
-        "checkpointLocation", "/tmp/location/_checkpoints/"
-    ).foreachBatch(process_locations).start()
+    (
+        location.writeStream.trigger(continuous=checkpoint_interval)
+        .option("checkpointLocation", "/tmp/location/_checkpoints/")
+        .foreachBatch(process_locations)
+        .start()
+    )
 
     addons = (
         spark.readStream.format("kafka")
@@ -63,9 +66,12 @@ if __name__ == "__main__":
         .load()
     )
 
-    addons.writeStream.option(
-        "checkpointLocation", "/tmp/addons/_checkpoints/"
-    ).foreachBatch(process_addons).start()
+    (
+        addons.writeStream.trigger(continuous=checkpoint_interval)
+        .option("checkpointLocation", "/tmp/addons/_checkpoints/")
+        .foreachBatch(process_addons)
+        .start()
+    )
 
     roomtypes = (
         spark.readStream.format("kafka")
@@ -76,9 +82,12 @@ if __name__ == "__main__":
         .load()
     )
 
-    roomtypes.writeStream.option(
-        "checkpointLocation", "/tmp/roomtypes/_checkpoints/"
-    ).foreachBatch(process_roomtypes).start()
+    (
+        roomtypes.writeStream.trigger(continuous=checkpoint_interval)
+        .option("checkpointLocation", "/tmp/roomtypes/_checkpoints/")
+        .foreachBatch(process_roomtypes)
+        .start()
+    )
 
     rooms = (
         spark.readStream.format("kafka")
@@ -89,9 +98,12 @@ if __name__ == "__main__":
         .load()
     )
 
-    rooms.writeStream.option(
-        "checkpointLocation", "/tmp/rooms/_checkpoints/"
-    ).foreachBatch(process_rooms).start()
+    (
+        rooms.writeStream.trigger(continuous=checkpoint_interval)
+        .option("checkpointLocation", "/tmp/rooms/_checkpoints/")
+        .foreachBatch(process_rooms)
+        .start()
+    )
 
     guests = (
         spark.readStream.format("kafka")
@@ -102,9 +114,12 @@ if __name__ == "__main__":
         .load()
     )
 
-    guests.writeStream.option(
-        "checkpointLocation", "/tmp/guests/_checkpoints/"
-    ).foreachBatch(process_guests).start()
+    (
+        guests.writeStream.trigger(continuous=checkpoint_interval)
+        .option("checkpointLocation", "/tmp/guests/_checkpoints/")
+        .foreachBatch(process_guests)
+        .start()
+    )
 
     bookings = (
         spark.readStream.format("kafka")
@@ -115,9 +130,12 @@ if __name__ == "__main__":
         .load()
     )
 
-    bookings.writeStream.option(
-        "checkpointLocation", "/tmp/bookings/_checkpoints/"
-    ).foreachBatch(process_bookings).start()
+    (
+        bookings.writeStream.trigger(continuous=checkpoint_interval)
+        .option("checkpointLocation", "/tmp/bookings/_checkpoints/")
+        .foreachBatch(process_bookings)
+        .start()
+    )
 
     booking_rooms = (
         spark.readStream.format("kafka")
@@ -128,9 +146,12 @@ if __name__ == "__main__":
         .load()
     )
 
-    booking_rooms.writeStream.option(
-        "checkpointLocation", "/tmp/booking_rooms/_checkpoints/"
-    ).foreachBatch(process_booking_rooms).start()
+    (
+        booking_rooms.writeStream.trigger(continuous=checkpoint_interval)
+        .option("checkpointLocation", "/tmp/booking_rooms/_checkpoints/")
+        .foreachBatch(process_booking_rooms)
+        .start()
+    )
 
     booking_addons = (
         spark.readStream.format("kafka")
@@ -140,9 +161,13 @@ if __name__ == "__main__":
         .option("maxOffsetsPerTrigger", 1)
         .load()
     )
-    booking_addons.writeStream.option(
-        "checkpointLocation", "/tmp/booking_addons/_checkpoints/"
-    ).foreachBatch(process_booking_addons).start()
+
+    (
+        booking_addons.writeStream.trigger(continuous=checkpoint_interval)
+        .option("checkpointLocation", "/tmp/booking_addons/_checkpoints/")
+        .foreachBatch(process_booking_addons)
+        .start()
+    )
 
     try:
         spark.streams.awaitAnyTermination()
