@@ -62,6 +62,7 @@ avail_room_q = (
             )
         )
     )
+    .where(not_(BookingRoom.c.id.in_(booking_rooms.id.tolist())))
     .where(not_(BookingRoom.c.guest.in_(booking_rooms.guest.tolist())))
 )
 
