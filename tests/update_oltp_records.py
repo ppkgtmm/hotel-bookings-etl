@@ -66,21 +66,21 @@ booking_room_q = (
     )
     .where(not_(BookingRoom.c.guest.in_(guests)))
 )
-
+updated_booking_rooms = []
 for i, br in enumerate(oltp_conn.execute(booking_room_q).fetchmany(len(booking_rooms))):
     room = br._asdict()["room"]
     id = booking_rooms[i]
     update_booking_room_q = (
         update(BookingRoom).where(BookingRoom.c.id == id).values(room=room)
     )
-    print(oltp_conn.execute(update_booking_room_q))
+    oltp_conn.execute(update_booking_room_q)
     oltp_conn.commit()
-# booking_rooms = [
-#     {"booking": booking_id, "room": r[0], "guest": guests[i]}
-#     for i, r in enumerate(oltp_conn.execute(room_q).fetchmany(len(guests)))
-# ]
+    updated_booking_room = oltp_conn.execute(
+        select(BookingRoom).where(BookingRoom.c.id == id)
+    ).fetchone()
+    updated_booking_rooms.append(updated_booking_room._asdict())
 
-# pd.DataFrame(booking_rooms).to_csv(booking_room_after, index=False)
+pd.DataFrame(updated_booking_rooms).to_csv(booking_room_after, index=False)
 
 oltp_conn.close()
 oltp_engine.dispose()
