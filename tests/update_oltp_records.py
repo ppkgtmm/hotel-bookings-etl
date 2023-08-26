@@ -67,7 +67,7 @@ avail_room_q = (
 
 avail_rooms = oltp_conn.execute(avail_room_q).fetchmany(booking_rooms.shape[0])
 for i, br in enumerate(avail_rooms):
-    room, id = br._asdict()["room"], booking_rooms.loc[i, "id"]
+    room, id = br._asdict()["room"], int(booking_rooms.loc[i, "id"])
     update_booking_room_q = (
         update(BookingRoom).where(BookingRoom.c.id == id).values(room=room)
     )
@@ -82,7 +82,7 @@ pd.DataFrame(booking_rooms).to_csv(booking_room_after, index=False)
 booking_addon = (
     oltp_conn.execute(
         select(BookingAddon).where(
-            BookingAddon.c.booking_room == booking_rooms.loc[0, "id"]
+            BookingAddon.c.booking_room == int(booking_rooms.loc[0, "id"])
         )
     )
     .fetchone()
