@@ -133,7 +133,7 @@ def stage_booking_addons():
 
 
 if __name__ == "__main__":
-    oltp_engine = create_engine(conn_string, isolation_level="SERIALIZABLE")
+    oltp_engine = create_engine(conn_string)
     oltp_conn = oltp_engine.connect()
     writer = DatabaseWriter()
     stage_booking_addons()
