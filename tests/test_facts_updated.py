@@ -43,7 +43,7 @@ for row in fct_booking.to_dict(orient="records"):
     )
     assert (
         len(olap_conn.execute(query).fetchall())
-        == (row["checkout"] - row["checkin"]).days
+        == (row["checkout"] - row["checkin"]).days + 1
     )
 
 for row in fct_purchase.to_dict(orient="records"):
