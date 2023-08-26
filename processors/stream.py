@@ -51,8 +51,7 @@ if __name__ == "__main__":
     )
 
     (
-        location.writeStream.trigger(continuous=checkpoint_interval)
-        .option("checkpointLocation", "/tmp/location/_checkpoints/")
+        location.writeStream.option("checkpointLocation", "/tmp/location/_checkpoints/")
         .foreachBatch(process_locations)
         .start()
     )
@@ -67,8 +66,7 @@ if __name__ == "__main__":
     )
 
     (
-        addons.writeStream.trigger(continuous=checkpoint_interval)
-        .option("checkpointLocation", "/tmp/addons/_checkpoints/")
+        addons.writeStream.option("checkpointLocation", "/tmp/addons/_checkpoints/")
         .foreachBatch(process_addons)
         .start()
     )
@@ -83,8 +81,9 @@ if __name__ == "__main__":
     )
 
     (
-        roomtypes.writeStream.trigger(continuous=checkpoint_interval)
-        .option("checkpointLocation", "/tmp/roomtypes/_checkpoints/")
+        roomtypes.writeStream.option(
+            "checkpointLocation", "/tmp/roomtypes/_checkpoints/"
+        )
         .foreachBatch(process_roomtypes)
         .start()
     )
@@ -99,8 +98,7 @@ if __name__ == "__main__":
     )
 
     (
-        rooms.writeStream.trigger(continuous=checkpoint_interval)
-        .option("checkpointLocation", "/tmp/rooms/_checkpoints/")
+        rooms.writeStream.option("checkpointLocation", "/tmp/rooms/_checkpoints/")
         .foreachBatch(process_rooms)
         .start()
     )
@@ -115,8 +113,7 @@ if __name__ == "__main__":
     )
 
     (
-        guests.writeStream.trigger(continuous=checkpoint_interval)
-        .option("checkpointLocation", "/tmp/guests/_checkpoints/")
+        guests.writeStream.option("checkpointLocation", "/tmp/guests/_checkpoints/")
         .foreachBatch(process_guests)
         .start()
     )
@@ -131,8 +128,7 @@ if __name__ == "__main__":
     )
 
     (
-        bookings.writeStream.trigger(continuous=checkpoint_interval)
-        .option("checkpointLocation", "/tmp/bookings/_checkpoints/")
+        bookings.writeStream.option("checkpointLocation", "/tmp/bookings/_checkpoints/")
         .foreachBatch(process_bookings)
         .start()
     )
@@ -147,8 +143,9 @@ if __name__ == "__main__":
     )
 
     (
-        booking_rooms.writeStream.trigger(continuous=checkpoint_interval)
-        .option("checkpointLocation", "/tmp/booking_rooms/_checkpoints/")
+        booking_rooms.writeStream.option(
+            "checkpointLocation", "/tmp/booking_rooms/_checkpoints/"
+        )
         .foreachBatch(process_booking_rooms)
         .start()
     )
@@ -163,8 +160,9 @@ if __name__ == "__main__":
     )
 
     (
-        booking_addons.writeStream.trigger(continuous=checkpoint_interval)
-        .option("checkpointLocation", "/tmp/booking_addons/_checkpoints/")
+        booking_addons.writeStream.option(
+            "checkpointLocation", "/tmp/booking_addons/_checkpoints/"
+        )
         .foreachBatch(process_booking_addons)
         .start()
     )
