@@ -78,5 +78,30 @@ for i, br in enumerate(avail_rooms):
 print("writing booking rooms after update")
 pd.DataFrame(booking_rooms).to_csv(booking_room_after, index=False)
 
+
+booking_addon = (
+    oltp_conn.execute(
+        select(BookingAddon).where(
+            BookingAddon.c.booking_room == booking_rooms.loc[0, "id"]
+        )
+    )
+    .fetchone()
+    ._asdict()
+)
+
+print("writing booking addon before update")
+pd.DataFrame([booking_addon]).to_csv(booking_addon_before, index=False)
+
+booking_addon["quantity"] = booking_addon["quantity"] + 1
+oltp_conn.execute(
+    update(BookingAddon)
+    .where(BookingAddon.c.id == booking_addon["id"])
+    .values(quantity=booking_addon["quantity"])
+)
+oltp_conn.commit()
+
+print("writing booking addon after update")
+pd.DataFrame([booking_addon]).to_csv(booking_addon_after, index=False)
+
 oltp_conn.close()
 oltp_engine.dispose()
