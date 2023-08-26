@@ -3,7 +3,6 @@ from sqlalchemy import (
     Table,
     MetaData,
     NullPool,
-    delete,
     select,
     update,
     and_,
@@ -34,11 +33,10 @@ pd.DataFrame([booking]).to_csv(booking_before, index=False)
 
 booking_room_q = select(BookingRoom).where(BookingRoom.c.booking == booking_id)
 booking_rooms = [br._asdict() for br in oltp_conn.execute(booking_room_q).fetchall()]
+booking_rooms = pd.DataFrame(booking_rooms)
 
 print("writing booking rooms before update")
-pd.DataFrame(booking_rooms).to_csv(booking_room_before, index=False)
-guests = [br["guest"] for br in booking_rooms]
-booking_rooms = [br["id"] for br in booking_rooms]
+booking_rooms.to_csv(booking_room_before, index=False)
 
 update_booking_q = (
     update(Booking)
@@ -48,12 +46,12 @@ update_booking_q = (
 oltp_conn.execute(update_booking_q)
 oltp_conn.commit()
 
-booking["checkin"] = checkin
-booking["checkout"] = checkout
+booking["checkin"], booking["checkout"] = checkin, checkout
+print("writing booking after update")
 pd.DataFrame([booking]).to_csv(booking_after, index=False)
 
-booking_room_q = (
-    select(BookingRoom)
+avail_room_q = (
+    select(BookingRoom.c.room)
     .outerjoin(Booking, Booking.c.id == BookingRoom.c.booking)
     .where(
         not_(
@@ -64,23 +62,21 @@ booking_room_q = (
             )
         )
     )
-    .where(not_(BookingRoom.c.guest.in_(guests)))
+    .where(not_(BookingRoom.c.guest.in_(booking_rooms.guest.tolist())))
 )
-updated_booking_rooms = []
-for i, br in enumerate(oltp_conn.execute(booking_room_q).fetchmany(len(booking_rooms))):
-    room = br._asdict()["room"]
-    id = booking_rooms[i]
+
+avail_rooms = oltp_conn.execute(avail_room_q).fetchmany(booking_rooms.shape[0])
+for i, br in enumerate(avail_rooms):
+    room, id = br._asdict()["room"], booking_rooms.loc[i, "id"]
     update_booking_room_q = (
         update(BookingRoom).where(BookingRoom.c.id == id).values(room=room)
     )
     oltp_conn.execute(update_booking_room_q)
     oltp_conn.commit()
-    updated_booking_room = oltp_conn.execute(
-        select(BookingRoom).where(BookingRoom.c.id == id)
-    ).fetchone()
-    updated_booking_rooms.append(updated_booking_room._asdict())
+    booking_rooms.loc[i, "room"] = room
 
-pd.DataFrame(updated_booking_rooms).to_csv(booking_room_after, index=False)
+print("writing booking rooms after update")
+pd.DataFrame(booking_rooms).to_csv(booking_room_after, index=False)
 
 oltp_conn.close()
 oltp_engine.dispose()
