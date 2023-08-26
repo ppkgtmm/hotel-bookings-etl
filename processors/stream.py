@@ -17,7 +17,6 @@ import traceback
 load_dotenv()
 
 max_offsets = 100
-checkpoint_interval = "1 second"
 broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 # broker = getenv("KAFKA_BOOTSTRAP_SERVERS")
 
