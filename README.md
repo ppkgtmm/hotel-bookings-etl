@@ -1,56 +1,59 @@
 # hotel bookings
 
-### Set up
+## Usage
+
+#### Set up
 1. Copy file `example.env` into a new file called `.env` in same directory
    
 2. In `.env` file created, replace `<YOUR DB PASSWORD>` with wanted password 
 
-3. Allow set up script execution
+3. Run following to allow set up script execution
 
 ```
 chmod +x setup.sh
 ```
 
-### Process
+4. Run the set up script
+
+```
+./setup.sh
+```
+
+#### Execute project 
+
 1. Activate virtual environment
 
 ```
 source venv/bin/activate
 ```
 
-2. Generate fake hotel booking data (can skip after first run)
+2. Generate fake booking data
 
 ```
 chmod +x generators/run.sh && ./generators/run.sh
 ```
 
-3. run the set up script
-
-```
-./setup.sh
-```
-
-4. Insert generated data to OLTP database
+3. Populate OLTP database
    
 ```
 python3 seed_oltp.py
 ``` 
 
-5. register OLTP database to kafka connect
+4. Register OLTP database to kafka connect
 
 ```
 python3 kafka_connect/register_mysql.py
 ```
 
-6. start container for initial load and real-time changes sync to OLAP database
+5. Start container for initial load and streaming ETL
 
 ```
 docker-compose up -d processor
 ```
 
-7. You are all set ! after a few minutes, data will start appearing in OLAP database
+After a few minutes, data will start appearing in OLAP database
 
-### Tear down
+#### Tear down
 
 ```
 docker-compose down -v
