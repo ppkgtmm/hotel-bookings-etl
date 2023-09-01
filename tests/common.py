@@ -5,7 +5,11 @@ from os.path import abspath, dirname, join
 import pandas as pd
 
 sys.path.append(dirname(dirname(abspath(__file__))))
-from processors.constants import fct_booking_table, fct_purchase_table, dim_addon_table
+from processors.utilities.constants import (
+    fct_booking_table,
+    fct_purchase_table,
+    dim_addon_table,
+)
 
 dt_fmt = "%Y%m%d%H%M%S"
 result_folder = join(dirname(abspath(__file__)), "results")
