@@ -1,4 +1,4 @@
-# hotel bookings
+# hotel bookings etl
 
 ## Usage
 
@@ -33,7 +33,7 @@ source venv/bin/activate
 chmod +x generators/run.sh && ./generators/run.sh
 ```
 
-3. Populate OLTP database
+3. Populate OLTP database using generated data
    
 ```
 python3 seed_oltp.py
