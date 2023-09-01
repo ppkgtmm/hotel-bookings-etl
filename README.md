@@ -53,6 +53,28 @@ docker-compose up -d processor
 
 After a few minutes, data will start appearing in OLAP database
 
+#### Run tests
+
+Make sure that `processors/stream.py` start up, which will take time due to additional packages installation, is complete before testing
+
+1. Activate virtual environment
+
+```
+source venv/bin/activate
+```
+
+2. update and delete records in OLTP database
+
+```
+python3 tests/update_oltp_records.py && python3 tests/delete_oltp_records.py
+```
+
+3. After 5 minutes (preferable), verify if the changes in OLTP database are synced to OLAP database
+
+```
+python3 tests/test_facts_updated.py &&  python3 tests/test_facts_deleted.py
+```
+
 #### Tear down
 
 ```
