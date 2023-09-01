@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
 import math
-from db_writer import DatabaseWriter
+from utilities.db_writer import DatabaseWriter
 
 start_date = datetime.strptime("2021-01-01 00:00:00", "%Y-%m-%d %H:%M:%S") + timedelta(
     days=-90

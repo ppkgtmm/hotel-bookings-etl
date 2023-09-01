@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 from os import getenv
-from helper import (
+from utilities.helper import (
     process_addons,
     process_roomtypes,
     process_locations,
@@ -11,7 +11,7 @@ from helper import (
     process_booking_rooms,
     process_booking_addons,
 )
-from db_writer import DatabaseWriter
+from utilities.db_writer import DatabaseWriter
 import traceback
 
 load_dotenv()

@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from os import getenv
-from constants import *
-from db_writer import DatabaseWriter
+from utilities.constants import *
+from utilities.db_writer import DatabaseWriter
 
 load_dotenv()
 db_host = getenv("DB_HOST_INTERNAL")
