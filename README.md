@@ -77,6 +77,13 @@ python3 tests/test_facts_updated.py &&  python3 tests/test_facts_deleted.py
 
 There will not be any error messages printed out to console if tests were successful
 
+#### Clean up
+1. Run following after project execution to start airflow related containers for periodical clean up of staging tables
+
+```
+docker-compose up -d --no-recreate
+```
+
 #### Tear down
 
 ```
