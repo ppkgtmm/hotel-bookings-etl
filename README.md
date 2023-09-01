@@ -1,4 +1,4 @@
-# mochi
+# hotel bookings
 
 ### Set up
 1. Copy file `example.env` into a new file called `.env` in same directory
