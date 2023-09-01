@@ -27,8 +27,8 @@ COPY run.sh .
 
 COPY kafka/ kafka/
 
-COPY utilities/ utilities/
-
 COPY *.py scripts/
+
+COPY utilities/ scripts/utilities/
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
