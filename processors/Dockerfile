@@ -25,6 +25,10 @@ RUN pip3 install -r requirements.txt
 
 COPY run.sh .
 
+COPY kafka/ kafka/
+
+COPY utilities/ utilities/
+
 COPY *.py scripts/
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
