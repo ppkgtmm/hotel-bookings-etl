@@ -17,7 +17,7 @@ from pyspark.sql.functions import (
     to_date,
     lit,
 )
-from db_writer import DatabaseWriter
+from utilities.db_writer import DatabaseWriter
 
 addon_schema = StructType(
     [
