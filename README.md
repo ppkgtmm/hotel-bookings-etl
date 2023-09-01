@@ -75,6 +75,8 @@ python3 tests/update_oltp_records.py && python3 tests/delete_oltp_records.py
 python3 tests/test_facts_updated.py &&  python3 tests/test_facts_deleted.py
 ```
 
+There will not be any error messages printed out to console if tests were successful
+
 #### Tear down
 
 ```
