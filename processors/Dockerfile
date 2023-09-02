@@ -21,7 +21,7 @@ WORKDIR /processor
 COPY requirements.txt .
 
 # install required packages
-RUN pip3 install -r requirements.txt
+RUN pip3 --no-cache-dir install -r requirements.txt
 
 COPY run.sh .
 
