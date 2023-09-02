@@ -154,13 +154,13 @@ remove_purchases_query = """
 delete_stg_booking_addons = """
     DELETE
     FROM {stg_booking_addon_table}
-    WHERE datetime <= {datetime} AND processed = true
+    WHERE datetime <= DATETIME('{datetime}') AND processed = true
 """
 
 delete_del_booking_addons = """
     DELETE
     FROM {del_booking_addon_table}
-    WHERE datetime <= {datetime} AND processed = true
+    WHERE datetime <= DATETIME('{datetime}') AND processed = true
 """
 
 delete_stg_booking_rooms = """
@@ -169,11 +169,11 @@ delete_stg_booking_rooms = """
     WHERE processed = true AND booking IN (
         SELECT id
         FROM {stg_booking_table}
-        WHERE checkout <= {date}
+        WHERE checkout <= DATE('{date}')
         UNION
         SELECT id
         FROM {del_booking_table}
-        WHERE checkout <= {date}
+        WHERE checkout <= DATE('{date}')
     )
 """
 
@@ -183,24 +183,24 @@ delete_del_booking_rooms = """
     WHERE processed = true AND booking IN (
         SELECT id
         FROM {stg_booking_table}
-        WHERE checkout <= {date}
+        WHERE checkout <= DATE('{date}')
         UNION
         SELECT id
         FROM {del_booking_table}
-        WHERE checkout <= {date}
+        WHERE checkout <= DATE('{date}')
     )
 """
 
 delete_stg_bookings = """
     DELETE
     FROM {stg_booking_table}
-    WHERE processed = true AND checkout <= {date}
+    WHERE processed = true AND checkout <= DATE('{date}')
 """
 
 delete_del_bookings = """
     DELETE
     FROM {del_booking_table}
-    WHERE processed = true AND checkout <= {date}
+    WHERE processed = true AND checkout <= DATE('{date}')
 """
 
 delete_rooms_query = """
