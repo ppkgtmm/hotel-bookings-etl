@@ -85,6 +85,7 @@ cleanup_guests = MySqlOperator(
     mysql_conn_id=mysql_conn_id,
     dag=dag,
 )
+
 cleanup_rooms = MySqlOperator(
     sql=delete_rooms_query.format(stg_room_table=stg_room_table),
     task_id="cleanup_rooms",
