@@ -16,8 +16,21 @@ dag = DAG(
     max_active_runs=1,  # no concurrent runs
 )
 
-cleanup_booking_addons = PythonOperator(task_id="cleanup_booking_addons", dag=dag)
-cleanup_booking_rooms = PythonOperator(task_id="cleanup_booking_rooms", dag=dag)
-cleanup_bookings = PythonOperator(task_id="cleanup_bookings", dag=dag)
-cleanup_guests = PythonOperator(task_id="cleanup_guests", dag=dag)
-cleanup_rooms = PythonOperator(task_id="cleanup_rooms", dag=dag)
+
+def pprint():
+    print(1)
+
+
+cleanup_booking_addons = PythonOperator(
+    python_callable=pprint, task_id="cleanup_booking_addons", dag=dag
+)
+cleanup_booking_rooms = PythonOperator(
+    python_callable=pprint, task_id="cleanup_booking_rooms", dag=dag
+)
+cleanup_bookings = PythonOperator(
+    python_callable=pprint, task_id="cleanup_bookings", dag=dag
+)
+cleanup_guests = PythonOperator(
+    python_callable=pprint, task_id="cleanup_guests", dag=dag
+)
+cleanup_rooms = PythonOperator(python_callable=pprint, task_id="cleanup_rooms", dag=dag)
