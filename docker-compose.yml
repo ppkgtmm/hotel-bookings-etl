@@ -75,6 +75,9 @@ services:
     build:
       context: processors/
       dockerfile: airflow/Dockerfile
+      args:
+        - AIRFLOW_HOME=$AIRFLOW_HOME
+        - DAGS_FOLDER=$DAGS_FOLDER
     <<: *airflow-common
     container_name: airflow-init
     entrypoint: bash -c
