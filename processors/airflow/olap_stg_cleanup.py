@@ -79,7 +79,15 @@ cleanup_del_bookings = MySqlOperator(
     cleanup_del_bookings,
 ]
 
-# cleanup_guests = PythonOperator(
-#     python_callable=pprint, task_id="cleanup_guests", dag=dag
-# )
-# cleanup_rooms = PythonOperator(python_callable=pprint, task_id="cleanup_rooms", dag=dag)
+cleanup_guests = MySqlOperator(
+    sql=delete_guests_query.format(stg_guest_table=stg_guest_table),
+    task_id="cleanup_guests",
+    mysql_conn_id=mysql_conn_id,
+    dag=dag,
+)
+cleanup_rooms = MySqlOperator(
+    sql=delete_rooms_query.format(stg_room_table=stg_room_table),
+    task_id="cleanup_rooms",
+    mysql_conn_id=mysql_conn_id,
+    dag=dag,
+)
