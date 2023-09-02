@@ -46,9 +46,9 @@ update_booking_q = (
 oltp_conn.execute(update_booking_q)
 oltp_conn.commit()
 
-booking["checkin"], booking["checkout"] = checkin, checkout
+updated_booking = {**booking, "checkin": checkin, "checkout": checkout}
 print("writing booking after update")
-pd.DataFrame([booking]).to_csv(booking_after, index=False)
+pd.DataFrame([updated_booking]).to_csv(booking_after, index=False)
 
 avail_guest_q = (
     select(BookingRoom.c.guest)
@@ -59,6 +59,18 @@ avail_guest_q = (
                 and_(Booking.c.checkin <= checkin, checkin <= Booking.c.checkout),
                 and_(Booking.c.checkin <= checkout, checkout <= Booking.c.checkout),
                 and_(checkin <= Booking.c.checkin, checkout >= Booking.c.checkout),
+                and_(
+                    Booking.c.checkin <= booking["checkin"],
+                    booking["checkin"] <= Booking.c.checkout,
+                ),
+                and_(
+                    Booking.c.checkin <= booking["checkout"],
+                    booking["checkout"] <= Booking.c.checkout,
+                ),
+                and_(
+                    booking["checkin"] <= Booking.c.checkin,
+                    booking["checkout"] >= Booking.c.checkout,
+                ),
             )
         )
     )
