@@ -5,7 +5,7 @@
 #### Set up
 1. Copy file `example.env` into a new file called `.env` in same directory
    
-2. In `.env` file created, replace `<YOUR DB PASSWORD>` with wanted password 
+2. In `.env` file created, replace values that have following pattern `<FILL IN ...>` with suitable values 
 
 3. Run following to allow set up script execution
 
