@@ -89,7 +89,9 @@ docker-compose up -d --no-recreate
 3. Turn on the dag for clean up of staging tables in OLAP database
 
 
-Clean up dag (configured to run daily) will be triggered automatically
+4. Click on the dag name to monitor it while running
+
+Clean up dag is configured to run daily and will be triggered automatically
 
 #### Tear down
 
