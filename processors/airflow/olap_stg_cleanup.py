@@ -22,7 +22,7 @@ dag = DAG(
 
 cleanup_stg_booking_addons = create_table = MySqlOperator(
     sql=delete_stg_booking_addons.format(
-        stg_booking_addon_table=stg_booking_addon_table
+        stg_booking_addon_table=stg_booking_addon_table, datetime="{{ ts }}"
     ),
     task_id="cleanup_stg_booking_addons",
     mysql_conn_id=mysql_conn_id,
@@ -31,7 +31,7 @@ cleanup_stg_booking_addons = create_table = MySqlOperator(
 
 cleanup_del_booking_addons = create_table = MySqlOperator(
     sql=delete_del_booking_addons.format(
-        del_booking_addon_table=del_booking_addon_table
+        del_booking_addon_table=del_booking_addon_table, datetime="{{ ts }}"
     ),
     task_id="cleanup_del_booking_addons",
     mysql_conn_id=mysql_conn_id,
@@ -43,6 +43,7 @@ cleanup_stg_booking_rooms = MySqlOperator(
         stg_booking_room_table=stg_booking_room_table,
         stg_booking_table=stg_booking_table,
         del_booking_table=del_booking_table,
+        date="{{ ds }}",
     ),
     task_id="cleanup_stg_booking_rooms",
     mysql_conn_id=mysql_conn_id,
@@ -54,6 +55,7 @@ cleanup_del_booking_rooms = MySqlOperator(
         del_booking_room_table=del_booking_room_table,
         stg_booking_table=stg_booking_table,
         del_booking_table=del_booking_table,
+        date="{{ ds }}",
     ),
     task_id="cleanup_del_booking_rooms",
     mysql_conn_id=mysql_conn_id,
@@ -61,14 +63,18 @@ cleanup_del_booking_rooms = MySqlOperator(
 )
 
 cleanup_stg_bookings = MySqlOperator(
-    sql=delete_stg_bookings.format(stg_booking_table=stg_booking_table),
+    sql=delete_stg_bookings.format(
+        stg_booking_table=stg_booking_table, date="{{ ds }}"
+    ),
     task_id="cleanup_stg_bookings",
     mysql_conn_id=mysql_conn_id,
     dag=dag,
 )
 
 cleanup_del_bookings = MySqlOperator(
-    sql=delete_del_bookings.format(del_booking_table=del_booking_table),
+    sql=delete_del_bookings.format(
+        del_booking_table=del_booking_table, date="{{ ds }}"
+    ),
     task_id="cleanup_del_bookings",
     mysql_conn_id=mysql_conn_id,
     dag=dag,
