@@ -2,13 +2,13 @@ from airflow import DAG
 from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime
-from os import environ
+from os import getenv
 from utilities.constants import *
 from utilities.db_writer import DatabaseWriter
 
 db_writer = DatabaseWriter()
 
-mysql_conn_id = environ["AIRFLOW_OLAP_CONN_ID"]
+mysql_conn_id = getenv["AIRFLOW_OLAP_CONN_ID"]
 
 default_args = dict(
     owner="airflow",
