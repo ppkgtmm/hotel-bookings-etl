@@ -105,7 +105,6 @@ def load_bookings():
 
     for row in merged.to_dict(orient="records"):
         result = conn.execute(text(insert_q), row)
-        conn.commit()
         booking = {**row, "id": result.lastrowid}
         load_booking_rooms(booking, room_types, guests, addons)
 
@@ -154,7 +153,6 @@ def load_booking_rooms(booking, room_types, guests, addons):
     booking_rooms = booking_rooms.drop_duplicates("room").drop_duplicates("guest")
     for row in booking_rooms.to_dict(orient="records"):
         result = conn.execute(text(booking_room_q), row)
-        conn.commit()
         booking_room = {**row, "id": result.lastrowid}
         load_booking_addons(booking, booking_room, addons)
 
@@ -187,7 +185,6 @@ def load_booking_addons(booking, booking_room, addons):
     df = df.groupby(["booking_room", "addon", "datetime"]).aggregate("sum")
     for row in df.reset_index().to_dict(orient="records"):
         conn.execute(text(booking_addons_q), row)
-        conn.commit()
 
 
 if __name__ == "__main__":

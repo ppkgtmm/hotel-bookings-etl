@@ -35,7 +35,6 @@ update_booking_q = (
     .values(checkin=checkin, checkout=checkout)
 )
 oltp_conn.execute(update_booking_q)
-oltp_conn.commit()
 
 updated_booking = {**booking, "checkin": checkin, "checkout": checkout}
 print("writing booking after update")
@@ -75,7 +74,6 @@ for i, br in enumerate(avail_guest):
         update(BookingRoom).where(BookingRoom.c.id == id).values(guest=guest)
     )
     oltp_conn.execute(update_booking_room_q)
-    oltp_conn.commit()
     booking_rooms.loc[i, "guest"] = guest
 
 print("writing booking rooms after update")
@@ -101,7 +99,6 @@ oltp_conn.execute(
     .where(BookingAddon.c.id == booking_addon["id"])
     .values(quantity=booking_addon["quantity"])
 )
-oltp_conn.commit()
 
 print("writing booking addon after update")
 pd.DataFrame([booking_addon]).to_csv(booking_addon_after, index=False)

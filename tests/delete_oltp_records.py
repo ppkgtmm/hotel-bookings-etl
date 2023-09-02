@@ -37,15 +37,12 @@ del_booking_addon_q = delete(BookingAddon).where(
     BookingAddon.c.booking_room.in_(booking_rooms)
 )
 oltp_conn.execute(del_booking_addon_q)
-oltp_conn.commit()
 
 del_booking_room_q = delete(BookingRoom).where(BookingRoom.c.booking == booking_id)
 oltp_conn.execute(del_booking_room_q)
-oltp_conn.commit()
 
 del_booking_q = delete(Booking).where(Booking.c.id == booking_id)
 oltp_conn.execute(del_booking_q)
-oltp_conn.commit()
 
 oltp_conn.close()
 oltp_engine.dispose()
