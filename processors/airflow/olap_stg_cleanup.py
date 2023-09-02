@@ -1,8 +1,12 @@
 from airflow import DAG
 from airflow.operators.mysql_operator import MySqlOperator
+from airflow.operators.python_operator import PythonOperator
 from datetime import datetime
 from os import environ
 from utilities.constants import *
+from utilities.db_writer import DatabaseWriter
+
+db_writer = DatabaseWriter()
 
 mysql_conn_id = environ["AIRFLOW_OLAP_CONN_ID"]
 
@@ -18,6 +22,33 @@ dag = DAG(
     "olap_stg_cleanup",
     default_args=default_args,
     max_active_runs=1,  # no concurrent runs
+)
+
+remove_fct_booking = PythonOperator(
+    python_callable=db_writer.remove_fct_bookings,
+    task_id="remove_fct_booking",
+    dag=dag,
+)
+remove_fct_purchase = PythonOperator(
+    python_callable=db_writer.remove_fct_purchases,
+    task_id="remove_fct_purchase",
+    dag=dag,
+)
+write_fct_booking = PythonOperator(
+    python_callable=db_writer.write_fct_bookings,
+    task_id="write_fct_booking",
+    dag=dag,
+)
+write_fct_purchase = PythonOperator(
+    python_callable=db_writer.write_fct_purchases,
+    task_id="write_fct_purchase",
+    dag=dag,
+)
+
+tear_down_db_writer = PythonOperator(
+    python_callable=db_writer.tear_down,
+    task_id="tear_down_db_writer",
+    dag=dag,
 )
 
 cleanup_stg_booking_addons = create_table = MySqlOperator(
@@ -86,9 +117,6 @@ cleanup_del_bookings = MySqlOperator(
     dag=dag,
 )
 
-[cleanup_stg_booking_rooms, cleanup_del_booking_rooms] >> cleanup_stg_bookings
-[cleanup_stg_booking_rooms, cleanup_del_booking_rooms] >> cleanup_del_bookings
-
 cleanup_guests = MySqlOperator(
     sql=delete_guests_query.format(stg_guest_table=stg_guest_table),
     task_id="cleanup_guests",
@@ -102,3 +130,18 @@ cleanup_rooms = MySqlOperator(
     mysql_conn_id=mysql_conn_id,
     dag=dag,
 )
+
+remove_fct_booking >> write_fct_booking
+remove_fct_purchase >> write_fct_purchase
+[write_fct_booking, write_fct_purchase] >> tear_down_db_writer
+
+tear_down_db_writer >> [
+    cleanup_stg_booking_addons,
+    cleanup_del_booking_addons,
+    cleanup_stg_booking_rooms,
+    cleanup_del_booking_rooms,
+    cleanup_guests,
+    cleanup_rooms,
+]
+[cleanup_stg_booking_rooms, cleanup_del_booking_rooms] >> cleanup_stg_bookings
+[cleanup_stg_booking_rooms, cleanup_del_booking_rooms] >> cleanup_del_bookings
