@@ -154,13 +154,13 @@ remove_purchases_query = """
 delete_stg_booking_addons = """
     DELETE
     FROM {stg_booking_addon_table}
-    WHERE datetime <= {{ ts }} AND processed = true
+    WHERE datetime <= {datetime} AND processed = true
 """
 
 delete_del_booking_addons = """
     DELETE
     FROM {del_booking_addon_table}
-    WHERE datetime <= {{ ts }} AND processed = true
+    WHERE datetime <= {datetime} AND processed = true
 """
 
 delete_stg_booking_rooms = """
@@ -169,11 +169,11 @@ delete_stg_booking_rooms = """
     WHERE processed = true AND booking IN (
         SELECT id
         FROM {stg_booking_table}
-        WHERE checkout <= {{ ds }}
+        WHERE checkout <= {date}
         UNION
         SELECT id
         FROM {del_booking_table}
-        WHERE checkout <= {{ ds }}
+        WHERE checkout <= {date}
     )
 """
 
@@ -183,24 +183,24 @@ delete_del_booking_rooms = """
     WHERE processed = true AND booking IN (
         SELECT id
         FROM {stg_booking_table}
-        WHERE checkout <= {{ ds }}
+        WHERE checkout <= {date}
         UNION
         SELECT id
         FROM {del_booking_table}
-        WHERE checkout <= {{ ds }}
+        WHERE checkout <= {date}
     )
 """
 
 delete_stg_bookings = """
     DELETE
     FROM {stg_booking_table}
-    WHERE processed = true AND checkout <= {{ ds }}
+    WHERE processed = true AND checkout <= {date}
 """
 
 delete_del_bookings = """
     DELETE
     FROM {del_booking_table}
-    WHERE processed = true AND checkout <= {{ ds }}
+    WHERE processed = true AND checkout <= {date}
 """
 
 delete_rooms_query = """
@@ -210,7 +210,7 @@ delete_rooms_query = """
         SELECT id, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnum
         FROM {stg_room_table}
     ) sub
-    ON sub.rnum <= 3 AND stg.id = sub.id
+    ON sub.rnum > 3 AND stg.id = sub.id
 """
 
 delete_guests_query = """
@@ -220,5 +220,5 @@ delete_guests_query = """
         SELECT id, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnum
         FROM {stg_guest_table}
     ) sub
-    ON sub.rnum <= 3 AND stg.id = sub.id
+    ON sub.rnum > 3 AND stg.id = sub.id
 """
