@@ -199,6 +199,8 @@ class DatabaseWriter:
             stg_room_table=stg_room_table,
             stg_booking_table=stg_booking_table,
             stg_booking_room_table=stg_booking_room_table,
+            dim_roomtype_table=dim_roomtype_table,
+            dim_location_table=dim_location_table,
         )
         with self.engine.connect() as conn:
             for row in conn.execute(text(query)):
@@ -265,6 +267,9 @@ class DatabaseWriter:
             stg_room_table=stg_room_table,
             stg_booking_addon_table=stg_booking_addon_table,
             stg_booking_room_table=stg_booking_room_table,
+            dim_addon_table=dim_addon_table,
+            dim_roomtype_table=dim_roomtype_table,
+            dim_location_table=dim_location_table,
         )
         with self.engine.connect() as conn:
             for row in conn.execute(text(query)):
@@ -295,6 +300,7 @@ class DatabaseWriter:
             del_booking_addon_table=del_booking_addon_table,
             del_booking_room_table=del_booking_room_table,
             stg_booking_room_table=stg_booking_room_table,
+            dim_addon_table=dim_addon_table,
         )
         with self.engine.connect() as conn:
             for row in conn.execute(text(query)):
