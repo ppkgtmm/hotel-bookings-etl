@@ -78,6 +78,8 @@ services:
       args:
         - AIRFLOW_HOME=$AIRFLOW_HOME
         - DAGS_FOLDER=$DAGS_FOLDER
+        - AIRFLOW_VERSION=$AIRFLOW_VERSION
+        - PYTHON_VERSION=$PYTHON_VERSION
     <<: *airflow-common
     container_name: airflow-init
     entrypoint: bash -c
