@@ -74,10 +74,8 @@ cleanup_del_bookings = MySqlOperator(
     dag=dag,
 )
 
-[cleanup_stg_booking_rooms, cleanup_del_booking_rooms] >> [
-    cleanup_stg_bookings,
-    cleanup_del_bookings,
-]
+[cleanup_stg_booking_rooms, cleanup_del_booking_rooms] >> cleanup_stg_bookings
+[cleanup_stg_booking_rooms, cleanup_del_booking_rooms] >> cleanup_del_bookings
 
 cleanup_guests = MySqlOperator(
     sql=delete_guests_query.format(stg_guest_table=stg_guest_table),
