@@ -151,28 +151,54 @@ remove_purchases_query = """
         WHERE ba.processed = false AND COALESCE(dbr.id, sbr.id) IS NOT NULL
 """
 
-delete_rooms_query = """
+delete_stg_booking_addons = """
     DELETE
-    FROM stg_room
-    WHERE EXISTS (
-        SELECT *
-        FROM (
-            SELECT *, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnum
-            FROM stg_room
-        ) sub
-        WHERE rnum > 3
+    FROM {stg_booking_addon_table}
+    WHERE datetime <= {{ ts }} AND processed = true
+"""
+
+delete_del_booking_addons = """
+    DELETE
+    FROM {del_booking_addon_table}
+    WHERE datetime <= {{ ts }} AND processed = true
+"""
+
+delete_stg_booking_rooms = """
+    DELETE
+    FROM {stg_booking_room_table}
+    WHERE processed = true AND booking IN (
+        SELECT id
+        FROM {stg_booking_table}
+        WHERE checkout <= {{ ds }}
+        UNION
+        SELECT id
+        FROM {del_booking_table}
+        WHERE checkout <= {{ ds }}
     )
 """
 
-delete_guests_query = """
+delete_del_booking_rooms = """
     DELETE
-    FROM stg_guest
-    WHERE EXISTS (
-        SELECT *
-        FROM (
-            SELECT *, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnum
-            FROM stg_guest
-        ) sub
-        WHERE rnum > 3
+    FROM {del_booking_room_table}
+    WHERE processed = true AND booking IN (
+        SELECT id
+        FROM {stg_booking_table}
+        WHERE checkout <= {{ ds }}
+        UNION
+        SELECT id
+        FROM {del_booking_table}
+        WHERE checkout <= {{ ds }}
     )
+"""
+
+delete_stg_bookings = """
+    DELETE
+    FROM {stg_booking_table}
+    WHERE processed = true AND checkout <= {{ ds }}
+"""
+
+delete_del_bookings = """
+    DELETE
+    FROM {del_booking_table}
+    WHERE processed = true AND checkout <= {{ ds }}
 """
