@@ -1,2 +1,3 @@
 python-dotenv==1.0.0
+SQLAlchemy==2.0.15
 mysql-connector-python==8.0.33
