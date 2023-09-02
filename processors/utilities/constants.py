@@ -192,15 +192,35 @@ delete_del_booking_rooms = """
 """
 
 delete_stg_bookings = """
-    DELETE
-    FROM {stg_booking_table}
-    WHERE processed = true AND checkout <= DATE('{date}')
+    DELETE sb
+    FROM {stg_booking_table} sb
+    LEFT JOIN (
+        SELECT booking
+        FROM {stg_booking_room_table}
+        WHERE processed = false
+        UNION
+        SELECT booking
+        FROM {del_booking_room_table}
+        WHERE processed = false
+    ) br
+    ON br.booking = sb.id
+    WHERE br.booking IS NULL AND checkout <= DATE('{date}')
 """
 
 delete_del_bookings = """
-    DELETE
-    FROM {del_booking_table}
-    WHERE processed = true AND checkout <= DATE('{date}')
+    DELETE db
+    FROM {del_booking_table} db
+    LEFT JOIN (
+        SELECT booking
+        FROM {stg_booking_room_table}
+        WHERE processed = false
+        UNION
+        SELECT booking
+        FROM {del_booking_room_table}
+        WHERE processed = false
+    ) br
+    ON br.booking = db.id
+    WHERE br.booking IS NULL AND checkout <= DATE('{date}')
 """
 
 delete_rooms_query = """
