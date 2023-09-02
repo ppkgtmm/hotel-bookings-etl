@@ -60,12 +60,12 @@ bookings_query = """
         b.guest_location,
         (
             SELECT MAX(id)
-            FROM dim_roomtype
+            FROM {dim_roomtype_table}
             WHERE _id = b.room_type AND created_at <= b.updated_at
 
         ) room_type
     FROM bookings b
-    INNER JOIN dim_location l
+    INNER JOIN {dim_location_table} l
     ON b.guest_location = l.id
     WHERE b.room_type IS NOT NULL
 """
@@ -106,7 +106,7 @@ purchases_query = """
             ) room_type,
             (
                 SELECT MAX(id)
-                FROM dim_addon
+                FROM {dim_addon_table}
                 WHERE _id = ba.addon AND created_at <= ba.updated_at
             ) addon,
             ba.quantity,
@@ -122,13 +122,13 @@ purchases_query = """
         p.guest_location,
         (
             SELECT MAX(id)
-            FROM dim_roomtype
+            FROM {dim_roomtype_table}
             WHERE _id = p.room_type AND created_at <= p.updated_at
         ) room_type,
         p.addon,
         p.quantity
     FROM purchases p
-    INNER JOIN dim_location l
+    INNER JOIN {dim_location_table} l
     ON p.guest_location = l.id
     WHERE p.room_type IS NOT NULL AND p.addon IS NOT NULL
 """
@@ -140,7 +140,7 @@ remove_purchases_query = """
             COALESCE(dbr.guest, sbr.guest) guest,
             (
                 SELECT MAX(id)
-                FROM dim_addon
+                FROM {dim_addon_table}
                 WHERE _id = ba.addon AND created_at <= ba.updated_at
             ) addon
         FROM {del_booking_addon_table} ba
