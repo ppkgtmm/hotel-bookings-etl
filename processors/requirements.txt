@@ -1,5 +1,5 @@
 pyspark==3.4.1
 python-dotenv==1.0.0
-SQLAlchemy==2.0.15
+SQLAlchemy==1.4.49
 mysql-connector-python==8.0.33
 confluent-kafka==2.1.1
