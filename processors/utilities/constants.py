@@ -154,13 +154,13 @@ remove_purchases_query = """
 delete_stg_booking_addons = """
     DELETE
     FROM {stg_booking_addon_table}
-    WHERE datetime <= DATETIME('{datetime}') AND processed = true
+    WHERE datetime <= CAST('{datetime}' AS DATETIME) AND processed = true
 """
 
 delete_del_booking_addons = """
     DELETE
     FROM {del_booking_addon_table}
-    WHERE datetime <= DATETIME('{datetime}') AND processed = true
+    WHERE datetime <= CAST('{datetime}' AS DATETIME) AND processed = true
 """
 
 delete_stg_booking_rooms = """
