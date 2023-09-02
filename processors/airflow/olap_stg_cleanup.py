@@ -1,6 +1,10 @@
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.mysql_operator import MySqlOperator
 from datetime import datetime
+from os import environ
+from utilities.constants import *
+
+mysql_conn_id = environ["AIRFLOW_OLAP_CONN_ID"]
 
 default_args = dict(
     owner="airflow",
@@ -16,21 +20,66 @@ dag = DAG(
     max_active_runs=1,  # no concurrent runs
 )
 
+cleanup_stg_booking_addons = create_table = MySqlOperator(
+    sql=delete_stg_booking_addons.format(
+        stg_booking_addon_table=stg_booking_addon_table
+    ),
+    task_id="cleanup_stg_booking_addons",
+    mysql_conn_id=mysql_conn_id,
+    dag=dag,
+)
 
-def pprint():
-    print(1)
+cleanup_del_booking_addons = create_table = MySqlOperator(
+    sql=delete_del_booking_addons.format(
+        del_booking_addon_table=del_booking_addon_table
+    ),
+    task_id="cleanup_del_booking_addons",
+    mysql_conn_id=mysql_conn_id,
+    dag=dag,
+)
 
+cleanup_stg_booking_rooms = MySqlOperator(
+    sql=delete_stg_booking_rooms.format(
+        stg_booking_room_table=stg_booking_room_table,
+        stg_booking_table=stg_booking_table,
+        del_booking_table=del_booking_table,
+    ),
+    task_id="cleanup_stg_booking_rooms",
+    mysql_conn_id=mysql_conn_id,
+    dag=dag,
+)
 
-cleanup_booking_addons = PythonOperator(
-    python_callable=pprint, task_id="cleanup_booking_addons", dag=dag
+cleanup_del_booking_rooms = MySqlOperator(
+    sql=delete_del_booking_rooms.format(
+        del_booking_room_table=del_booking_room_table,
+        stg_booking_table=stg_booking_table,
+        del_booking_table=del_booking_table,
+    ),
+    task_id="cleanup_del_booking_rooms",
+    mysql_conn_id=mysql_conn_id,
+    dag=dag,
 )
-cleanup_booking_rooms = PythonOperator(
-    python_callable=pprint, task_id="cleanup_booking_rooms", dag=dag
+
+cleanup_stg_bookings = MySqlOperator(
+    sql=delete_stg_bookings.format(stg_booking_table=stg_booking_table),
+    task_id="cleanup_stg_bookings",
+    mysql_conn_id=mysql_conn_id,
+    dag=dag,
 )
-cleanup_bookings = PythonOperator(
-    python_callable=pprint, task_id="cleanup_bookings", dag=dag
+
+cleanup_del_bookings = MySqlOperator(
+    sql=delete_del_bookings.format(del_booking_table=del_booking_table),
+    task_id="cleanup_del_bookings",
+    mysql_conn_id=mysql_conn_id,
+    dag=dag,
 )
-cleanup_guests = PythonOperator(
-    python_callable=pprint, task_id="cleanup_guests", dag=dag
-)
-cleanup_rooms = PythonOperator(python_callable=pprint, task_id="cleanup_rooms", dag=dag)
+
+[cleanup_stg_booking_rooms, cleanup_del_booking_rooms] >> [
+    cleanup_stg_bookings,
+    cleanup_del_bookings,
+]
+
+# cleanup_guests = PythonOperator(
+#     python_callable=pprint, task_id="cleanup_guests", dag=dag
+# )
+# cleanup_rooms = PythonOperator(python_callable=pprint, task_id="cleanup_rooms", dag=dag)
