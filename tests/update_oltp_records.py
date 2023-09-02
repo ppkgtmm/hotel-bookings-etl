@@ -50,8 +50,8 @@ booking["checkin"], booking["checkout"] = checkin, checkout
 print("writing booking after update")
 pd.DataFrame([booking]).to_csv(booking_after, index=False)
 
-avail_room_q = (
-    select(BookingRoom.c.room)
+avail_guest_q = (
+    select(BookingRoom.c.guest)
     .outerjoin(Booking, Booking.c.id == BookingRoom.c.booking)
     .where(
         not_(
@@ -62,19 +62,18 @@ avail_room_q = (
             )
         )
     )
-    .where(not_(BookingRoom.c.id.in_(booking_rooms.id.tolist())))
     .where(not_(BookingRoom.c.guest.in_(booking_rooms.guest.tolist())))
 )
 
-avail_rooms = oltp_conn.execute(avail_room_q).fetchmany(booking_rooms.shape[0])
-for i, br in enumerate(avail_rooms):
-    room, id = br._asdict()["room"], int(booking_rooms.loc[i, "id"])
+avail_guest = oltp_conn.execute(avail_guest_q).fetchmany(booking_rooms.shape[0])
+for i, br in enumerate(avail_guest):
+    guest, id = br._asdict()["guest"], int(booking_rooms.loc[i, "id"])
     update_booking_room_q = (
-        update(BookingRoom).where(BookingRoom.c.id == id).values(room=room)
+        update(BookingRoom).where(BookingRoom.c.id == id).values(guest=guest)
     )
     oltp_conn.execute(update_booking_room_q)
     oltp_conn.commit()
-    booking_rooms.loc[i, "room"] = room
+    booking_rooms.loc[i, "guest"] = guest
 
 print("writing booking rooms after update")
 pd.DataFrame(booking_rooms).to_csv(booking_room_after, index=False)
