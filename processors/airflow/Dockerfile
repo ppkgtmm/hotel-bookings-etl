@@ -14,5 +14,5 @@ USER airflow
 WORKDIR /
 
 COPY airflow/setup.sh .
-COPY utilities/ ${DAGS_FOLDER}/scripts/utilities
+COPY utilities/ ${DAGS_FOLDER}/utilities
 COPY airflow/*.py ${DAGS_FOLDER}/
