@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, Table, MetaData, NullPool, select
+from sqlalchemy import create_engine, Table, MetaData, select
+from sqlalchemy.pool import NullPool
 from common import *
 
 olap_engine = create_engine(olap_conn_str, poolclass=NullPool)

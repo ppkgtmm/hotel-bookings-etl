@@ -1,7 +1,8 @@
 from typing import Any, Dict
 from dotenv import load_dotenv
 from os import getenv
-from sqlalchemy import create_engine, text, Table, MetaData, update, NullPool, delete
+from sqlalchemy import create_engine, text, Table, MetaData, update, delete
+from sqlalchemy.pool import NullPool
 from sqlalchemy.dialects.mysql import insert
 from utilities.constants import *
 from datetime import timedelta

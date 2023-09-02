@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, Table, MetaData, NullPool, delete, select, func
+from sqlalchemy import create_engine, Table, MetaData, delete, select
+from sqlalchemy.pool import NullPool
 from common import *
 import pandas as pd
 

@@ -1,14 +1,5 @@
-from sqlalchemy import (
-    create_engine,
-    Table,
-    MetaData,
-    NullPool,
-    select,
-    update,
-    and_,
-    or_,
-    not_,
-)
+from sqlalchemy import create_engine, Table, MetaData, select, update, and_, or_, not_
+from sqlalchemy.pool import NullPool
 from common import *
 import pandas as pd
 from datetime import datetime, timedelta
