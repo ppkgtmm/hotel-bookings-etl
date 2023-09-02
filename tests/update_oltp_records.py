@@ -82,7 +82,7 @@ pd.DataFrame(booking_rooms).to_csv(booking_room_after, index=False)
 booking_addon = (
     oltp_conn.execute(
         select(BookingAddon).where(
-            BookingAddon.c.booking_room == int(booking_rooms.loc[0, "id"])
+            BookingAddon.c.booking_room > int(booking_rooms["id"].max())
         )
     )
     .fetchone()
