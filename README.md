@@ -84,6 +84,13 @@ There will not be any error messages printed out to console if tests were succes
 docker-compose up -d --no-recreate
 ```
 
+2. Go to `http://localhost:8080/` in web browser then login to airflow with `AIRFLOW_ADMIN_USERNAME` and `AIRFLOW_ADMIN_PASSWORD` defined in `.env` file
+   
+3. Turn on the dag for clean up of staging tables in OLAP database
+
+
+Clean up dag (configured to run daily) will be triggered automatically
+
 #### Tear down
 
 ```
