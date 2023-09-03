@@ -73,15 +73,12 @@ bookings_query = """
 remove_bookings_query = """
     SELECT 
         br.id,
-        COALESCE(db.checkin, sb.checkin) checkin, 
-        COALESCE(db.checkout, sb.checkout) checkout,
+        db.checkin,
+        db.checkout,
         br.guest
     FROM {del_booking_room_table} br
-    LEFT JOIN {del_booking_table} db
-    ON br.booking = db.id
-    LEFT JOIN {stg_booking_table} sb
-    ON br.booking = sb.id
-    WHERE br.processed = false AND COALESCE(db.id, sb.id) IS NOT NULL
+    INNER JOIN {del_booking_table} db
+    ON br.processed = false AND br.booking = db.id
 """
 
 purchases_query = """
@@ -137,18 +134,15 @@ remove_purchases_query = """
         SELECT
             ba.id,
             ba.datetime,
-            COALESCE(dbr.guest, sbr.guest) guest,
+            dbr.guest,
             (
                 SELECT MAX(id)
                 FROM {dim_addon_table}
                 WHERE _id = ba.addon AND created_at <= ba.updated_at
             ) addon
         FROM {del_booking_addon_table} ba
-        LEFT JOIN {del_booking_room_table} dbr
-        ON ba.booking_room = dbr.id
-        LEFT JOIN {stg_booking_room_table} sbr
-        ON ba.booking_room = sbr.id
-        WHERE ba.processed = false AND COALESCE(dbr.id, sbr.id) IS NOT NULL
+        INNER JOIN {del_booking_room_table} dbr
+        ON ba.processed = false AND ba.booking_room = dbr.id
 """
 
 delete_stg_booking_addons = """
