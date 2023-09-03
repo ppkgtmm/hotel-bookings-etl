@@ -54,7 +54,7 @@ if __name__ == "__main__":
     conn.execute(f"CREATE USER '{dbz_user}'@'%' IDENTIFIED BY '{dbz_password}'")
     conn.execute(f"GRANT {dbz_previllages} ON *.* TO '{dbz_user}'@'%'")
 
-    print("done setting user up debezium")
+    print("done setting up debezium user")
     print("-" * 30)
 
     conn.close()
