@@ -8,7 +8,7 @@ from utilities.db_writer import DatabaseWriter
 
 db_writer = DatabaseWriter()
 
-mysql_conn_id = getenv["AIRFLOW_OLAP_CONN_ID"]
+mysql_conn_id = getenv("AIRFLOW_OLAP_CONN_ID")
 
 default_args = dict(
     owner="airflow",
