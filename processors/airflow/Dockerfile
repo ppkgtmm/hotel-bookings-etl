@@ -9,11 +9,6 @@ ARG AIRFLOW_HOME
 
 USER root
 
-# required by mysqlclient python librrary installation
-RUN apt update && apt install -y pkg-config default-libmysqlclient-dev build-essential
-RUN export MYSQLCLIENT_LDFLAGS=${pkg-config mysqlclient --libs}
-RUN export MYSQLCLIENT_CFLAGS=${pkg-config mysqlclient --cflags}
-
 RUN mkdir -p ${AIRFLOW_HOME}
 
 # cr. https://stackabuse.com/running-airflow-locally-with-docker-a-technical-guide/
@@ -32,16 +27,3 @@ COPY airflow/setup.sh .
 COPY utilities/ ${DAGS_FOLDER}/utilities
 
 COPY airflow/*.py ${DAGS_FOLDER}/
-
-# install dependencies required for python
-# RUN apk add wget gcc musl-dev make zlib-dev bash openssl-dev
-
-# install python 3.9
-# RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz
-# RUN tar xzf Python-${PYTHON_VERSION}.tgz
-# RUN cd Python-${PYTHON_VERSION} && ./configure --enable-optimizations && make install && cd ../
-# RUN rm -rf Python-${PYTHON_VERSION}.tgz Python-${PYTHON_VERSION}.tgz 
-
-
-# install updated version of pip
-# RUN python3 -m ensurepip && pip3 install --upgrade pip
