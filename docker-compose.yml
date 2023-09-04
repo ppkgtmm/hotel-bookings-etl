@@ -60,13 +60,14 @@ services:
     env_file:
       - .env
 
-  ksqldb-cli:
-    image: confluentinc/ksqldb-cli:0.29.0
-    container_name: $KSQL_CLI_HOST_INTERNAL
+  processor:
     depends_on:
-      - broker
+      - kafka-connect
+      - mysql
       - ksqldb-server
+    build: processors/
+    image: processor
+    container_name: $PROCESSORS_HOST_INTERNAL
     env_file:
-      - .env
-    entrypoint: /bin/sh
-    tty: true
+      - '.env'
+    command: "./run.sh"
