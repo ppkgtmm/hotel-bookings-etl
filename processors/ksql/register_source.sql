@@ -14,12 +14,8 @@ CREATE SOURCE CONNECTOR ${DBZ_CONNECTOR} WITH (
     'topic.prefix' = '${OLTP_DB}',
     'database.include.list' = '${OLTP_DB}', 
     'table.include.list' = '${OLTP_DB}.*',
-    'database.history.kafka.bootstrap.servers' = '${KAFKA_BOOTSTRAP_SERVERS_INTERNAL}',
-    'database.history.kafka.topic' = 'history.${OLTP_DB}',
+    'schema.history.internal.kafka.bootstrap.servers' = '${KAFKA_BOOTSTRAP_SERVERS_INTERNAL}',
+    'schema.history.internal.kafka.topic' = 'history.${OLTP_DB}',
     'min.row.count.to.stream.results' = 0,
-    'snapshot.mode' = 'schema_only',
-    'transforms' = 'dropPrefix',
-    'transforms.dropPrefix.type' = 'org.apache.kafka.connect.transforms.RegexRouter',
-    'transforms.dropPrefix.regex' = '(.*)\\.(.*)\\.(.*)',
-    'transforms.dropPrefix.replacement' = '$3'
+    'snapshot.mode' = 'schema_only'
 );
