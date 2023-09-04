@@ -3,12 +3,12 @@ services:
   mysql:
     image: mysql:8.0.33
     container_name: mysql
-    ports:
-      - "3306:3306"
     env_file:
       - '.env'
     environment:
       - MYSQL_ROOT_PASSWORD=$DB_PASSWORD
+    ports:
+      - $DB_PORT:3306
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
