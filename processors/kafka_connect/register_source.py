@@ -36,6 +36,7 @@ if __name__ == "__main__":
         },
         json={"ksql": query},
     )
+    # print(response.status_code, response.json())
     assert response.status_code < 400
     for r in response.json():
         assert r.get("error_code") is None
