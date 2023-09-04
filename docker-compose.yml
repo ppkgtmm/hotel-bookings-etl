@@ -45,7 +45,7 @@ services:
       - broker
       - schema-registry
     ports:
-      - $CONNECT_PORT:8083
+      - $CONNECT_REST_PORT:8083
     env_file:
       - .env
 
