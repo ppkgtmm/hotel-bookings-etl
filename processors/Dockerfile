@@ -25,10 +25,12 @@ RUN pip3 --no-cache-dir install -r requirements.txt
 
 COPY run.sh .
 
-COPY kafka/ kafka/
+COPY kafka/*.py .
+
+COPY kafka_connect/*.py .
 
 COPY *.py scripts/
 
-COPY utilities/ scripts/utilities/
+COPY utilities/*.py scripts/utilities/
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
