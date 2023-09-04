@@ -18,8 +18,8 @@ CREATE SOURCE CONNECTOR ${DBZ_CONNECTOR} WITH (
     'database.history.kafka.topic' = 'history.${OLTP_DB}',
     'min.row.count.to.stream.results' = 0,
     'snapshot.mode' = 'schema_only',
-    "transforms" = "dropPrefix",
-    "transforms.dropPrefix.type" = "org.apache.kafka.connect.transforms.RegexRouter",
-    "transforms.dropPrefix.regex" = "(.*)\\.(.*)\\.(.*)",
-    "transforms.dropPrefix.replacement" = "$3"
+    'transforms' = 'dropPrefix',
+    'transforms.dropPrefix.type' = 'org.apache.kafka.connect.transforms.RegexRouter',
+    'transforms.dropPrefix.regex' = '(.*)\\.(.*)\\.(.*)',
+    'transforms.dropPrefix.replacement' = '$3'
 );
