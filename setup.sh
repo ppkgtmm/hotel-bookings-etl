@@ -6,7 +6,7 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 
 # start required containers
-docker-compose up -d mysql zookeeper broker kafka-connect schema-registry ksqldb-server ksqldb-cli
+docker-compose up -d mysql zookeeper broker kafka-connect schema-registry ksqldb-server
 
 # wait for containers to start properly
 sleep 60
