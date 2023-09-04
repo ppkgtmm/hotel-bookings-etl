@@ -33,4 +33,6 @@ COPY *.py scripts/
 
 COPY utilities/*.py scripts/utilities/
 
+COPY ksql/ ksql/
+
 ENTRYPOINT [ "/bin/sh", "-c" ]
