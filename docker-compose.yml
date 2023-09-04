@@ -33,7 +33,7 @@ services:
       - zookeeper
       - broker
     ports:
-      - $SCHEMA_REGISTRY_PORT:8081
+      - $REGISTRY_PORT:8081
     env_file:
       - .env
 
