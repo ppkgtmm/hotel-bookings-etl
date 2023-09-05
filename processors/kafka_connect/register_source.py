@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 import requests
+import json
 
 load_dotenv()
 
@@ -10,15 +11,15 @@ DBZ_PASSWORD = os.getenv("DBZ_PASSWORD")
 DB_PORT = os.getenv("DB_PORT")
 OLTP_DB = os.getenv("OLTP_DB")
 DBZ_CONNECTOR = os.getenv("DBZ_CONNECTOR")
-KSQL_LISTENERS = os.getenv("KSQL_LISTENERS")
+KAFKA_CONNECT_SERVER = os.getenv("KAFKA_CONNECT_SERVER")
 KAFKA_BOOTSTRAP_SERVERS_INTERNAL = os.getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 
 if __name__ == "__main__":
-    query_path = f"{os.path.dirname(__file__)}/ksql/register_source.sql"
-    with open(query_path, "r") as fp:
-        query = fp.read()
-    query = (
-        query.replace("${DBZ_CONNECTOR}", DBZ_CONNECTOR)
+    config_path = f"{os.path.dirname(__file__)}/config.json"
+    with open(config_path, "r") as fp:
+        config = fp.read()
+    config = (
+        config.replace("${DBZ_CONNECTOR}", DBZ_CONNECTOR)
         .replace("${DB_HOST_INTERNAL}", DB_HOST_INTERNAL)
         .replace("${DBZ_USER}", DBZ_USER)
         .replace("${DBZ_PASSWORD}", DBZ_PASSWORD)
@@ -29,14 +30,11 @@ if __name__ == "__main__":
         )
     )
     response = requests.post(
-        f"{KSQL_LISTENERS}/ksql/",
+        f"{KAFKA_CONNECT_SERVER}/connectors/",
         headers={
-            "Accept": "application/vnd.ksql.v1+json",
+            "Accept": "application/json",
             "Content-Type": "application/json",
         },
-        json={"ksql": query},
+        json=json.loads(config),
     )
-    # print(response.status_code, response.json())
-    assert response.status_code < 400
-    for r in response.json():
-        assert r.get("error_code") is None
+    assert response.status_code == 201
