@@ -26,16 +26,16 @@ services:
     ports:
       - $KAFKA_PORT_INTERNAL:9092
 
-  schema-registry:
-    image: confluentinc/cp-schema-registry:7.4.0
-    container_name: $SCHEMA_REGISTRY_HOST_INTERNAL
-    depends_on:
-      - zookeeper
-      - broker
-    ports:
-      - $REGISTRY_PORT:8081
-    env_file:
-      - .env
+  # schema-registry:
+  #   image: confluentinc/cp-schema-registry:7.4.0
+  #   container_name: $SCHEMA_REGISTRY_HOST_INTERNAL
+  #   depends_on:
+  #     - zookeeper
+  #     - broker
+  #   ports:
+  #     - $REGISTRY_PORT:8081
+  #   env_file:
+  #     - .env
 
   kafka-connect:
     image: kafka-connect
@@ -43,7 +43,7 @@ services:
     container_name: $CONNECT_HOST_INTERNAL
     depends_on:
       - broker
-      - schema-registry
+      # - schema-registry
     ports:
       - $CONNECT_REST_PORT:8083
     env_file:
