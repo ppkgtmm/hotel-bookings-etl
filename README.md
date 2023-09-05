@@ -42,8 +42,10 @@ python3 seed_oltp.py
 4. Register OLTP database to kafka connect
 
 ```
-python3 kafka_connect/register_mysql.py
+python3 kafka_connect/register_source.py
 ```
+
+If the step above failed with connection issue, retry after a few minutes
 
 5. Start container for initial load and streaming ETL
 
