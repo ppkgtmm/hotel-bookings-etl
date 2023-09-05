@@ -23,12 +23,12 @@ COPY run.sh .
 
 COPY kafka/*.py .
 
-COPY kafka_connect/*.py .
+# COPY kafka_connect/*.py .
 
 COPY *.py scripts/
 
 COPY utilities/*.py scripts/utilities/
 
-COPY ksql/ ksql/
+# COPY ksql/ ksql/
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
