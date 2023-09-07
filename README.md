@@ -45,7 +45,7 @@ python3 seed_oltp.py
 python3 kafka_connect/register_source.py
 ```
 
-If the step above failed with connection issue, retry after a few minutes
+If the command above failed with connection issue, retry after a few minutes
 
 5. Start container for initial load and streaming ETL
 
