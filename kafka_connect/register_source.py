@@ -37,4 +37,5 @@ if __name__ == "__main__":
         },
         json=json.loads(config),
     )
+    print(response.text)
     assert response.status_code == 201
