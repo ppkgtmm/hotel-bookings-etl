@@ -5,11 +5,17 @@ source venv/bin/activate
 # install required dependencies
 pip3 install -r requirements.txt
 
-# start required containers
-docker-compose up -d mysql zookeeper broker kafka-connect schema-registry ksqldb-server
+# start mysql and zookeeper containers
+docker-compose up -d mysql zookeeper
 
 # wait for containers to start properly
 sleep 60
 
+# start kafka broker container
+docker-compose up -d broker --no-recreate
+
 # initialize oltp and olap databases
 python3 setup_dbs.py
+
+# start other required containers
+docker-compose up -d schema-registry kafka-connect ksqldb-server
