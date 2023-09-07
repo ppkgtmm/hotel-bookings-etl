@@ -11,11 +11,11 @@ DBZ_PASSWORD = os.getenv("DBZ_PASSWORD")
 DB_PORT = os.getenv("DB_PORT")
 OLTP_DB = os.getenv("OLTP_DB")
 DBZ_CONNECTOR = os.getenv("DBZ_CONNECTOR")
-KSQL_SERVER_PORT = os.getenv("KSQL_SERVER_PORT")
+KAFKA_CONNECT_SERVER = os.getenv("KAFKA_CONNECT_SERVER")
 KAFKA_BOOTSTRAP_SERVERS_INTERNAL = os.getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 
 if __name__ == "__main__":
-    config_path = os.path.abspath("ksql/register_source.sql")
+    config_path = f"{os.path.dirname(__file__)}/config.json"
     with open(config_path, "r") as fp:
         config = fp.read()
     config = (
@@ -30,12 +30,12 @@ if __name__ == "__main__":
         )
     )
     response = requests.post(
-        f"http://localhost:{KSQL_SERVER_PORT}/ksql/",
+        f"{KAFKA_CONNECT_SERVER}/connectors/",
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
         },
-        json={"ksql": config},
+        json=json.loads(config),
     )
     print(response.text)
     assert response.status_code == 201
