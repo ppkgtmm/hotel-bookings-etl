@@ -1,15 +1,20 @@
+import sys
+from os.path import abspath
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from os import getenv
+
+sys.path.append(abspath("./"))
 from utilities.constants import *
 from utilities.db_writer import DatabaseWriter
 
 load_dotenv()
-db_host = getenv("DB_HOST_INTERNAL")
+db_host = getenv("DB_HOST")
 db_port = getenv("DB_PORT")
 db_user = getenv("DB_USER")
 db_password = getenv("DB_PASSWORD")
 oltp_db = getenv("OLTP_DB")
+olap_db = getenv("OLAP_DB")
 location_table = getenv("LOCATION_TABLE")
 guests_table = getenv("GUESTS_TABLE")
 addons_table = getenv("ADDONS_TABLE")
@@ -135,7 +140,7 @@ def stage_booking_addons():
 if __name__ == "__main__":
     oltp_engine = create_engine(conn_string)
     oltp_conn = oltp_engine.connect()
-    writer = DatabaseWriter()
+    writer = DatabaseWriter(db_user, db_password, db_host, db_port, olap_db)
     stage_booking_addons()
     stage_booking_rooms()
     stage_bookings()
