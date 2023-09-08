@@ -51,7 +51,8 @@ services:
       - -c
       - |
         echo "Installing Connector"
-        confluent-hub install --no-prompt debezium/debezium-connector-mysql:2.2.1
+        curl -O https://repo1.maven.org/maven2/io/debezium/debezium-connector-mysql/2.3.3.Final/debezium-connector-mysql-2.3.3.Final-plugin.tar.gz
+        tar -xzf debezium-connector-mysql-2.3.3.Final-plugin.tar.gz -C $CONNECT_PLUGIN_PATH
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run
       
