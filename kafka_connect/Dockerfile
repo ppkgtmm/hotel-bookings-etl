@@ -7,3 +7,5 @@ USER root
 RUN chmod +x run.sh
 
 USER appuser
+
+ENTRYPOINT [ "/bin/sh", "-c" ]
