@@ -1,6 +1,4 @@
 from typing import Any, Dict
-from dotenv import load_dotenv
-from os import getenv
 from sqlalchemy import create_engine, text, Table, MetaData, update, delete
 from sqlalchemy.pool import NullPool
 from sqlalchemy.dialects.mysql import insert
@@ -9,20 +7,14 @@ from datetime import timedelta
 
 dt_fmt = "%Y%m%d%H%M%S"
 
-load_dotenv()
-db_host = getenv("DB_HOST_INTERNAL")
-db_port = getenv("DB_PORT")
-db_user = getenv("DB_USER")
-db_password = getenv("DB_PASSWORD")
-db_name = getenv("OLAP_DB")
-
-connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
-    db_user, db_password, db_host, db_port, db_name
-)
-
 
 class DatabaseWriter:
-    def __init__(self) -> None:
+    def __init__(
+        self, db_user: str, db_password: str, db_host: str, db_port: str, db_name: str
+    ):
+        connection_string = "mysql+mysqlconnector://{}:{}@{}:{}/{}".format(
+            db_user, db_password, db_host, db_port, db_name
+        )
         self.engine = create_engine(connection_string, poolclass=NullPool)
 
         self.metadata = MetaData()
