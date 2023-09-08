@@ -37,7 +37,8 @@ services:
       - .env
 
   kafka-connect:
-    image: confluentinc/cp-kafka-connect:7.4.0
+    image: kafka-connect
+    build: kafka_connect/
     container_name: $CONNECT_HOST_INTERNAL
     depends_on:
       - broker
@@ -46,15 +47,7 @@ services:
       - $CONNECT_REST_PORT:8083
     env_file:
       - .env
-    command:  
-      - bash
-      - -c
-      - |
-        echo "Installing Connector"
-        curl -O https://repo1.maven.org/maven2/io/debezium/debezium-connector-mysql/2.3.3.Final/debezium-connector-mysql-2.3.3.Final-plugin.tar.gz
-        tar -xzf debezium-connector-mysql-2.3.3.Final-plugin.tar.gz -C $CONNECT_PLUGIN_PATH
-        echo "Launching Kafka Connect worker"
-        /etc/confluent/docker/run
+    command: ["sh", "-c", "./run.sh"]
       
 
   ksqldb-server:
