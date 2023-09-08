@@ -45,9 +45,15 @@ python3 seed_oltp.py
 python3 kafka_connect/register_source.py
 ```
 
-If the command above failed with assertion error, retry after a few minutes
+If the command above failed with connection error, retry after a few minutes
 
-5. Start container for initial load and streaming ETL
+5. Create kafka topics in advance to prevent topic not found error
+
+```
+python3 kafka/create_topics.py 
+```
+
+6. Start container for initial load and streaming ETL
 
 ```
 docker-compose up -d processor
