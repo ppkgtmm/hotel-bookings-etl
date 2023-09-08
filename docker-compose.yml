@@ -32,7 +32,7 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - $BROKER_PORT:9092
+      - $BROKER_PORT:$BROKER_PORT
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.4.0
