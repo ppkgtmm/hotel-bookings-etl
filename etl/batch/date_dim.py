@@ -1,6 +1,20 @@
+import sys
+from os.path import abspath
 from datetime import timedelta, datetime
 import math
+from dotenv import load_dotenv
+from os import getenv
+
+sys.path.append(abspath("./"))
 from utilities.db_writer import DatabaseWriter
+
+load_dotenv()
+
+db_host = getenv("DB_HOST")
+db_port = getenv("DB_PORT")
+db_user = getenv("DB_USER")
+db_password = getenv("DB_PASSWORD")
+db_name = getenv("OLAP_DB")
 
 start_date = datetime.strptime("2021-01-01 00:00:00", "%Y-%m-%d %H:%M:%S") + timedelta(
     days=-90
@@ -25,6 +39,6 @@ while curr_date <= max_date:
     )
     curr_date += timedelta(minutes=30)
 
-db_writer = DatabaseWriter()
+db_writer = DatabaseWriter(db_user, db_password, db_host, db_port, db_name)
 db_writer.write_dim_date(data)
 db_writer.tear_down()
