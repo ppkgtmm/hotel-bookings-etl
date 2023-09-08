@@ -4,7 +4,7 @@ from os import getenv
 
 
 load_dotenv()
-broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
+broker = getenv("KAFKA_BOOTSTRAP_SERVERS")
 required_topics = [
     getenv("LOCATION_TABLE"),
     getenv("GUESTS_TABLE"),
