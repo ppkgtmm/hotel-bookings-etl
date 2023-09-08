@@ -53,7 +53,13 @@ If the command above failed with connection error, retry after a few minutes
 python3 kafka/create_topics.py 
 ```
 
-6. Start container for initial load and streaming ETL
+6. Run first round of ETL in batch mode
+
+```
+chmod +x etl/batch/run.sh && ./etl/batch/run.sh
+```
+
+7. Start container for streaming ETL
 
 ```
 docker-compose up -d processor
