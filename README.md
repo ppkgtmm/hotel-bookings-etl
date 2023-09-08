@@ -62,7 +62,7 @@ chmod +x etl/batch/run.sh && ./etl/batch/run.sh
 7. Start container for streaming ETL
 
 ```
-docker-compose up -d processor
+docker-compose up -d processor --no-recreate
 ```
 
 After a few minutes, data will start appearing in OLAP database
