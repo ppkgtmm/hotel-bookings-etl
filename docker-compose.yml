@@ -32,7 +32,7 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - $KAFKA_PORT_INTERNAL:9092
+      - $BROKER_PORT:9092
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.4.0
