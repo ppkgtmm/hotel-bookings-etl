@@ -1,3 +1,9 @@
-FROM confluentinc/cp-server-connect-base:7.4.0
+FROM confluentinc/cp-kafka-connect:7.4.0
 
-RUN confluent-hub install --no-prompt debezium/debezium-connector-mysql:2.2.1
+COPY run.sh .
+
+USER root
+
+RUN chmod +x run.sh
+
+USER appuser
