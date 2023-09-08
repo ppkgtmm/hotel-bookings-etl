@@ -5,7 +5,7 @@ from os.path import abspath, dirname, join
 import pandas as pd
 
 sys.path.append(dirname(dirname(abspath(__file__))))
-from processors.utilities.constants import (
+from utilities.constants import (
     fct_booking_table,
     fct_purchase_table,
     dim_addon_table,
