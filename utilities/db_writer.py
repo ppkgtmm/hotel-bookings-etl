@@ -6,6 +6,7 @@ from utilities.constants import *
 from datetime import timedelta
 
 dt_fmt = "%Y%m%d%H%M%S"
+batch_size = 500
 
 
 class DatabaseWriter:
@@ -58,16 +59,17 @@ class DatabaseWriter:
         )
 
     def write_dim_date(self, rows: list[Dict[str, Any]]):
-        query = insert(self.DimDate).values(rows)
-        query = query.on_duplicate_key_update(
-            datetime=query.inserted.datetime,
-            date=query.inserted.date,
-            month=query.inserted.month,
-            quarter=query.inserted.quarter,
-            year=query.inserted.year,
-        )
         with self.engine.connect() as conn:
-            conn.execute(query)
+            for i in range(0, len(rows), batch_size):
+                query = insert(self.DimDate).values(rows[i : i + batch_size])
+                query = query.on_duplicate_key_update(
+                    datetime=query.inserted.datetime,
+                    date=query.inserted.date,
+                    month=query.inserted.month,
+                    quarter=query.inserted.quarter,
+                    year=query.inserted.year,
+                )
+                conn.execute(query)
 
     def write_dim_addons(self, rows: list[Dict[str, Any]]):
         query = insert(self.DimAddon).values(rows)
