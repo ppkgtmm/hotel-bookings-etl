@@ -14,7 +14,7 @@ RUN apk add bash gcc musl-dev librdkafka librdkafka-dev
 
 WORKDIR /processor
 
-COPY requirements.txt .
+COPY etl/stream/requirements.txt .
 
 # install required packages
 RUN pip3 install -r requirements.txt
