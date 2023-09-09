@@ -19,7 +19,7 @@ COPY etl/stream/requirements.txt .
 # install required packages
 RUN pip3 install -r requirements.txt
 
-COPY etl/stream/stream.py scripts/
+COPY etl/stream/*.py scripts/
 
 COPY utilities/*.py scripts/utilities/
 
