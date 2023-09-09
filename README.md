@@ -39,25 +39,25 @@ chmod +x generators/run.sh && ./generators/run.sh
 python3 seed_oltp.py
 ``` 
 
-4. Register OLTP database to kafka connect
+4. Create kafka topics in advance to prevent topic not found error
+
+```
+python3 kafka/create_topics.py 
+```
+
+5. Run first round of ETL in batch mode
+
+```
+chmod +x etl/batch/run.sh && ./etl/batch/run.sh
+```
+
+6. Register OLTP database to kafka connect
 
 ```
 python3 kafka_connect/register_source.py
 ```
 
 If the command above failed with connection error, retry after a few minutes
-
-5. Create kafka topics in advance to prevent topic not found error
-
-```
-python3 kafka/create_topics.py 
-```
-
-6. Run first round of ETL in batch mode
-
-```
-chmod +x etl/batch/run.sh && ./etl/batch/run.sh
-```
 
 7. Start container for streaming ETL
 
