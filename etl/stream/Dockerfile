@@ -17,18 +17,10 @@ WORKDIR /processor
 COPY requirements.txt .
 
 # install required packages
-RUN pip3 --no-cache-dir install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
-COPY run.sh .
-
-COPY kafka/*.py .
-
-# COPY kafka_connect/*.py .
-
-COPY *.py scripts/
+COPY etl/stream/stream.py scripts/
 
 COPY utilities/*.py scripts/utilities/
-
-# COPY ksql/ ksql/
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
