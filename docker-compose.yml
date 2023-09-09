@@ -68,7 +68,7 @@ services:
     container_name: $PROCESSORS_HOST_INTERNAL
     env_file:
       - '.env'
-    command: "./run.sh"
+    command: "python3 scripts/stream.py"
   
   # postgres:
   #   image: postgres:13
