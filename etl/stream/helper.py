@@ -7,7 +7,6 @@ from pyspark.sql.types import (
     StructField,
     StructType,
 )
-
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import (
     from_json,
@@ -18,6 +17,16 @@ from pyspark.sql.functions import (
     lit,
 )
 from utilities.db_writer import DatabaseWriter
+from dotenv import load_dotenv
+from os import getenv
+
+load_dotenv()
+
+db_host = getenv("DB_HOST_INTERNAL")
+db_port = getenv("DB_PORT")
+db_user = getenv("DB_USER")
+db_password = getenv("DB_PASSWORD")
+db_name = getenv("OLAP_DB")
 
 addon_schema = StructType(
     [
@@ -102,7 +111,7 @@ booking_addon_schema = StructType(
     ]
 )
 json_schema = MapType(StringType(), StringType())
-db_writer = DatabaseWriter()
+db_writer = DatabaseWriter(db_user, db_password, db_host, db_port, db_name)
 
 
 def df_to_list(df: DataFrame):
