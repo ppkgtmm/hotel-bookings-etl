@@ -11,6 +11,11 @@ CREATE STREAM booking_rooms WITH (
     value_format = 'avro'
 );
 
+CREATE STREAM booking_addons WITH (
+    kafka_topic = 'booking_addons',
+    value_format = 'avro'
+);
+
 CREATE STREAM bookings_before_repart WITH (kafka_topic='bookings_before_repart', key_format='avro', value_format='avro') AS
 SELECT
     before->id,
