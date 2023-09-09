@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 from os import getenv
-from utilities.helper import (
+from helper import (
     process_addons,
     process_roomtypes,
     process_locations,
@@ -11,12 +11,11 @@ from utilities.helper import (
     process_booking_rooms,
     process_booking_addons,
 )
-from utilities.db_writer import DatabaseWriter
 import traceback
 
 load_dotenv()
 
-max_offsets = 100
+# max_offsets = 100
 broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 # broker = getenv("KAFKA_BOOTSTRAP_SERVERS")
 
@@ -30,7 +29,6 @@ booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
 booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
 
 if __name__ == "__main__":
-    db_writer = DatabaseWriter()
     spark = (
         SparkSession.builder.appName("hotel oltp processor")
         .config("spark.driver.memory", "1g")
@@ -45,7 +43,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", location_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", max_offsets)
+        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -60,7 +58,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", addons_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", max_offsets)
+        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -75,7 +73,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", roomtypes_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", max_offsets)
+        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -92,7 +90,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", rooms_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", max_offsets)
+        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -107,7 +105,7 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", guests_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", max_offsets)
+        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
