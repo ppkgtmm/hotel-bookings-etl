@@ -61,7 +61,9 @@ services:
     depends_on:
       - kafka-connect
       - mysql
-    build: processors/
+    build:
+      context: .
+      dockerfile: etl/stream/Dockerfile
     image: processor
     container_name: $PROCESSORS_HOST_INTERNAL
     env_file:
