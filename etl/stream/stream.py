@@ -10,6 +10,8 @@ from helper import (
     process_bookings,
     process_booking_rooms,
     process_booking_addons,
+    setup,
+    tear_down,
 )
 import traceback
 
@@ -37,6 +39,8 @@ if __name__ == "__main__":
         )  # cr. https://stackoverflow.com/questions/54285151/kafka-structured-streaming-kafkasourceprovider-could-not-be-instantiated
         .getOrCreate()
     )
+
+    setup()
 
     location = (
         spark.readStream.format("kafka")
@@ -169,4 +173,4 @@ if __name__ == "__main__":
     except Exception as e:
         traceback.print_exc()
     finally:
-        db_writer.tear_down()
+        tear_down()
