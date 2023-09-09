@@ -21,7 +21,17 @@ FROM bookings
 WHERE before IS NOT NULL
 PARTITION BY before->id;
 
-CREATE STREAM bookings_before_repart WITH (kafka_topic='booking_rooms_before_repart', key_format='avro', value_format='avro') AS
+CREATE STREAM bookings_after_repart WITH (kafka_topic='bookings_after_repart', key_format='avro', value_format='avro') AS
+SELECT
+    after->id,
+    after->checkin,
+    after->checkout,
+    after->updated_at
+FROM bookings
+WHERE after IS NOT NULL
+PARTITION BY after->id;
+
+CREATE STREAM booking_rooms_before_repart WITH (kafka_topic='booking_rooms_before_repart', key_format='avro', value_format='avro') AS
 SELECT
     before->booking,
     before->id,
@@ -32,21 +42,18 @@ FROM booking_rooms
 WHERE before IS NOT NULL
 PARTITION BY before->booking;
 
--- CREATE STREAM deleted_fct_bookings (
---     table_key STRUCT<key1 INT, key2 BIGINT> KEY,
---     id INT,
---     booking INT,
---     room INT,
---     guest INT,
---     checkin INT,
---     checkout INT,
---     booking_room_updated BIGINT,
---     booking_updated BIGINT
--- ) WITH (kafka_topic='deleted_fct_bookings', key_format='avro', value_format='avro', partitions=1);
+CREATE STREAM booking_rooms_after_repart WITH (kafka_topic='booking_rooms_after_repart', key_format='avro', value_format='avro') AS
+SELECT
+    after->booking,
+    after->id,
+    after->room,
+    after->guest,
+    after->updated_at
+FROM booking_rooms
+WHERE after IS NOT NULL
+PARTITION BY after->booking;
 
--- INSERT INTO deleted_fct_bookings
--- STRUCT(key1 := br.before->id, key2 := br.before->updated_at) table_key,
-CREATE STREAM bookings_deleted WITH (kafka_topic='bookings_deleted', key_format='avro', value_format='avro') AS
+CREATE STREAM bookings_before WITH (kafka_topic='bookings_before', key_format='avro', value_format='avro') AS
 SELECT
     br.booking,
     br.id,
