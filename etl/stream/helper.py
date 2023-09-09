@@ -116,6 +116,7 @@ db_writer = None
 
 def setup():
     db_writer = DatabaseWriter(db_user, db_password, db_host, db_port, db_name)
+db_writer = DatabaseWriter(db_user, db_password, db_host, db_port, db_name)
 
 
 def df_to_list(df: DataFrame):
