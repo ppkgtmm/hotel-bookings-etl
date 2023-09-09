@@ -111,7 +111,11 @@ booking_addon_schema = StructType(
     ]
 )
 json_schema = MapType(StringType(), StringType())
-db_writer = DatabaseWriter(db_user, db_password, db_host, db_port, db_name)
+db_writer = None
+
+
+def setup():
+    db_writer = DatabaseWriter(db_user, db_password, db_host, db_port, db_name)
 
 
 def df_to_list(df: DataFrame):
@@ -322,3 +326,7 @@ def process_booking_addons(micro_batch_df: DataFrame, batch_id: int):
     if rows_after != []:
         db_writer.stage_booking_addons(rows_after)
         db_writer.write_fct_purchases()
+
+
+def tear_down():
+    db_writer.tear_down()
