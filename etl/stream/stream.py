@@ -13,6 +13,9 @@ from helper import (
     tear_down,
 )
 import traceback
+from pyspark.sql.functions import col
+from pyspark.sql.avro.functions import from_avro, to_avro
+from confluent_kafka.schema_registry import SchemaRegistryClient
 
 load_dotenv()
 
