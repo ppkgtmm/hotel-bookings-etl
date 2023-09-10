@@ -27,9 +27,8 @@ guests_table = getenv("GUESTS_TABLE")
 addons_table = getenv("ADDONS_TABLE")
 roomtypes_table = getenv("ROOMTYPES_TABLE")
 rooms_table = getenv("ROOMS_TABLE")
-bookings_table = getenv("BOOKINGS_TABLE")
-booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
-booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
+bookings_before = "BOOKINGS_BEFORE"
+bookings_after = "BOOKINGS_AFTER"
 
 if __name__ == "__main__":
     spark = (
