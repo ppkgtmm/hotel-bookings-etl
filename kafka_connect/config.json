@@ -14,6 +14,7 @@
     "schema.history.internal.kafka.bootstrap.servers": "${KAFKA_BOOTSTRAP_SERVERS_INTERNAL}",
     "schema.history.internal.kafka.topic": "history.${OLTP_DB}",
     "min.row.count.to.stream.results": 0,
+    "snapshot.mode": "when_needed",
     "transforms": "dropPrefix",
     "transforms.dropPrefix.type": "org.apache.kafka.connect.transforms.RegexRouter",
     "transforms.dropPrefix.regex": "(.*)\\.(.*)\\.(.*)",
