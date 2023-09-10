@@ -16,16 +16,18 @@ CREATE STREAM booking_addons WITH (
     value_format = 'avro'
 );
 
-CREATE TABLE bookings_before AS
+CREATE TABLE booking_events AS
 SELECT
-    before->id key,
-    AS_VALUE(before->id) id,
-    EARLIEST_BY_OFFSET(before->checkin) checkin,
-    EARLIEST_BY_OFFSET(before->checkout) checkout
+    COALESCE(before->id, after->id) key,
+    AS_VALUE(COALESCE(before->id, after->id)) id,
+    EARLIEST_BY_OFFSET(before->checkin) checkin_b,
+    EARLIEST_BY_OFFSET(before->checkout) checkout_b,
+    LATEST_BY_OFFSET(after->checkin) checkin_a,
+    LATEST_BY_OFFSET(after->checkout) checkout_a
 FROM bookings
 WINDOW TUMBLING (SIZE 2 MINUTES)
-WHERE before IS NOT NULL
-GROUP BY before->id
+WHERE before->id IS NOT NULL OR after->id IS NOT NULL 
+GROUP BY COALESCE(before->id, after->id)
 EMIT FINAL;
 
 CREATE TABLE bookings_after AS
