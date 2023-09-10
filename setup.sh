@@ -12,7 +12,7 @@ docker-compose up -d mysql zookeeper
 sleep 60
 
 # start other required containers
-docker-compose up -d broker schema-registry kafka-connect --no-recreate
+docker-compose up -d broker schema-registry kafka-connect ksqldb-server --no-recreate
 
 # initialize oltp and olap databases
 python3 setup_dbs.py
