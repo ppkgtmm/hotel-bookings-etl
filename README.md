@@ -59,7 +59,17 @@ python3 kafka_connect/register_source.py
 
 If the command above failed with connection error, retry after a few minutes
 
-7. Start container for streaming ETL
+7. Copy SQL file to KSQL database container for execution
+```
+docker-compose cp ksql/window_events.sql ksqldb-server:/
+```
+
+8. Run the copied SQL file inside KSQL database container
+```
+docker-compose exec -it ksqldb-server /bin/sh -c "ksql http://0.0.0.0:${KSQL_SERVER_PORT} -f /window_events.sql"
+```
+
+9.  Start container for streaming ETL
 
 ```
 docker-compose up -d processor --no-recreate
