@@ -50,7 +50,6 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", location_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -65,7 +64,6 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", addons_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -80,7 +78,6 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", roomtypes_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -97,7 +94,6 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", rooms_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -112,7 +108,6 @@ if __name__ == "__main__":
         .option("kafka.bootstrap.servers", broker)
         .option("subscribe", guests_table)
         .option("startingOffsets", "earliest")
-        # .option("maxOffsetsPerTrigger", max_offsets)
         .load()
     )
 
@@ -125,9 +120,7 @@ if __name__ == "__main__":
     bookings = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
-        .option("subscribePattern", bookings_table)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", 1)
         .load()
     )
 
