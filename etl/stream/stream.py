@@ -30,6 +30,10 @@ rooms_table = getenv("ROOMS_TABLE")
 bookings_before = "BOOKINGS_BEFORE"
 bookings_after = "BOOKINGS_AFTER"
 
+sr_subject = "{}-value"
+schema_registry_conf = {"url": "http://localhost:8081"}
+sr_client = SchemaRegistryClient(schema_registry_conf)
+
 if __name__ == "__main__":
     spark = (
         SparkSession.builder.appName("hotel oltp processor")
