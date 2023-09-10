@@ -16,7 +16,7 @@ CREATE STREAM booking_addons WITH (
     value_format = 'avro'
 );
 
-CREATE TABLE booking_events AS
+CREATE TABLE bookings_event AS
 SELECT
     COALESCE(before->id, after->id) key,
     AS_VALUE(COALESCE(before->id, after->id)) id,
