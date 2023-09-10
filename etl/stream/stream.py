@@ -39,7 +39,8 @@ if __name__ == "__main__":
         SparkSession.builder.appName("hotel oltp processor")
         .config("spark.driver.memory", "1g")
         .config(
-            "spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1"
+            "spark.jars.packages",
+            "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1,org.apache.spark:spark-avro_2.12:3.4.1",
         )  # cr. https://stackoverflow.com/questions/54285151/kafka-structured-streaming-kafkasourceprovider-could-not-be-instantiated
         .getOrCreate()
     )
