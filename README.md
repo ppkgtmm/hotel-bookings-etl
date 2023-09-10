@@ -45,10 +45,10 @@ python3 seed_oltp.py
 python3 kafka/create_topics.py 
 ```
 
-5. Run first round of ETL in batch mode
+5. Run command below to populate date dimension table
 
 ```
-chmod +x etl/batch/run.sh && ./etl/batch/run.sh
+python3 etl/batch/date_dim.py
 ```
 
 6. Register OLTP database to kafka connect
