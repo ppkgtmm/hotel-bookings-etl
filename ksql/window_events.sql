@@ -18,7 +18,8 @@ CREATE STREAM booking_addons WITH (
 
 CREATE TABLE bookings_before AS
 SELECT
-    before->id,
+    before->id key,
+    AS_VALUE(before->id) id,
     EARLIEST_BY_OFFSET(before->checkin) checkin,
     EARLIEST_BY_OFFSET(before->checkout) checkout
 FROM bookings
@@ -29,7 +30,8 @@ EMIT FINAL;
 
 CREATE TABLE bookings_after AS
 SELECT
-    after->id,
+    after->id key,
+    AS_VALUE(after->id) id,
     LATEST_BY_OFFSET(after->checkin) checkin,
     LATEST_BY_OFFSET(after->checkout) checkout
 FROM bookings
@@ -40,7 +42,8 @@ EMIT FINAL;
 
 CREATE TABLE booking_rooms_before AS
 SELECT
-    before->id,
+    before->id key,
+    AS_VALUE(before->id) id,
     EARLIEST_BY_OFFSET(before->booking) booking,
     EARLIEST_BY_OFFSET(before->room) room,
     EARLIEST_BY_OFFSET(before->guest) guest,
@@ -53,7 +56,8 @@ EMIT FINAL;
 
 CREATE TABLE booking_rooms_after AS
 SELECT
-    after->id,
+    after->id key,
+    AS_VALUE(after->id) id,
     LATEST_BY_OFFSET(after->booking) booking,
     LATEST_BY_OFFSET(after->room) room,
     LATEST_BY_OFFSET(after->guest) guest,
@@ -66,7 +70,8 @@ EMIT FINAL;
 
 CREATE TABLE booking_addons_before AS
 SELECT
-    before->id,
+    before->id key,
+    AS_VALUE(before->id) id,
     EARLIEST_BY_OFFSET(before->booking_room) booking_room,
     EARLIEST_BY_OFFSET(before->addon) addon,
     EARLIEST_BY_OFFSET(before->quantity) quantity,
@@ -80,7 +85,8 @@ EMIT FINAL;
 
 CREATE TABLE booking_addons_after AS
 SELECT
-    after->id,
+    after->id key,
+    AS_VALUE(after->id) id,
     LATEST_BY_OFFSET(after->booking_room) booking_room,
     LATEST_BY_OFFSET(after->addon) addon,
     LATEST_BY_OFFSET(after->quantity) quantity,
