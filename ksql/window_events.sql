@@ -16,7 +16,7 @@ CREATE STREAM booking_addons WITH (
     value_format = 'avro'
 );
 
-CREATE TABLE bookings_before WITH (KAFKA_TOPIC = 'bookings_before', value_format = 'JSON') AS
+CREATE TABLE bookings_before AS
 SELECT
     before->id,
     EARLIEST_BY_OFFSET(before->checkin) checkin,
@@ -27,7 +27,7 @@ WHERE before IS NOT NULL
 GROUP BY before->id
 EMIT FINAL;
 
-CREATE TABLE bookings_after WITH (KAFKA_TOPIC = 'bookings_after', value_format = 'JSON') AS
+CREATE TABLE bookings_after AS
 SELECT
     after->id,
     LATEST_BY_OFFSET(after->checkin) checkin,
@@ -38,7 +38,7 @@ WHERE after IS NOT NULL
 GROUP BY after->id
 EMIT FINAL;
 
-CREATE TABLE booking_rooms_before WITH (KAFKA_TOPIC = 'booking_rooms_before', value_format = 'JSON') AS
+CREATE TABLE booking_rooms_before AS
 SELECT
     before->id,
     EARLIEST_BY_OFFSET(before->booking) booking,
@@ -51,7 +51,7 @@ WHERE before IS NOT NULL
 GROUP BY before->id
 EMIT FINAL;
 
-CREATE TABLE booking_rooms_after WITH (KAFKA_TOPIC = 'booking_rooms_after', value_format = 'JSON') AS
+CREATE TABLE booking_rooms_after AS
 SELECT
     after->id,
     LATEST_BY_OFFSET(after->booking) booking,
@@ -64,7 +64,7 @@ WHERE after IS NOT NULL
 GROUP BY after->id
 EMIT FINAL;
 
-CREATE TABLE booking_addons_before  WITH (KAFKA_TOPIC = 'booking_addons_before', value_format = 'JSON') AS
+CREATE TABLE booking_addons_before AS
 SELECT
     before->id,
     EARLIEST_BY_OFFSET(before->booking_room) booking_room,
@@ -78,7 +78,7 @@ WHERE before IS NOT NULL
 GROUP BY before->id
 EMIT FINAL;
 
-CREATE TABLE booking_addons_after WITH (KAFKA_TOPIC = 'booking_addons_after', value_format = 'JSON') AS
+CREATE TABLE booking_addons_after AS
 SELECT
     after->id,
     LATEST_BY_OFFSET(after->booking_room) booking_room,
