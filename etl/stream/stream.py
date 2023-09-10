@@ -13,8 +13,8 @@ from helper import (
     tear_down,
 )
 import traceback
-from pyspark.sql.functions import col
-from pyspark.sql.avro.functions import from_avro, to_avro
+from pyspark.sql.functions import expr
+from pyspark.sql.avro.functions import from_avro
 from confluent_kafka.schema_registry import SchemaRegistryClient
 
 load_dotenv()
@@ -33,6 +33,11 @@ bookings_after = "BOOKINGS_AFTER"
 sr_subject = "{}-value"
 schema_registry_conf = {"url": "http://localhost:8081"}
 sr_client = SchemaRegistryClient(schema_registry_conf)
+
+
+def get_latest_schema(topic):
+    return sr_client.get_latest_version(sr_subject.format(topic)).schema.schema_str
+
 
 if __name__ == "__main__":
     spark = (
@@ -120,6 +125,7 @@ if __name__ == "__main__":
     bookings = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", bookings_before)
         .option("startingOffsets", "earliest")
         .load()
     )
