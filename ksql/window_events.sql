@@ -15,12 +15,7 @@ CREATE STREAM booking_addons WITH (
     kafka_topic = 'booking_addons',
     value_format = 'avro'
 );
--- WITH (
---     KAFKA_TOPIC='BOOKINGS_BEFORE',
---     KEY_FORMAT='KAFKA',
---     VALUE_FORMAT='JSON',
---     PARTITIONS=1
--- ) 
+
 CREATE TABLE bookings_before AS
 SELECT
     before->id,
