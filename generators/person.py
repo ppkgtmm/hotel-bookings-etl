@@ -25,8 +25,7 @@ states = states["state"].unique().tolist()
 def generate_person(count: int):
     result = []
     for _ in range(count):
-        fname = fake.first_name()
-        lname = fake.last_name()
+        fname, lname = fake.first_name(), fake.last_name()
         gender = fake.random.choice(genders)
         email = f"{fname}.{lname}@{fake.free_email().split('@')[-1]}".lower()
         dob = fake.date_between(start_date="-80y", end_date="-20y")
