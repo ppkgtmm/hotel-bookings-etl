@@ -1,7 +1,7 @@
 from faker import Faker
 from faker.generator import random
 import pandas as pd
-from datetime import date, timedelta
+from datetime import timedelta
 from dotenv import load_dotenv
 from os import getenv
 
@@ -32,9 +32,7 @@ def generate_bookings(count: int, max_stay: int):
     )
 
     for _ in range(count):
-        checkin = fake.date_between(
-            start_date=date(year=2021, month=1, day=1), end_date="today"
-        )
+        checkin = fake.date_between(start_date="-21m", end_date="+3m")
         stay_days = random.choices(stay_duration, weights=stay_weight, k=1)[0]
         checkout = checkin + timedelta(days=stay_days)
         payment = fake.date_time_between(
