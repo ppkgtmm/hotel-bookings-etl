@@ -15,4 +15,4 @@ sleep 60
 docker-compose up -d broker schema-registry kafka-connect --no-recreate
 
 # initialize oltp and olap databases
-python3 setup_dbs.py
+ python3 dbs/initialize.py
