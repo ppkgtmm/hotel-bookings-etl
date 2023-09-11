@@ -2,19 +2,14 @@ DROP DATABASE IF EXISTS oltp_hotel;
 CREATE DATABASE IF NOT EXISTS oltp_hotel;
 USE oltp_hotel;
 
-CREATE TABLE `location` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `state` varchar(255),
-  `country` varchar(255)
-);
-
 CREATE TABLE `users` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
   `firstname` varchar(255),
   `lastname` varchar(255),
   `gender` varchar(25),
   `email` varchar(255),
-  `location` integer
+  `state` varchar(255),
+  `country` varchar(255)
 );
 
 CREATE TABLE `guests` (
@@ -24,7 +19,8 @@ CREATE TABLE `guests` (
   `gender` varchar(25),
   `email` varchar(255),
   `dob` date,
-  `location` integer
+  `state` varchar(255),
+  `country` varchar(255)
 );
 
 CREATE TABLE `addons` (
@@ -82,14 +78,6 @@ ALTER TABLE `booking_rooms` ADD FOREIGN KEY (`booking`) REFERENCES `bookings` (`
 ALTER TABLE `booking_addons` ADD FOREIGN KEY (`addon`) REFERENCES `addons` (`id`);
 
 ALTER TABLE `booking_addons` ADD FOREIGN KEY (`booking_room`) REFERENCES `booking_rooms` (`id`);
-
-ALTER TABLE `users` ADD FOREIGN KEY (`location`) REFERENCES `location` (`id`);
-
-ALTER TABLE `guests` ADD FOREIGN KEY (`location`) REFERENCES `location` (`id`);
-
-ALTER TABLE `location`
-ADD COLUMN `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
 ALTER TABLE `users`
 ADD COLUMN `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
