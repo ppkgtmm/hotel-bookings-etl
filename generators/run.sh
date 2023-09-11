@@ -1,3 +1,4 @@
+echo "--------------------------------------"
 echo "downloading location data"
 python3 generators/location.py
 echo "downloaded location data"
