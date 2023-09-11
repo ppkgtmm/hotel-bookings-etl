@@ -44,11 +44,6 @@ connection_string = (
 )
 
 
-def load_location():
-    location = pd.read_csv(data_dir + "location.csv")
-    location.to_sql(location_table, conn, index=False, if_exists="append")
-
-
 def load_room_types():
     room_types = pd.read_csv(data_dir + "room_types.csv")
     room_types.to_sql(roomtypes_table, conn, index=False, if_exists="append")
@@ -60,21 +55,13 @@ def load_addons():
 
 
 def load_users():
-    columns = ["firstname", "lastname", "gender", "email", "id"]
     users = pd.read_csv(data_dir + "users.csv")
-    location = pd.read_sql_table(location_table, conn)
-    merged = users.merge(location, on=["state", "country"])[columns]
-    merged = merged.rename(columns={"id": "location"})
-    merged.to_sql(users_table, conn, index=False, if_exists="append")
+    users.to_sql(users_table, conn, index=False, if_exists="append")
 
 
 def load_guests():
-    columns = ["firstname", "lastname", "gender", "email", "dob", "id"]
     guests = pd.read_csv(data_dir + "guests.csv")
-    location = pd.read_sql_table(location_table, conn)
-    merged = guests.merge(location, on=["state", "country"])[columns]
-    merged = merged.rename(columns={"id": "location"})
-    merged.to_sql(guests_table, conn, index=False, if_exists="append")
+    guests.to_sql(guests_table, conn, index=False, if_exists="append")
 
 
 def load_rooms():
@@ -105,6 +92,7 @@ def load_bookings():
 
     for row in merged.to_dict(orient="records"):
         result = conn.execute(text(insert_q), row)
+        conn.commit()
         booking = {**row, "id": result.lastrowid}
         load_booking_rooms(booking, room_types, guests, addons)
 
@@ -153,6 +141,7 @@ def load_booking_rooms(booking, room_types, guests, addons):
     booking_rooms = booking_rooms.drop_duplicates("room").drop_duplicates("guest")
     for row in booking_rooms.to_dict(orient="records"):
         result = conn.execute(text(booking_room_q), row)
+        conn.commit()
         booking_room = {**row, "id": result.lastrowid}
         load_booking_addons(booking, booking_room, addons)
 
@@ -185,12 +174,12 @@ def load_booking_addons(booking, booking_room, addons):
     df = df.groupby(["booking_room", "addon", "datetime"]).aggregate("sum")
     for row in df.reset_index().to_dict(orient="records"):
         conn.execute(text(booking_addons_q), row)
+        conn.commit()
 
 
 if __name__ == "__main__":
     engine = create_engine(connection_string)
     conn = engine.connect()
-    load_location()
     load_room_types()
     load_addons()
     load_users()
