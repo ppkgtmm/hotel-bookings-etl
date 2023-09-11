@@ -32,7 +32,7 @@ def generate_bookings(count: int, max_stay: int):
     )
 
     for _ in range(count):
-        checkin = fake.date_between(start_date="-21m", end_date="+3m")
+        checkin = fake.date_between(start_date="-1y", end_date="today")
         stay_days = random.choices(stay_duration, weights=stay_weight, k=1)[0]
         checkout = checkin + timedelta(days=stay_days)
         payment = fake.date_time_between(
