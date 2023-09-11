@@ -1,8 +1,4 @@
 echo "--------------------------------------"
-echo "downloading location data"
-python3 generators/location.py
-echo "downloaded location data"
-echo "--------------------------------------"
 echo "generating room types & addons data"
 python3 generators/static.py
 echo "generated room types & addons data"
