@@ -78,7 +78,6 @@ def load_bookings():
     columns = ["id", "checkin", "checkout", "payment"]
     bookings = pd.read_csv(data_dir + "bookings.csv")
     users = pd.read_sql_table(users_table, conn)
-    addons = pd.read_sql_table(addons_table, conn)
 
     bookings["checkin"] = pd.to_datetime(bookings["checkin"])
     bookings["checkout"] = pd.to_datetime(bookings["checkout"])
@@ -89,6 +88,7 @@ def load_bookings():
 
     room_types = pd.read_sql(f"SELECT id FROM {roomtypes_table}", conn)["id"].tolist()
     guests = pd.read_sql(f"SELECT id FROM {guests_table}", conn)["id"].tolist()
+    addons = pd.read_sql(f"SELECT id FROM {addons_table}", conn)["id"].tolist()
 
     for row in merged.to_dict(orient="records"):
         result = conn.execute(text(insert_q), row)
@@ -152,7 +152,7 @@ def load_booking_addons(booking, booking_room, addons):
     result = []
     for day in range(random.randint(0, stay_duration)):
         max_addons = random.randint(1, max_addon_cnt)
-        chosen_addons = random.choices(addons["id"].tolist(), k=max_addons)
+        chosen_addons = random.choices(addons, k=max_addons)
         for addon in chosen_addons:
             quantity = random.randint(1, max_addon_quantity)
             datetime = booking["checkin"] + timedelta(
