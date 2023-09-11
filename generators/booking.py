@@ -41,14 +41,7 @@ def generate_bookings(count: int, max_stay: int):
         )
         user = users.loc[_ % user_count, "email"]
         booking = pd.DataFrame(
-            [
-                dict(
-                    user=user,
-                    checkin=checkin,
-                    checkout=checkout,
-                    payment=payment,
-                )
-            ]
+            [dict(user=user, checkin=checkin, checkout=checkout, payment=payment)]
         )
         bookings = pd.concat([bookings, booking])
     return bookings.reset_index(drop=True)
