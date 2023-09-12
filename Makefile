@@ -1,0 +1,44 @@
+# create virtual environment
+create-venv:
+	python3 -m venv venv 
+
+# activate virtual environment
+activate:
+	. venv/bin/activate
+
+# install required dependencies
+install:
+	pip3 install -r requirements.txt
+
+# start containers required for project
+up:
+	docker-compose up -d mysql zookeeper && \
+	sleep 60 && \
+	docker-compose up -d broker schema-registry kafka-connect --no-recreate
+
+# tear down containers
+down:
+	docker compose down -v
+
+# initialize oltp and olap databases
+db-init:
+	python3 dbs/initialize.py
+
+# combination of steps required for project set up
+setup: create-venv activate install down up db-init
+
+# generate fake booking data
+datagen:
+	python3 datagen/generate.py
+
+# seed OLTP database
+populate:
+	python3 dbs/populate.py    
+
+# register OLTP database to kafka connect
+connect:
+	python3 kafka_connect/register_source.py
+
+# load data to date dimension table
+dim-date:
+	python3 scripts/dim_date.py
