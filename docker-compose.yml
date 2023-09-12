@@ -46,7 +46,7 @@ services:
 
   kafka-connect:
     image: kafka-connect
-    build: kafka_connect/
+    build: kafka_connect/docker/
     container_name: $CONNECT_HOST_INTERNAL
     depends_on:
       - broker
