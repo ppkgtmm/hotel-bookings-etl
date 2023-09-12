@@ -170,5 +170,6 @@ if __name__ == "__main__":
     load_guests()
     load_rooms()
     load_bookings()
+    load_booking_rooms()
     conn.close()
     engine.dispose()
