@@ -102,8 +102,7 @@ def load_bookings():
 def load_booking_rooms():
     guests = pd.read_sql_table(guests_table, conn, columns=["id"]).id.tolist()
     rooms = pd.read_sql(rooms_table, conn, columns=["id"]).id.tolist()
-    booking_columns = ["id", "checkin", "checkout"]
-    bookings = pd.read_sql_table(bookings_table, conn, columns=booking_columns)
+    bookings = pd.read_sql_table(bookings_table, conn)
 
     for booking in bookings.to_dict(orient="records"):
         checkin, checkout = booking["checkin"], booking["checkout"]
@@ -112,11 +111,10 @@ def load_booking_rooms():
             conn,
         )
         num_rooms = random.choices(room_counts, weights=count_weight, k=1)[0]
-
         available_guests = set(guests) - set(overlapping.guest.to_list())
+        available_rooms = set(rooms) - set(overlapping.room.to_list())
         assert len(available_guests) >= num_rooms
         guest = random.sample(available_guests, k=num_rooms)
-        available_rooms = set(rooms) - set(overlapping.room.to_list())
         assert len(available_rooms) >= num_rooms
         room = random.sample(available_rooms, k=num_rooms)
 
