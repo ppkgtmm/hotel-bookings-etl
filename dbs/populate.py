@@ -12,7 +12,7 @@ filterwarnings(action="ignore")
 load_dotenv()
 
 max_rooms = 5
-max_addon_cnt = 10
+max_addon_cnt = 6
 max_addon_quantity = 3
 
 db_host = getenv("DB_HOST")
