@@ -16,13 +16,16 @@ from pyspark.sql.functions import (
     to_date,
     lit,
 )
+import sys
+
+sys.path.append(".")
 from utilities.db_writer import DatabaseWriter
 from dotenv import load_dotenv
 from os import getenv
 
 load_dotenv()
 
-db_host = getenv("DB_HOST_INTERNAL")
+db_host = getenv("DB_HOST")
 db_port = getenv("DB_PORT")
 db_user = getenv("DB_USER")
 db_password = getenv("DB_PASSWORD")
@@ -111,11 +114,6 @@ booking_addon_schema = StructType(
     ]
 )
 json_schema = MapType(StringType(), StringType())
-db_writer = None
-
-
-def setup():
-    db_writer = DatabaseWriter(db_user, db_password, db_host, db_port, db_name)
 db_writer = DatabaseWriter(db_user, db_password, db_host, db_port, db_name)
 
 
