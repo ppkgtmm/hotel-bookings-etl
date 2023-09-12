@@ -43,6 +43,17 @@ connection_string = (
     f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 )
 
+overlapping_booking_sql = f"""
+    SELECT guest, room
+    FROM {booking_rooms_table} br
+    INNER JOIN {bookings_table} b
+    ON br.booking = b.id AND (
+        (checkin <= DATE('{{checkin}}') AND DATE('{{checkin}}') <= checkout) OR
+        (checkin <= DATE('{{checkout}}')AND DATE('{{checkout}}') <= checkout) OR
+        (DATE('{{checkin}}') <= checkin AND DATE('{{checkout}}') >= checkout)
+    )
+    """
+
 
 def load_room_types():
     room_types = pd.read_csv(data_dir + "room_types.csv")
@@ -74,7 +85,6 @@ def load_rooms():
 
 
 def load_bookings():
-    insert_q = f"INSERT INTO {bookings_table} (user, checkin, checkout, payment) VALUES (:user, :checkin, :checkout, :payment)"
     columns = ["id", "checkin", "checkout", "payment"]
     bookings = pd.read_csv(data_dir + "bookings.csv")
     users = pd.read_sql_table(users_table, conn)
@@ -86,64 +96,35 @@ def load_bookings():
     merged = bookings.merge(users, left_on="user", right_on="email")[columns]
     merged = merged.rename(columns={"id": "user"}).sort_values(by=["checkin"])
 
-    room_types = pd.read_sql(f"SELECT id FROM {roomtypes_table}", conn)["id"].tolist()
-    guests = pd.read_sql(f"SELECT id FROM {guests_table}", conn)["id"].tolist()
-    addons = pd.read_sql(f"SELECT id FROM {addons_table}", conn)["id"].tolist()
-
-    for row in merged.to_dict(orient="records"):
-        result = conn.execute(text(insert_q), row)
-        conn.commit()
-        booking = {**row, "id": result.lastrowid}
-        load_booking_rooms(booking, room_types, guests, addons)
+    merged.to_sql(bookings_table, conn, index=False, if_exists="append")
 
 
-def load_booking_rooms(booking, room_types, guests, addons):
-    booking_room_q = f"INSERT INTO {booking_rooms_table} (booking, room, guest) VALUES (:booking, :room, :guest)"
-    room_q = "SELECT id, type FROM {} WHERE type IN ({})"
-    checkin, checkout = booking["checkin"], booking["checkout"]
-    overlapping = pd.read_sql(
-        f"""
-        SELECT guest, room
-        FROM {booking_rooms_table}
-        WHERE booking IN (
-            SELECT id
-            FROM {bookings_table}
-            WHERE (checkin <= DATE('{checkin}') AND DATE('{checkin}') <= checkout)
-            OR (checkin <= DATE('{checkout}')AND DATE('{checkout}') <= checkout)
-            OR (DATE('{checkin}') <= checkin AND DATE('{checkout}') >= checkout)
+def load_booking_rooms():
+    guests = pd.read_sql_table(guests_table, conn, columns=["id"]).id.tolist()
+    rooms = pd.read_sql(rooms_table, conn, columns=["id"]).id.tolist()
+    booking_columns = ["id", "checkin", "checkout"]
+    bookings = pd.read_sql_table(bookings_table, conn, columns=booking_columns)
+
+    for booking in bookings.to_dict(orient="records"):
+        checkin, checkout = booking["checkin"], booking["checkout"]
+        overlapping = pd.read_sql(
+            overlapping_booking_sql.format(checkin=checkin, checkout=checkout),
+            conn,
         )
-        """,
-        conn,
-    )
-    num_rooms = random.choices(room_counts, weights=count_weight, k=1)[0]
+        num_rooms = random.choices(room_counts, weights=count_weight, k=1)[0]
 
-    avail_guests = set(guests) - set(overlapping.guest.to_list())
-    assert len(avail_guests) >= num_rooms
-    guest = random.sample(avail_guests, k=num_rooms)
+        available_guests = set(guests) - set(overlapping.guest.to_list())
+        assert len(available_guests) >= num_rooms
+        guest = random.sample(available_guests, k=num_rooms)
+        available_rooms = set(rooms) - set(overlapping.room.to_list())
+        assert len(available_rooms) >= num_rooms
+        room = random.sample(available_rooms, k=num_rooms)
 
-    room_type = random.choices(room_types, k=num_rooms)
-    room_q = room_q.format(
-        rooms_table, ",".join(pd.Series(room_type, dtype=str).tolist())
-    )
-    rooms = pd.read_sql(room_q, conn)
-    room = []
-    for type in room_type:
-        avail_rooms = set(rooms[rooms["type"] == type]["id"])
-        avail_rooms = avail_rooms - set(overlapping.room.to_list())
-        assert len(avail_rooms) >= 1
-        sample = random.sample(avail_rooms, k=1)
-        room += sample
-        rooms = rooms[~rooms["id"].isin(sample)]
-
-    booking_room = {"booking": booking["id"], "room": room, "guest": guest}
-    booking_rooms = pd.DataFrame([booking_room])
-    booking_rooms = booking_rooms.explode(["room", "guest"])
-    booking_rooms = booking_rooms.drop_duplicates("room").drop_duplicates("guest")
-    for row in booking_rooms.to_dict(orient="records"):
-        result = conn.execute(text(booking_room_q), row)
+        booking_room = {"booking": booking["id"], "room": room, "guest": guest}
+        booking_room = pd.DataFrame([booking_room]).explode(["room", "guest"])
+        booking_room = booking_room.drop_duplicates("room").drop_duplicates("guest")
+        booking_room.to_sql(booking_rooms_table, conn, index=False, if_exists="append")
         conn.commit()
-        booking_room = {**row, "id": result.lastrowid}
-        load_booking_addons(booking, booking_room, addons)
 
 
 def load_booking_addons(booking, booking_room, addons):
