@@ -54,6 +54,13 @@ overlapping_booking_sql = f"""
     )
     """
 
+booking_details_sql = f"""
+    SELECT br.id, checkin, checkout
+    FROM {booking_rooms_table} br
+    INNER JOIN {bookings_table} b
+    ON br.booking = b.id
+"""
+
 
 def load_room_types():
     room_types = pd.read_csv(data_dir + "room_types.csv")
@@ -130,34 +137,38 @@ def load_booking_rooms():
         conn.commit()
 
 
-def load_booking_addons(booking, booking_room, addons):
-    booking_addons_q = f"INSERT INTO {booking_addons_table} (booking_room, addon, quantity, datetime) VALUES (:booking_room, :addon, :quantity, :datetime)"
-    stay_duration = (booking["checkout"] - booking["checkin"]).days
-    result = []
-    for day in range(random.randint(0, stay_duration)):
-        max_addons = random.randint(1, max_addon_cnt)
-        chosen_addons = random.choices(addons, k=max_addons)
-        for addon in chosen_addons:
-            quantity = random.randint(1, max_addon_quantity)
-            datetime = booking["checkin"] + timedelta(
-                days=day,
-                hours=random.randint(0, 23),
-                minutes=random.choice([0, 30]),
-            )
-            assert booking["checkin"] <= datetime <= booking["checkout"]
-            data = dict(
-                booking_room=booking_room["id"],
-                addon=addon,
-                quantity=quantity,
-                datetime=datetime,
-            )
-            result.append(data)
-    if result == []:
-        return
-    df = pd.DataFrame(result)
-    df = df.groupby(["booking_room", "addon", "datetime"]).aggregate("sum")
-    for row in df.reset_index().to_dict(orient="records"):
-        conn.execute(text(booking_addons_q), row)
+def get_booking_addons():
+    booking_details = pd.read_sql(booking_details_sql, conn)
+    addons = pd.read_sql_table(addons_table, conn).id.tolist()
+
+    for booking_detail in booking_details.to_dict(orient="records"):
+        checkin, checkout = booking_detail["checkin"], booking_detail["checkout"]
+
+        for date in pd.date_range(checkin, checkout):
+            max_addons = random.randint(1, max_addon_cnt)
+            chosen_addons = random.choices(addons, k=max_addons)
+            booking_addon = [
+                {
+                    "addon": addon,
+                    "quantity": random.randint(1, max_addon_quantity),
+                    "datetime": date + timedelta(hours=random.randint(0, 23)),
+                }
+                for addon in chosen_addons
+            ]
+            yield booking_detail["id"], booking_addon
+
+
+def load_booking_addons():
+    for data in get_booking_addons():
+        booking_room, booking_addon = data
+        booking_addon = pd.DataFrame(booking_addon)
+        booking_addon["booking_room"] = booking_room
+        booking_addon = booking_addon.drop_duplicates(
+            ["booking_room", "addon", "datetime"]
+        )
+        booking_addon.to_sql(
+            booking_addons_table, conn, index=False, if_exists="append"
+        )
         conn.commit()
 
 
@@ -171,5 +182,6 @@ if __name__ == "__main__":
     load_rooms()
     load_bookings()
     load_booking_rooms()
+    load_booking_addons()
     conn.close()
     engine.dispose()
