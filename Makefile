@@ -36,8 +36,8 @@ populate:
 	python3 dbs/populate.py    
 
 # register OLTP database to kafka connect
-connect:
-	python3 kafka_connect/register_source.py
+kconnect:
+	python3 connect/register_source.py
 
 # load data to date dimension table
 dim-date:
