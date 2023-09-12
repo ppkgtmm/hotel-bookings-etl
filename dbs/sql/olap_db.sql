@@ -103,11 +103,11 @@ CREATE TABLE `fct_amenities` (
 );
 
 CREATE TABLE `fct_booking` (
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
   `datetime` bigint,
   `guest` integer,
   `guest_location` integer,
-  `roomtype` integer,
-  PRIMARY KEY (`datetime`, `guest`, `guest_location`, `roomtype`)
+  `roomtype` integer
 );
 
 ALTER TABLE `fct_booking` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
