@@ -55,7 +55,7 @@ CREATE TABLE `dim_date` (
   `date` date,
   `month` date,
   `quarter` date,
-  `year` integer
+  `year` date
 );
 
 CREATE TABLE `dim_roomtype` (
@@ -63,7 +63,8 @@ CREATE TABLE `dim_roomtype` (
   `_id` integer,
   `name` varchar(255),
   `price` float,
-  `created_at` datetime
+  `created_at` datetime,
+  `is_current` boolean
 );
 
 CREATE TABLE `dim_addon` (
@@ -71,30 +72,34 @@ CREATE TABLE `dim_addon` (
   `_id` integer,
   `name` varchar(255),
   `price` float,
-  `created_at` datetime
+  `created_at` datetime,
+  `is_current` boolean
 );
 
 CREATE TABLE `dim_guest` (
-  `id` integer PRIMARY KEY,
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `_id` integer,
   `email` varchar(255),
   `dob` date,
-  `gender` varchar(25)
+  `gender` varchar(25),
+  `created_at` datetime,
+  `is_current` boolean
 );
 
 CREATE TABLE `dim_location` (
-  `id` integer PRIMARY KEY,
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
   `state` varchar(255),
   `country` varchar(255)
 );
 
-CREATE TABLE `fct_purchase` (
+CREATE TABLE `fct_amenities` (
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
   `datetime` bigint,
   `guest` integer,
   `guest_location` integer,
   `roomtype` integer,
   `addon` integer,
-  `addon_quantity` integer,
-  PRIMARY KEY (`datetime`, `guest`, `guest_location`, `roomtype`, `addon`)
+  `addon_quantity` integer
 );
 
 CREATE TABLE `fct_booking` (
@@ -113,12 +118,12 @@ ALTER TABLE `fct_booking` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype`
 
 ALTER TABLE `fct_booking` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
 
-ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
+ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
 
-ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`addon`) REFERENCES `dim_addon` (`id`);
+ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`addon`) REFERENCES `dim_addon` (`id`);
 
-ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`guest`) REFERENCES `dim_guest` (`id`);
+ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`guest`) REFERENCES `dim_guest` (`id`);
 
-ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype` (`id`);
+ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype` (`id`);
 
-ALTER TABLE `fct_purchase` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
+ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
