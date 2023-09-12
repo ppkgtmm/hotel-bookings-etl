@@ -70,16 +70,19 @@ class DatabaseWriter:
                     year=query.inserted.year,
                 )
                 conn.execute(query)
+                conn.commit()
 
     def write_dim_addons(self, rows: list[Dict[str, Any]]):
         query = insert(self.DimAddon).values(rows)
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def write_dim_roomtypes(self, rows: list[Dict[str, Any]]):
         query = insert(self.DimRoomType).values(rows)
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def write_dim_locations(self, rows: list[Dict[str, Any]]):
         query = insert(self.DimLocation).values(rows)
@@ -88,16 +91,19 @@ class DatabaseWriter:
         )
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def stage_rooms(self, rows: list[Dict[str, Any]]):
         query = insert(self.Room).values(rows)
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def stage_guests(self, rows: list[Dict[str, Any]]):
         query = insert(self.Guest).values(rows)
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def write_dim_guests(self, rows: list[Dict[str, Any]]):
         query = insert(self.DimGuest).values(rows)
@@ -108,6 +114,7 @@ class DatabaseWriter:
         )
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def stage_bookings(self, rows: list[Dict[str, Any]]):
         query = insert(self.Booking).values(rows)
@@ -116,6 +123,7 @@ class DatabaseWriter:
         )
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def del_bookings(self, rows: list[Dict[str, Any]]):
         query = insert(self.DelBooking).values(rows)
@@ -124,6 +132,7 @@ class DatabaseWriter:
         )
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def stage_booking_rooms(self, rows: list[Dict[str, Any]]):
         query = insert(self.BookingRoom).values(rows)
@@ -136,6 +145,7 @@ class DatabaseWriter:
         )
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def del_booking_rooms(self, rows: list[Dict[str, Any]]):
         query = insert(self.DelBookingRoom).values(rows)
@@ -148,6 +158,7 @@ class DatabaseWriter:
         )
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def stage_booking_addons(self, rows: list[Dict[str, Any]]):
         query = insert(self.BookingAddon).values(rows)
@@ -161,6 +172,7 @@ class DatabaseWriter:
         )
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def del_booking_addons(self, rows: list[Dict[str, Any]]):
         query = insert(self.DelBookingAddon).values(rows)
@@ -174,6 +186,7 @@ class DatabaseWriter:
         )
         with self.engine.connect() as conn:
             conn.execute(query)
+            conn.commit()
 
     def write_fct_bookings(self):
         query = bookings_query.format(
@@ -206,6 +219,7 @@ class DatabaseWriter:
                         datetime=query.inserted.datetime
                     )
                     conn.execute(query)
+                    conn.commit()
 
                     mark_processed = (
                         update(self.BookingRoom)
@@ -213,6 +227,7 @@ class DatabaseWriter:
                         .values(processed=True)
                     )
                     conn.execute(mark_processed)
+                    conn.commit()
 
                     current_date += timedelta(days=1)
 
@@ -234,6 +249,7 @@ class DatabaseWriter:
                     )
                 )
                 conn.execute(query)
+                conn.commit()
 
                 mark_processed = (
                     update(self.DelBookingRoom)
@@ -241,6 +257,7 @@ class DatabaseWriter:
                     .values(processed=True)
                 )
                 conn.execute(mark_processed)
+                conn.commit()
 
     def write_fct_purchases(self):
         query = purchases_query.format(
@@ -267,6 +284,7 @@ class DatabaseWriter:
                     addon_quantity=query.inserted.addon_quantity
                 )
                 conn.execute(query)
+                conn.commit()
 
                 mark_processed = (
                     update(self.BookingAddon)
@@ -274,6 +292,7 @@ class DatabaseWriter:
                     .values(processed=True)
                 )
                 conn.execute(mark_processed)
+                conn.commit()
 
     def remove_fct_purchases(self):
         query = remove_purchases_query.format(
@@ -294,6 +313,7 @@ class DatabaseWriter:
                     .where(self.FactPurchase.c.addon == addon)
                 )
                 conn.execute(query)
+                conn.commit()
 
                 mark_processed = (
                     update(self.DelBookingAddon)
@@ -301,6 +321,7 @@ class DatabaseWriter:
                     .values(processed=True)
                 )
                 conn.execute(mark_processed)
+                conn.commit()
 
     def tear_down(self):
         self.engine.dispose()
