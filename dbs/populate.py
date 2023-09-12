@@ -99,7 +99,7 @@ def load_bookings():
     merged.to_sql(bookings_table, conn, index=False, if_exists="append")
 
 
-def load_booking_rooms():
+def get_booking_details():
     guests = pd.read_sql_table(guests_table, conn, columns=["id"]).id.tolist()
     rooms = pd.read_sql(rooms_table, conn, columns=["id"]).id.tolist()
     bookings = pd.read_sql_table(bookings_table, conn)
@@ -118,9 +118,14 @@ def load_booking_rooms():
         assert len(available_rooms) >= num_rooms
         room = random.sample(available_rooms, k=num_rooms)
 
-        booking_room = {"booking": booking["id"], "room": room, "guest": guest}
+        yield booking["id"], room, guest
+
+
+def load_booking_rooms():
+    for booking_detail in get_booking_details():
+        booking, room, guest = booking_detail
+        booking_room = {"booking": booking, "room": room, "guest": guest}
         booking_room = pd.DataFrame([booking_room]).explode(["room", "guest"])
-        booking_room = booking_room.drop_duplicates("room").drop_duplicates("guest")
         booking_room.to_sql(booking_rooms_table, conn, index=False, if_exists="append")
         conn.commit()
 
