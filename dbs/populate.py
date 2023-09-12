@@ -12,7 +12,7 @@ filterwarnings(action="ignore")
 load_dotenv()
 
 max_rooms = 5
-max_addon_cnt = 6
+max_addon_cnt = 5
 max_addon_quantity = 3
 
 db_host = getenv("DB_HOST")
@@ -145,7 +145,7 @@ def get_booking_addons():
         checkin, checkout = booking_detail["checkin"], booking_detail["checkout"]
 
         for date in pd.date_range(checkin, checkout):
-            max_addons = random.randint(1, max_addon_cnt)
+            max_addons = random.randint(0, max_addon_cnt)
             chosen_addons = random.choices(addons, k=max_addons)
             booking_addon = [
                 {
