@@ -20,10 +20,6 @@ schema_registry_url = getenv("SCHEMA_REGISTRY_URL")
 
 schema_registry_client = SchemaRegistryClient({"url": schema_registry_url})
 
-# connection_args = dict(
-#     host=db_host, port=db_port, user=db_user, password=db_password, database=db_name
-# )
-
 
 def get_connection_string(jdbc: bool = True):
     template = "{}:{}@{}:{}/{}"
