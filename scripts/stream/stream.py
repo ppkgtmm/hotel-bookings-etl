@@ -7,7 +7,7 @@ from helper import (
     process_roomtypes,
     process_rooms,
     process_guests,
-    # process_bookings,
+    process_bookings,
     # process_booking_rooms,
     # process_booking_addons,
     # tear_down,
@@ -106,14 +106,20 @@ if __name__ == "__main__":
         .start()
     )
 
-    # bookings = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", broker)
-    #     .option("subscribe", bookings_table)
-    #     .option("startingOffsets", "earliest")
-    #     .option("maxOffsetsPerTrigger", max_offsets)
-    #     .load()
-    # )
+    bookings = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", bookings_table)
+        .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", max_offsets)
+        .load()
+    )
+
+    (
+        bookings.writeStream.option("checkpointLocation", "/tmp/bookings/_checkpoints/")
+        .foreachBatch(process_bookings)
+        .start()
+    )
 
     # bookings = (
     #     bookings.withColumn("data", expr("substring(value, 6, length(value) - 5)"))
