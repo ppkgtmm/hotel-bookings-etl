@@ -22,9 +22,11 @@ schema_registry_client = SchemaRegistryClient({"url": schema_registry_url})
 
 
 def get_connection_string(jdbc: bool = True):
-    template = "{}:{}@{}:{}/{}?useSSL=false"
+    template = "{}:{}@{}:{}/{}"
     template = template.format(db_user, db_password, db_host, db_port, db_name)
-    return (jdbc_driver if jdbc else driver) + template
+    if jdbc:
+        return jdbc_driver + template + "?useSSL=false"
+    return driver + template
 
 
 def get_avro_schema(topic):
