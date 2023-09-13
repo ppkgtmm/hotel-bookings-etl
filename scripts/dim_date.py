@@ -24,7 +24,7 @@ data["id"] = data["datetime"].dt.strftime("%Y%m%d%H%M%S").astype(int)
 data["date"] = data["datetime"].dt.date
 data["month"] = data["datetime"].dt.to_period("M").dt.to_timestamp().dt.date
 data["quarter"] = data["datetime"].dt.to_period("Q").dt.to_timestamp().dt.date
-data["year"] = data["datetime"].dt.year
+data["year"] = data["datetime"].dt.to_period("Y").dt.to_timestamp().dt.date
 
 db_writer = DatabaseWriter(db_user, db_password, db_host, db_port, db_name)
 db_writer.write_dim_date(data.to_dict(orient="records"))
