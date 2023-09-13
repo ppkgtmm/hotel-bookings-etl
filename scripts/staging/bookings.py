@@ -12,8 +12,8 @@ stg_booking_table = getenv("STG_BOOKING_TABLE")
 del_booking_table = getenv("DEL_BOOKING_TABLE")
 
 upsert_query = (
-    "INSERT INTO {} VALUES (:id, :checkin, :checkout, :updated_at)\n"
-    "ON DUPLICATE KEY UPDATE checkin=:checkin, checkout=:checkout, updated_at=:updated_at"
+    "INSERT INTO {} VALUES (:id, :checkin, :checkout, :updated_at) "
+    + "ON DUPLICATE KEY UPDATE checkin=:checkin, checkout=:checkout, updated_at=:updated_at"
 )
 
 
