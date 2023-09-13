@@ -17,9 +17,7 @@ upsert_query = (
 )
 
 delete_query = (
-    "UPDATE {} dest INNER JOIN {} src "
-    "ON dest.id = src.id "
-    "SET dest.is_deleted = true"
+    "UPDATE {} dest INNER JOIN {} src ON dest.id = src.id SET dest.is_deleted = true"
 )
 
 
