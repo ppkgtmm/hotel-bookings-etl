@@ -18,7 +18,7 @@ down:
 db-init:
 	${PYTHON} dbs/initialize.py
 
-datagen:
+data-gen:
 	${PYTHON} datagen/generate.py
 
 populate:
