@@ -63,8 +63,7 @@ CREATE TABLE `dim_roomtype` (
   `_id` integer,
   `name` varchar(255),
   `price` float,
-  `created_at` datetime,
-  `is_current` boolean
+  `created_at` datetime
 );
 
 CREATE TABLE `dim_addon` (
@@ -72,8 +71,7 @@ CREATE TABLE `dim_addon` (
   `_id` integer,
   `name` varchar(255),
   `price` float,
-  `created_at` datetime,
-  `is_current` boolean
+  `created_at` datetime
 );
 
 CREATE TABLE `dim_guest` (
@@ -82,8 +80,7 @@ CREATE TABLE `dim_guest` (
   `email` varchar(255),
   `dob` date,
   `gender` varchar(25),
-  `created_at` datetime,
-  `is_current` boolean
+  `created_at` datetime
 );
 
 CREATE TABLE `dim_location` (
