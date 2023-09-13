@@ -1,34 +1,23 @@
-from pyspark.sql import SparkSession, Window
+from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 from os import getenv
 
-# from helper import (
-#     process_addons,
-#     process_roomtypes,
-#     process_locations,
-#     process_rooms,
-#     process_guests,
-#     process_bookings,
-#     process_booking_rooms,
-#     process_booking_addons,
-#     tear_down,
-# )
-import traceback
-from pyspark.sql.functions import (
-    expr,
-    col,
-    window,
-    coalesce,
-    row_number,
-    struct,
-    to_json,
+from helper import (
+    process_addons,
+    process_roomtypes,
+    # process_locations,
+    # process_rooms,
+    # process_guests,
+    # process_bookings,
+    # process_booking_rooms,
+    # process_booking_addons,
+    # tear_down,
 )
-from pyspark.sql.avro.functions import from_avro
-from confluent_kafka.schema_registry import SchemaRegistryClient
+import traceback
 
 load_dotenv()
 
-max_offsets = 10
+max_offsets = 20
 # broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 broker = getenv("KAFKA_BOOTSTRAP_SERVERS")
 
@@ -40,22 +29,15 @@ rooms_table = getenv("ROOMS_TABLE")
 bookings_table = getenv("BOOKINGS_TABLE")
 booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
 
-topic_map = {bookings_table: bookings_table.upper() + "_EVENT"}
-
-sr_subject = "{}-value"
-unwrap = "{}_unwrap"
-schema_registry_conf = {"url": "http://localhost:8081"}
-sr_client = SchemaRegistryClient(schema_registry_conf)
-
-
-def get_schema(topic):
-    return sr_client.get_latest_version(sr_subject.format(topic)).schema.schema_str
-
 
 if __name__ == "__main__":
     spark = (
         SparkSession.builder.appName("hotel oltp processor")
         .config("spark.driver.memory", "1g")
+        .config(
+            "spark.jars",
+            "/Users/pinky/Downloads/mysql-connector-java-8.0.13/mysql-connector-java-8.0.13.jar",
+        )
         .config(
             "spark.jars.packages",
             "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1,org.apache.spark:spark-avro_2.12:3.4.1",
@@ -63,49 +45,37 @@ if __name__ == "__main__":
         .getOrCreate()
     )
 
-    # location = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", broker)
-    #     .option("subscribe", location_table)
-    #     .option("startingOffsets", "earliest")
-    #     .load()
-    # )
+    addons = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", addons_table)
+        .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", max_offsets)
+        .load()
+    )
 
-    # (
-    #     location.writeStream.option("checkpointLocation", "/tmp/location/_checkpoints/")
-    #     .foreachBatch(process_locations)
-    #     .start()
-    # )
+    (
+        addons.writeStream.option("checkpointLocation", "/tmp/addons/_checkpoints/")
+        .foreachBatch(process_addons)
+        .start()
+    )
 
-    # addons = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", broker)
-    #     .option("subscribe", addons_table)
-    #     .option("startingOffsets", "earliest")
-    #     .load()
-    # )
+    roomtypes = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", roomtypes_table)
+        .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", max_offsets)
+        .load()
+    )
 
-    # (
-    #     addons.writeStream.option("checkpointLocation", "/tmp/addons/_checkpoints/")
-    #     .foreachBatch(process_addons)
-    #     .start()
-    # )
-
-    # roomtypes = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", broker)
-    #     .option("subscribe", roomtypes_table)
-    #     .option("startingOffsets", "earliest")
-    #     .load()
-    # )
-
-    # (
-    #     roomtypes.writeStream.option(
-    #         "checkpointLocation", "/tmp/roomtypes/_checkpoints/"
-    #     )
-    #     .foreachBatch(process_roomtypes)
-    #     .start()
-    # )
+    (
+        roomtypes.writeStream.option(
+            "checkpointLocation", "/tmp/roomtypes/_checkpoints/"
+        )
+        .foreachBatch(process_roomtypes)
+        .start()
+    )
 
     # rooms = (
     #     spark.readStream.format("kafka")
@@ -135,63 +105,63 @@ if __name__ == "__main__":
     #     .start()
     # )
 
-    bookings = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", bookings_table)
-        .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", max_offsets)
-        .load()
-    )
+    # bookings = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", broker)
+    #     .option("subscribe", bookings_table)
+    #     .option("startingOffsets", "earliest")
+    #     .option("maxOffsetsPerTrigger", max_offsets)
+    #     .load()
+    # )
 
-    bookings = (
-        bookings.withColumn("data", expr("substring(value, 6, length(value) - 5)"))
-        .withColumn("decoded", from_avro("data", get_schema(bookings_table)))
-        .filter(expr("coalesce(decoded.before, decoded.after) IS NOT NULL"))
-        .select(["decoded.before", "decoded.after", "decoded.source.ts_ms"])
-        .withColumn("id", expr("coalesce(before.id, after.id)"))
-        .select(["id", "before", "after", expr("timestamp_millis(ts_ms)").alias("ts")])
-        .withWatermark("ts", "5 minutes")
-    )
+    # bookings = (
+    #     bookings.withColumn("data", expr("substring(value, 6, length(value) - 5)"))
+    #     .withColumn("decoded", from_avro("data", get_schema(bookings_table)))
+    #     .filter(expr("coalesce(decoded.before, decoded.after) IS NOT NULL"))
+    #     .select(["decoded.before", "decoded.after", "decoded.source.ts_ms"])
+    #     .withColumn("id", expr("coalesce(before.id, after.id)"))
+    #     .select(["id", "before", "after", expr("timestamp_millis(ts_ms)").alias("ts")])
+    #     .withWatermark("ts", "5 minutes")
+    # )
 
-    booking_rooms = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", broker)
-        .option("subscribe", booking_rooms_table)
-        .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", max_offsets)
-        .load()
-    )
+    # booking_rooms = (
+    #     spark.readStream.format("kafka")
+    #     .option("kafka.bootstrap.servers", broker)
+    #     .option("subscribe", booking_rooms_table)
+    #     .option("startingOffsets", "earliest")
+    #     .option("maxOffsetsPerTrigger", max_offsets)
+    #     .load()
+    # )
 
-    booking_rooms = (
-        booking_rooms.withColumn("data", expr("substring(value, 6, length(value) - 5)"))
-        .withColumn("decoded", from_avro("data", get_schema(booking_rooms_table)))
-        .filter(expr("coalesce(decoded.before, decoded.after) IS NOT NULL"))
-        .select(["decoded.before", "decoded.after", "decoded.source.ts_ms"])
-        .withColumn("id", expr("coalesce(before.id, after.id)"))
-        .select(["id", "before", "after", expr("timestamp_millis(ts_ms)").alias("ts")])
-        .withWatermark("ts", "5 minutes")
-    )
+    # booking_rooms = (
+    #     booking_rooms.withColumn("data", expr("substring(value, 6, length(value) - 5)"))
+    #     .withColumn("decoded", from_avro("data", get_schema(booking_rooms_table)))
+    #     .filter(expr("coalesce(decoded.before, decoded.after) IS NOT NULL"))
+    #     .select(["decoded.before", "decoded.after", "decoded.source.ts_ms"])
+    #     .withColumn("id", expr("coalesce(before.id, after.id)"))
+    #     .select(["id", "before", "after", expr("timestamp_millis(ts_ms)").alias("ts")])
+    #     .withWatermark("ts", "5 minutes")
+    # )
 
-    (
-        bookings.writeStream.option(
-            "checkpointLocation", f"/tmp/{bookings_table}/_checkpoints/"
-        )
-        .format("console")
-        .outputMode("append")
-        .start()
-        .awaitTermination()
-    )
+    # (
+    #     bookings.writeStream.option(
+    #         "checkpointLocation", f"/tmp/{bookings_table}/_checkpoints/"
+    #     )
+    #     .format("console")
+    #     .outputMode("append")
+    #     .start()
+    #     .awaitTermination()
+    # )
 
-    (
-        booking_rooms.writeStream.option(
-            "checkpointLocation", f"/tmp/{booking_rooms_table}/_checkpoints/"
-        )
-        .format("console")
-        .outputMode("append")
-        .start()
-        .awaitTermination()
-    )
+    # (
+    #     booking_rooms.writeStream.option(
+    #         "checkpointLocation", f"/tmp/{booking_rooms_table}/_checkpoints/"
+    #     )
+    #     .format("console")
+    #     .outputMode("append")
+    #     .start()
+    #     .awaitTermination()
+    # )
 
     # .withColumn(
     #     "ts",
@@ -325,9 +295,9 @@ if __name__ == "__main__":
     #     .start()
     # )
 
-    # try:
-    #     pass
-    # except Exception as e:
-    #     traceback.print_exc()
+    try:
+        spark.streams.awaitAnyTermination()
+    except Exception as e:
+        traceback.print_exc()
     # finally:
     #     tear_down()
