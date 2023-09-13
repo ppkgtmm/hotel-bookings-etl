@@ -15,9 +15,11 @@ db_name = getenv("OLAP_DB")
 addons_table = getenv("ADDONS_TABLE")
 roomtypes_table = getenv("ROOMTYPES_TABLE")
 rooms_table = getenv("ROOMS_TABLE")
+guests_table = getenv("GUESTS_TABLE")
 stg_room_table = getenv("STG_ROOM_TABLE")
 dim_addon_table = getenv("DIM_ADDON_TABLE")
 dim_roomtype_table = getenv("DIM_ROOMTYPE_TABLE")
+dim_guest_table = getenv("DIM_GUEST_TABLE")
 registry_url = getenv("SCHEMA_REGISTRY_URL")
 
 connection_string = "jdbc:mysql://{}:{}@{}:{}/{}?useSSL=false".format(
@@ -102,32 +104,25 @@ def process_rooms(df: DataFrame, batch_id: int):
     )
 
 
-# def process_guests(micro_batch_df: DataFrame, batch_id: int):
-#     data: DataFrame = (
-#         micro_batch_df.withColumn(
-#             "message", from_json(col("value").cast(StringType()), json_schema)
-#         )
-#         .withColumn("payload", from_json("message.payload", json_schema))
-#         .withColumn("data", from_json("payload.after", guest_schema))
-#         .filter("data IS NOT NULL")
-#         .select(
-#             [
-#                 "data.id",
-#                 "data.email",
-#                 date_add(
-#                     to_date(lit("1970-01-01"), "yyyy-MM-dd"), col("data.dob")
-#                 ).alias("dob"),
-#                 "data.gender",
-#                 "data.location",
-#                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
-#             ]
-#         )
-#     )
-#     rows = df_to_list(data)
-#     if rows != []:
-#         db_writer.stage_guests(rows)
-#         rows = df_to_list(data.select(["id", "email", "dob", "gender"]))
-#         db_writer.write_dim_guests(rows)
+def process_guests(df: DataFrame, batch_id: int):
+    data: DataFrame = decode_data(df, guests_table)
+
+    processed_data = (
+        data.filter(expr("after IS NOT NULL"))
+        .select("after.*")
+        .withColumnRenamed("id", "_id")
+        .withColumn("created_at", expr("timestamp_millis(updated_at)"))
+        .withColumn("dob", expr("date_from_unix_date(dob)"))
+        .select(["_id", "email", "dob", "gender", "created_at"])
+    )
+    (
+        processed_data.write.format("jdbc")
+        .mode("append")
+        .option("url", connection_string)
+        .option("driver", "com.mysql.jdbc.Driver")
+        .option("dbtable", dim_guest_table)
+        .save()
+    )
 
 
 # def transform_bookings(bookings_df: DataFrame, key: str):
