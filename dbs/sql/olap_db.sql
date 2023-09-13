@@ -13,10 +13,11 @@ CREATE TABLE `stg_booking` (
   `id` integer PRIMARY KEY,
   `checkin` date,
   `checkout` date,
-  `updated_at` datetime
+  `updated_at` datetime,
+  `is_deleted` boolean DEFAULT false
 );
 
-CREATE TABLE `del_booking` LIKE `stg_booking`;
+-- CREATE TABLE `del_booking` LIKE `stg_booking`;
 
 CREATE TABLE `stg_booking_room` (
   `id` integer PRIMARY KEY,
@@ -24,10 +25,11 @@ CREATE TABLE `stg_booking_room` (
   `room` integer,
   `guest` integer,
   `updated_at` datetime,
-  `processed` boolean DEFAULT false
+  `processed` boolean DEFAULT false,
+  `is_deleted` boolean DEFAULT false
 );
 
-CREATE TABLE `del_booking_room` LIKE `stg_booking_room`;
+-- CREATE TABLE `del_booking_room` LIKE `stg_booking_room`;
 
 CREATE TABLE `stg_booking_addon` (
   `id` integer PRIMARY KEY,
@@ -36,10 +38,11 @@ CREATE TABLE `stg_booking_addon` (
   `quantity` integer,
   `datetime` timestamp,
   `updated_at` datetime,
-  `processed` boolean DEFAULT false
+  `processed` boolean DEFAULT false,
+  `is_deleted` boolean DEFAULT false
 );
 
-CREATE TABLE `del_booking_addon` LIKE `stg_booking_addon`;
+-- CREATE TABLE `del_booking_addon` LIKE `stg_booking_addon`;
 
 CREATE TABLE `dim_date` (
   `id` bigint PRIMARY KEY,
