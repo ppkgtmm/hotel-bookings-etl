@@ -13,7 +13,7 @@ dim_addon_table = "dim_addon"
 dim_guest_table = "dim_guest"
 dim_location_table = "dim_location"
 fct_booking_table = "fct_booking"
-fct_purchase_table = "fct_purchase"
+fct_purchase_table = "fct_amenities"
 
 location_query = "SELECT id, state, country FROM {}"
 guest_query = "SELECT id, email, dob, gender, location, updated_at FROM {}"
