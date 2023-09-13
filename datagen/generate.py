@@ -20,7 +20,7 @@ class DataGenerator:
 
     @staticmethod
     def get_locations():
-        url = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/csv/states.csv"
+        url = getenv("LOCATION_FILE")
         locations = pd.read_csv(url)
         states, countries = locations["name"], locations["country_name"]
         return zip(states.tolist(), countries.tolist())
