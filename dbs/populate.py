@@ -3,7 +3,7 @@ import random
 from dotenv import load_dotenv
 from os import getenv
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from faker.generator import random
 from warnings import filterwarnings
 
