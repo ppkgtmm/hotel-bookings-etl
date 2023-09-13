@@ -7,6 +7,9 @@ from os import getenv
 
 load_dotenv()
 
+driver = "mysql+mysqlconnector://"
+jdbc_driver = "jdbc:mysql://"
+
 db_host = getenv("DB_HOST")
 db_port = getenv("DB_PORT")
 db_user = getenv("DB_USER")
@@ -16,9 +19,12 @@ db_name = getenv("OLAP_DB")
 schema_registry_url = getenv("SCHEMA_REGISTRY_URL")
 
 schema_registry_client = SchemaRegistryClient({"url": schema_registry_url})
-connection_string = "jdbc:mysql://{}:{}@{}:{}/{}?useSSL=false".format(
-    db_user, db_password, db_host, db_port, db_name
-)
+
+
+def get_connection_string(jdbc: bool = True):
+    template = "{}:{}@{}:{}/{}?useSSL=false"
+    template = template.format(db_user, db_password, db_host, db_port, db_name)
+    return (jdbc_driver if jdbc else driver) + template
 
 
 def get_avro_schema(topic):
