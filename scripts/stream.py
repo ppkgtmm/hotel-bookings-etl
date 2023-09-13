@@ -2,16 +2,7 @@ from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 from os import getenv
 
-from helper import (
-    process_addons,
-    process_roomtypes,
-    process_rooms,
-    process_guests,
-    process_bookings,
-    # process_booking_rooms,
-    # process_booking_addons,
-    # tear_down,
-)
+from dimensions import *
 import traceback
 
 load_dotenv()
