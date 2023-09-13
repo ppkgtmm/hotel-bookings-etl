@@ -8,21 +8,45 @@ from db_writer import execute_query
 load_dotenv()
 
 bookings_table = getenv("BOOKINGS_TABLE")
-stg_booking_table = getenv("STG_BOOKING_TABLE")
-del_booking_table = getenv("DEL_BOOKING_TABLE")
+raw_booking_table = getenv("RAW_BOOKING_TABLE")
+temp_booking_table = "temp_" + raw_booking_table
+
+# upsert_query = (
+#     "INSERT INTO {} (id, checkin, checkout, updated_at) VALUES (%(id)s, %(checkin)s, %(checkout)s, %(updated_at)s) "
+#     + "ON DUPLICATE KEY UPDATE checkin=%(checkin)s, checkout=%(checkout)s, updated_at=%(updated_at)s"
+# )
 
 upsert_query = (
-    "INSERT INTO {} VALUES (:id, :checkin, :checkout, :updated_at) "
-    + "ON DUPLICATE KEY UPDATE checkin=:checkin, checkout=:checkout, updated_at=:updated_at"
+    "INSERT INTO {} dest SELECT * FROM {} src ON DUPLICATE KEY UPDATE "
+    "dest.checkin=src.checkin, "
+    "dest.checkout=src.checkout, "
+    "dest.updated_at=src.updated_at"
+)
+
+delete_query = (
+    "UPDATE {} dest INNER JOIN {} src "
+    "ON dest.id = src.id "
+    "SET dest.is_deleted = true"
 )
 
 
-def write_bookings(df: DataFrame, table_name: str):
-    if df.count() == 0:
-        return
-    query = upsert_query.format(table_name)
-    connection_string = get_connection_string(False)
-    execute_query(connection_string, query, to_list(df))
+def write_bookings(df: DataFrame, delete: bool = False):
+    (
+        df.write.format("jdbc")
+        .mode("overwrite")
+        .option("url", get_connection_string())
+        .option("driver", "com.mysql.jdbc.Driver")
+        .option("dbtable", temp_booking_table)
+        .save()
+    )
+    query = delete_query if delete else upsert_query
+    query = query.format(raw_booking_table, temp_booking_table)
+    execute_query(get_connection_string(False), query)
+
+
+# if df.count() == 0:
+#     return
+# query = upsert_query.format(table_name)
 
 
 def process_bookings(df: DataFrame, batch_id: int):
@@ -35,7 +59,7 @@ def process_bookings(df: DataFrame, batch_id: int):
         .withColumn("updated_at", expr("timestamp_millis(updated_at)"))
         .select(["id", "checkin", "checkout", "updated_at"])
     )
-    write_bookings(deleted_data, del_booking_table)
+    write_bookings(deleted_data, True)
     upserted_data = (
         data.filter(expr("after IS NOT NULL"))
         .select("after.*")
@@ -44,4 +68,4 @@ def process_bookings(df: DataFrame, batch_id: int):
         .withColumn("updated_at", expr("timestamp_millis(updated_at)"))
         .select(["id", "checkin", "checkout", "updated_at"])
     )
-    write_bookings(upserted_data, stg_booking_table)
+    write_bookings(upserted_data)
