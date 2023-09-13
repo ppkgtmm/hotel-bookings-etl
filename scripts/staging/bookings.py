@@ -13,7 +13,7 @@ del_booking_table = getenv("DEL_BOOKING_TABLE")
 
 upsert_query = (
     "INSERT INTO {} VALUES (:id, :checkin, :checkout, :updated_at)\n"
-    "ON DUPLICATE KEY UPDATE SET checkin=:checkin, checkout=:checkout, updated_at=:updated_at"
+    "ON DUPLICATE KEY UPDATE checkin=:checkin, checkout=:checkout, updated_at=:updated_at"
 )
 
 
