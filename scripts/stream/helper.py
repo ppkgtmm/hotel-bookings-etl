@@ -14,6 +14,8 @@ db_password = getenv("DB_PASSWORD")
 db_name = getenv("OLAP_DB")
 addons_table = getenv("ADDONS_TABLE")
 roomtypes_table = getenv("ROOMTYPES_TABLE")
+rooms_table = getenv("ROOMS_TABLE")
+stg_room_table = getenv("STG_ROOM_TABLE")
 dim_addon_table = getenv("DIM_ADDON_TABLE")
 dim_roomtype_table = getenv("DIM_ROOMTYPE_TABLE")
 registry_url = getenv("SCHEMA_REGISTRY_URL")
@@ -81,41 +83,23 @@ def process_roomtypes(df: DataFrame, batch_id: int):
     )
 
 
-# def process_locations(micro_batch_df: DataFrame, batch_id: int):
-#     data: DataFrame = (
-#         micro_batch_df.withColumn(
-#             "message", from_json(col("value").cast(StringType()), json_schema)
-#         )
-#         .withColumn("payload", from_json("message.payload", json_schema))
-#         .withColumn("data", from_json("payload.after", location_schema))
-#         .filter("data IS NOT NULL")
-#         .select(["data.id", "data.state", "data.country"])
-#     )
+def process_rooms(df: DataFrame, batch_id: int):
+    data: DataFrame = decode_data(df, rooms_table)
 
-#     rows = df_to_list(data)
-#     if rows != []:
-#         db_writer.write_dim_locations(rows)
-
-
-# def process_rooms(micro_batch_df: DataFrame, batch_id: int):
-#     data: DataFrame = (
-#         micro_batch_df.withColumn(
-#             "message", from_json(col("value").cast(StringType()), json_schema)
-#         )
-#         .withColumn("payload", from_json("message.payload", json_schema))
-#         .withColumn("data", from_json("payload.after", room_schema))
-#         .filter("data IS NOT NULL")
-#         .select(
-#             [
-#                 "data.id",
-#                 "data.type",
-#                 timestamp_seconds(col("data.updated_at") / 1000).alias("updated_at"),
-#             ]
-#         )
-#     )
-#     rows = df_to_list(data)
-#     if rows != []:
-#         db_writer.stage_rooms(rows)
+    processed_data = (
+        data.filter(expr("after IS NOT NULL"))
+        .select("after.*")
+        .withColumn("updated_at", expr("timestamp_millis(updated_at)"))
+        .select(["id", "type", "updated_at"])
+    )
+    (
+        processed_data.write.format("jdbc")
+        .mode("append")
+        .option("url", connection_string)
+        .option("driver", "com.mysql.jdbc.Driver")
+        .option("dbtable", stg_room_table)
+        .save()
+    )
 
 
 # def process_guests(micro_batch_df: DataFrame, batch_id: int):
