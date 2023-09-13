@@ -35,7 +35,7 @@ kconnect:
 	${PYTHON} connect/register_source.py
 
 dim-date:
-	${PYTHON} scripts/dim_date.py
+	${PYTHON} scripts/dimensions/dim_date.py
 
 run: kconnect dim-date
 
