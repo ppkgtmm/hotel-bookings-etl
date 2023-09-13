@@ -21,23 +21,20 @@ down:
 
 # initialize oltp and olap databases
 db-init:
-	python3 dbs/initialize.py
-
-# combination of steps required for project set up
-setup: create-venv activate install down up db-init
+	${PYTHON} dbs/initialize.py
 
 # generate fake booking data
 datagen:
-	python3 datagen/generate.py
+	${PYTHON} datagen/generate.py
 
 # seed OLTP database
 populate:
-	python3 dbs/populate.py    
+	${PYTHON} dbs/populate.py    
 
 # register OLTP database to kafka connect
 kconnect:
-	python3 connect/register_source.py
+	${PYTHON} connect/register_source.py
 
 # load data to date dimension table
 dim-date:
-	python3 scripts/dim_date.py
+	${PYTHON} scripts/dim_date.py
