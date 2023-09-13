@@ -12,10 +12,10 @@ raw_booking_table = getenv("RAW_BOOKING_TABLE")
 temp_booking_table = "temp_" + raw_booking_table
 
 upsert_query = (
-    "INSERT INTO {} dest SELECT * FROM {} src ON DUPLICATE KEY UPDATE "
-    "dest.checkin=src.checkin, "
-    "dest.checkout=src.checkout, "
-    "dest.updated_at=src.updated_at"
+    "INSERT INTO {} SELECT *, false FROM {} src ON DUPLICATE KEY UPDATE "
+    "checkin=src.checkin, "
+    "checkout=src.checkout, "
+    "updated_at=src.updated_at"
 )
 
 delete_query = (
