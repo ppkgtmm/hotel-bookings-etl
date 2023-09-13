@@ -1,6 +1,5 @@
-# create virtual environment
-create-venv:
-	python3 -m venv venv 
+PYTHON = ./venv/bin/python3
+PIP = ./venv/bin/pip3
 
 # activate virtual environment
 activate:
