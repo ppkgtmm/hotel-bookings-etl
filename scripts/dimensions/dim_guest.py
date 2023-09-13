@@ -2,7 +2,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from dotenv import load_dotenv
 from os import getenv
-from common import decode_data, connection_string
+from common import decode_data, get_connection_string
 
 load_dotenv()
 
@@ -24,7 +24,7 @@ def process_guests(df: DataFrame, batch_id: int):
     (
         processed_data.write.format("jdbc")
         .mode("append")
-        .option("url", connection_string)
+        .option("url", get_connection_string())
         .option("driver", "com.mysql.jdbc.Driver")
         .option("dbtable", dim_guest_table)
         .save()

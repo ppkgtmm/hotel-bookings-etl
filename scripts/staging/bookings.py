@@ -2,7 +2,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from dotenv import load_dotenv
 from os import getenv
-from common import decode_data, to_list, connection_string
+from common import decode_data, to_list, get_connection_string
 from db_writer import execute_query
 
 load_dotenv()
@@ -21,6 +21,7 @@ def write_bookings(df: DataFrame, table_name: str):
     if df.count() == 0:
         return
     query = upsert_query.format(table_name)
+    connection_string = get_connection_string(False)
     execute_query(connection_string, query, to_list(df))
 
 
