@@ -2,7 +2,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from dotenv import load_dotenv
 from os import getenv
-from common import decode_data, to_list, get_connection_string
+from common import decode_data, get_connection_string
 from db_writer import execute_query
 
 load_dotenv()
@@ -10,11 +10,6 @@ load_dotenv()
 bookings_table = getenv("BOOKINGS_TABLE")
 raw_booking_table = getenv("RAW_BOOKING_TABLE")
 temp_booking_table = "temp_" + raw_booking_table
-
-# upsert_query = (
-#     "INSERT INTO {} (id, checkin, checkout, updated_at) VALUES (%(id)s, %(checkin)s, %(checkout)s, %(updated_at)s) "
-#     + "ON DUPLICATE KEY UPDATE checkin=%(checkin)s, checkout=%(checkout)s, updated_at=%(updated_at)s"
-# )
 
 upsert_query = (
     "INSERT INTO {} dest SELECT * FROM {} src ON DUPLICATE KEY UPDATE "
@@ -42,11 +37,6 @@ def write_bookings(df: DataFrame, delete: bool = False):
     query = delete_query if delete else upsert_query
     query = query.format(raw_booking_table, temp_booking_table)
     execute_query(get_connection_string(False), query)
-
-
-# if df.count() == 0:
-#     return
-# query = upsert_query.format(table_name)
 
 
 def process_bookings(df: DataFrame, batch_id: int):
