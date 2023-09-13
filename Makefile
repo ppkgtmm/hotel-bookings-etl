@@ -1,13 +1,13 @@
 PYTHON = ./venv/bin/python3
 PIP = ./venv/bin/pip3
 
-# activate virtual environment
-activate:
-	. venv/bin/activate
+# create virtual environment
+setup:
+	python3 -m venv venv
 
 # install required dependencies
-install:
-	pip3 install -r requirements.txt
+install: setup
+	${PIP} install -r requirements.txt
 
 # start containers required for project
 up:
