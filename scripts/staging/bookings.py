@@ -13,9 +13,7 @@ temp_booking_table = "temp_" + raw_booking_table
 
 upsert_query = (
     "INSERT INTO {} SELECT *, false FROM {} src ON DUPLICATE KEY UPDATE "
-    "checkin=src.checkin, "
-    "checkout=src.checkout, "
-    "updated_at=src.updated_at"
+    "checkin=src.checkin, checkout=src.checkout, updated_at=src.updated_at"
 )
 
 delete_query = (
