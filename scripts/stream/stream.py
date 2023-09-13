@@ -5,8 +5,7 @@ from os import getenv
 from helper import (
     process_addons,
     process_roomtypes,
-    # process_locations,
-    # process_rooms,
+    process_rooms,
     # process_guests,
     # process_bookings,
     # process_booking_rooms,
@@ -77,19 +76,20 @@ if __name__ == "__main__":
         .start()
     )
 
-    # rooms = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", broker)
-    #     .option("subscribe", rooms_table)
-    #     .option("startingOffsets", "earliest")
-    #     .load()
-    # )
+    rooms = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", rooms_table)
+        .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", max_offsets)
+        .load()
+    )
 
-    # (
-    #     rooms.writeStream.option("checkpointLocation", "/tmp/rooms/_checkpoints/")
-    #     .foreachBatch(process_rooms)
-    #     .start()
-    # )
+    (
+        rooms.writeStream.option("checkpointLocation", "/tmp/rooms/_checkpoints/")
+        .foreachBatch(process_rooms)
+        .start()
+    )
 
     # guests = (
     #     spark.readStream.format("kafka")
