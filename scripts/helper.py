@@ -16,6 +16,9 @@ addons_table = getenv("ADDONS_TABLE")
 roomtypes_table = getenv("ROOMTYPES_TABLE")
 rooms_table = getenv("ROOMS_TABLE")
 guests_table = getenv("GUESTS_TABLE")
+bookings_table = getenv("BOOKINGS_TABLE")
+stg_booking_table = getenv("STG_BOOKING_TABLE")
+del_booking_table = getenv("DEL_BOOKING_TABLE")
 stg_room_table = getenv("STG_ROOM_TABLE")
 dim_addon_table = getenv("DIM_ADDON_TABLE")
 dim_roomtype_table = getenv("DIM_ROOMTYPE_TABLE")
@@ -123,6 +126,53 @@ def process_guests(df: DataFrame, batch_id: int):
         .option("dbtable", dim_guest_table)
         .save()
     )
+
+
+def process_bookings(df: DataFrame, batch_id: int):
+    data: DataFrame = decode_data(df, bookings_table)
+    deleted_data = (
+        data.filter(expr("after IS NULL AND before IS NOT NULL"))
+        .select("before.*")
+        .withColumn("checkin", expr("date_from_unix_date(checkin)"))
+        .withColumn("checkout", expr("date_from_unix_date(checkout)"))
+        .withColumn("updated_at", expr("timestamp_millis(updated_at)"))
+        .select(["id", "checkin", "checkout", "updated_at"])
+    )
+    processed_data = (
+        data.filter(expr("after IS NOT NULL"))
+        .select("after.*")
+        .withColumn("checkin", expr("date_from_unix_date(checkin)"))
+        .withColumn("checkout", expr("date_from_unix_date(checkout)"))
+        .withColumn("updated_at", expr("timestamp_millis(updated_at)"))
+        .select(["id", "checkin", "checkout", "updated_at"])
+    )
+
+    # .sparkSession.sql(
+    #     f"""
+    #         MERGE INTO {del_booking_table} dst
+    #         USING deleted_bookings src
+    #         ON dst.id = src.id
+    #         WHEN matched then UPDATE set checkin=t.checkin, checkout=t.checkout, updated_at=t.updated_at
+    #         when not matched then
+    #     """
+    # )
+    # to_list(deleted_data)
+    # processed_data.createGlobalTempView("upserted_bookings")
+    # deleted_data.sparkSession.sql(
+    #     f"""
+    #         CREATE TABLE IF NOT EXISTS {stg_booking_table}
+    #         USING JDBC
+    #         OPTIONS (
+    #             url '{connection_string}'
+    #         );
+
+    #         INSERT INTO {stg_booking_table}
+    #         SELECT * FROM upserted_bookings t
+    #         ON DUPLICATE KEY
+    #         UPDATE checkin=t.checkin, checkout=t.checkout, updated_at=t.updated_at;
+    #     """
+    # )
+    # to_list(processed_data)
 
 
 # def transform_bookings(bookings_df: DataFrame, key: str):
