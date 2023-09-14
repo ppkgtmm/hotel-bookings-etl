@@ -9,7 +9,7 @@ load_dotenv()
 
 bookings_table = getenv("BOOKINGS_TABLE")
 raw_booking_table = getenv("RAW_BOOKING_TABLE")
-temp_booking_table = "temp_" + raw_booking_table
+temp_booking_table = "temp_" + bookings_table
 
 upsert_query = (
     "INSERT INTO {} SELECT *, false FROM {} src ON DUPLICATE KEY UPDATE "
