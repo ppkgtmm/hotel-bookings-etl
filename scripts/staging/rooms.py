@@ -7,7 +7,7 @@ from common import decode_data, get_connection_string
 load_dotenv()
 
 rooms_table = getenv("ROOMS_TABLE")
-stg_room_table = getenv("STG_ROOM_TABLE")
+raw_room_table = getenv("RAW_ROOM_TABLE")
 
 
 def process_rooms(df: DataFrame, batch_id: int):
@@ -24,6 +24,6 @@ def process_rooms(df: DataFrame, batch_id: int):
         .mode("append")
         .option("url", get_connection_string())
         .option("driver", "com.mysql.jdbc.Driver")
-        .option("dbtable", stg_room_table)
+        .option("dbtable", raw_room_table)
         .save()
     )
