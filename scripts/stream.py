@@ -112,6 +112,22 @@ if __name__ == "__main__":
         .start()
     )
 
+    booking_rooms = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", booking_rooms_table)
+        .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", max_offsets)
+        .load()
+    )
+
+    (
+        booking_rooms.writeStream.option(
+            "checkpointLocation", "/tmp/booking_rooms/_checkpoints/"
+        )
+        .foreachBatch(process_booking_rooms)
+        .start()
+    )
     # bookings = (
     #     bookings.withColumn("data", expr("substring(value, 6, length(value) - 5)"))
     #     .withColumn("decoded", from_avro("data", get_schema(bookings_table)))
