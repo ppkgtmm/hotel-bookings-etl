@@ -9,6 +9,13 @@ CREATE TABLE `stg_room` (
   `updated_at` datetime
 );
 
+CREATE TABLE `stg_guest` (
+  `id` integer,
+  `state` varchar(255),
+  `country` varchar(255),
+  `updated_at` datetime
+);
+
 CREATE TABLE `stg_booking` (
   `id` integer PRIMARY KEY,
   `checkin` date,
