@@ -18,9 +18,9 @@ connection_string = (
 )
 
 
-data = pd.read_csv(file_url)
-data = data.drop_duplicates(["name", "country_name"])
-data = data.rename({"name": "state", "country_name": "country"})
+data = pd.read_csv(file_url)[["name", "country_name"]]
+data = data.drop_duplicates()
+data = data.rename(columns={"name": "state", "country_name": "country"})
 
 engine = create_engine(connection_string)
 
