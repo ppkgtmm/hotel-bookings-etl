@@ -47,6 +47,7 @@ etl() {
     activate
     python3 connect/register_source.py
     python3 scripts/dimensions/dim_date.py
+    python3 scripts/dimensions/dim_location.py
 }
 
 usage() {  
