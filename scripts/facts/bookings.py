@@ -23,8 +23,7 @@ query = """
             b.checkin,
             br.booking,
             br.room,
-            br.guest,
-            br.updated_at
+            br.guest
         FROM {booking_rooms} br
         INNER JOIN {bookings} b
         ON br.booking = b.id
