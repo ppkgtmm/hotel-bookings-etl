@@ -14,7 +14,7 @@ def process_roomtypes(df: DataFrame, batch_id: int):
     data: DataFrame = decode_data(df, roomtypes_table)
 
     processed_data = (
-        data.filter(expr("after IS NOT NULL"))
+        data.filter(expr("after IS NOT NULL AND after.deleted_at IS NULL"))
         .select("after.*")
         .withColumnRenamed("id", "_id")
         .withColumn("created_at", expr("timestamp_millis(updated_at)"))
