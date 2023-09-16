@@ -7,8 +7,15 @@ load_dotenv()
 
 raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
 raw_booking_table = getenv("RAW_BOOKING_TABLE")
+raw_room_table = getenv("RAW_ROOM_TABLE")
+raw_guest_table = getenv("RAW_GUEST_TABLE")
+dim_roomtype_table = getenv("DIM_ROOMTYPE_TABLE")
+dim_guest_table = getenv("DIM_GUEST_TABLE")
+dim_location_table = getenv("DIM_LOCATION_TABLE")
+fct_booking_table = getenv("FCT_BOOKING_TABLE")
 
 query = """
+CREATE TEMPORARY TABLE fact_bookings AS
     WITH RECURSIVE datetimes AS (
         SELECT id booking_id, checkin datetime, checkout
         FROM {bookings}
@@ -71,17 +78,47 @@ query = """
             ) room_type
         FROM bookings b
         WHERE b.guest IS NOT NULL AND b.guest_location IS NOT NULL AND b.room_type IS NOT NULL
-    ), fact_bookings AS (
-        SELECT 
-            b.id,
-            DATE_FORMAT(dt.datetime, '%Y%m%d000000') datetime,
-            b.guest,
-            b.guest_location,
-            b.room_type roomtype
-        FROM enriched_bookings b
-        INNER JOIN datetimes dt
-        ON b.booking = dt.booking_id
-        WHERE b.guest_location IS NOT NULL AND b.room_type IS NOT NULL
     )
+
+    SELECT 
+        b.id,
+        DATE_FORMAT(dt.datetime, '%Y%m%d000000') datetime,
+        b.guest,
+        b.guest_location,
+        b.room_type roomtype
+    FROM enriched_bookings b
+    INNER JOIN datetimes dt
+    ON b.booking = dt.booking_id
+    WHERE b.guest_location IS NOT NULL AND b.room_type IS NOT NULL;
+    
+    INSERT INTO {fct_bookings} (datetime, guest, guest_location, roomtype)
+    SELECT datetime, guest, guest_location, roomtype
+    FROM fact_bookings;
+
+    UPDATE {booking_rooms} br
+    INNER JOIN (
+        SELECT id
+        FROM fact_bookings
+        GROUP BY 1
+    ) fb
+    ON br.id = fb.id
+    SET br.processed = true;
 """
 
+
+def process_fct_bookings():
+    print(
+        query.format(
+            bookings=raw_booking_table,
+            booking_rooms=raw_booking_room_table,
+            dim_guest=dim_guest_table,
+            rooms=raw_room_table,
+            guests=raw_guest_table,
+            dim_location=dim_location_table,
+            dim_roomtype=dim_roomtype_table,
+            fct_bookings=fct_booking_table,
+        )
+    )
+
+
+process_fct_bookings()
