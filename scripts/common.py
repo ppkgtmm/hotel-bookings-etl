@@ -47,6 +47,6 @@ def decode_data(df: DataFrame, topic: str):
     )
 
 
-def process_guest(df: DataFrame, batch_id: int):
+def process_guests(df: DataFrame, batch_id: int):
     stage_guest(df, batch_id)
     process_dim_guest(df, batch_id)
