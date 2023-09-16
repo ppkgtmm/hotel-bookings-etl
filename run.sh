@@ -37,7 +37,7 @@ datagen() {
 
 seed() {
     activate
-    dbs/populate.py
+    python3 dbs/populate.py
     print "done seeding oltp database"
 }
 
