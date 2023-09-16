@@ -50,8 +50,8 @@ etl() {
 
 usage() {  
     echo "usage: ./run.sh command"  
-    echo "where command is one of setup, datagen, seed, etl, down"  
-    exit 1  
+    echo "where command is one of setup, datagen, seed, etl, down"
+    exit 1
 } 
 
 if [ "$1" = "setup" ]
