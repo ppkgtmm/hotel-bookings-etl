@@ -36,19 +36,19 @@ query = """
             (
                 SELECT MAX(id)
                 FROM {dim_guest}
-                WHERE _id = b.guest AND created_at <= b.checkin
+                WHERE _id = b.guest AND created_at <= IF(b.checkin > CURRENT_TIMESTAMP(), b.checkin, CURRENT_TIMESTAMP())
             ) guest,
             (
                 SELECT JSON_OBJECT("state", g.state, "country", g.country)
                 FROM {guests} g
-                WHERE g.id = b.guest AND g.updated_at <= b.checkin
+                WHERE g.id = b.guest AND g.updated_at <= IF(b.checkin > CURRENT_TIMESTAMP(), b.checkin, CURRENT_TIMESTAMP())
                 ORDER BY g.updated_at DESC
                 LIMIT 1
             ) guest_location,
             (
                 SELECT type
                 FROM {rooms} r
-                WHERE r.id = b.room AND r.updated_at <= b.checkin
+                WHERE r.id = b.room AND r.updated_at <= IF(b.checkin > CURRENT_TIMESTAMP(), b.checkin, CURRENT_TIMESTAMP())
                 ORDER BY r.updated_at DESC
                 LIMIT 1
             ) room_type
@@ -67,7 +67,7 @@ query = """
             (
                 SELECT MAX(id)
                 FROM {dim_roomtype}
-                WHERE _id = b.room_type AND created_at <= b.checkin
+                WHERE _id = b.room_type AND created_at <= IF(b.checkin > CURRENT_TIMESTAMP(), b.checkin, CURRENT_TIMESTAMP())
             ) room_type
         FROM bookings b
         WHERE b.guest IS NOT NULL AND b.guest_location IS NOT NULL AND b.room_type IS NOT NULL
