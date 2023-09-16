@@ -4,6 +4,8 @@ from pyspark.sql.avro.functions import from_avro
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from dotenv import load_dotenv
 from os import getenv
+from dimensions import process_guests as process_dim_guest
+from staging import process_guests as stage_guest
 
 load_dotenv()
 
@@ -43,3 +45,8 @@ def decode_data(df: DataFrame, topic: str):
         .withColumn("decoded", from_avro("data", get_avro_schema(topic)))
         .select("decoded.*")
     )
+
+
+def process_guest(df: DataFrame, batch_id: int):
+    stage_guest(df, batch_id)
+    process_dim_guest(df, batch_id)
