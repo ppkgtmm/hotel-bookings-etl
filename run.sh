@@ -48,6 +48,12 @@ etl() {
     python3 scripts/dimensions/dim_date.py
 }
 
+usage() {  
+    echo "usage: ./run.sh command"  
+    echo "where command is one of setup, datagen, seed, etl, down"  
+    exit 1  
+} 
+
 if [ "$1" = "setup" ]
 then
     setup
@@ -65,4 +71,5 @@ then
     down   
 else
     echo "${RED}error : invalid argument${CLEAR}"
+    usage
 fi
