@@ -94,7 +94,7 @@ CREATE TABLE `fct_amenities` (
   `addon_quantity` integer
 );
 
-CREATE TABLE `fct_booking` (
+CREATE TABLE `fct_bookings` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
   `datetime` bigint,
   `guest` integer,
@@ -102,13 +102,13 @@ CREATE TABLE `fct_booking` (
   `roomtype` integer
 );
 
-ALTER TABLE `fct_booking` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
+ALTER TABLE `fct_bookings` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
 
-ALTER TABLE `fct_booking` ADD FOREIGN KEY (`guest`) REFERENCES `dim_guest` (`id`);
+ALTER TABLE `fct_bookings` ADD FOREIGN KEY (`guest`) REFERENCES `dim_guest` (`id`);
 
-ALTER TABLE `fct_booking` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype` (`id`);
+ALTER TABLE `fct_bookings` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype` (`id`);
 
-ALTER TABLE `fct_booking` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
+ALTER TABLE `fct_bookings` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
 
 ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`datetime`) REFERENCES `dim_date` (`id`);
 
