@@ -25,6 +25,7 @@ setup() {
     docker-compose up -d mysql zookeeper
 	sleep 60
 	docker-compose up -d broker schema-registry kafka-connect --no-recreate
+    python3 dbs/initialize.py
     print "done setting up project"
 }
 
