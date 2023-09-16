@@ -51,7 +51,6 @@ etl() {
 usage() {  
     echo "usage: ./run.sh command"  
     echo "where command is one of setup, datagen, seed, etl, down"
-    exit 1
 } 
 
 if [ "$1" = "setup" ]
@@ -70,6 +69,7 @@ elif [ "$1" = "down" ]
 then
     down   
 else
-    echo "${RED}error : invalid argument${CLEAR}"
     usage
+    echo "${RED}error : invalid argument${CLEAR}"
+    exit 1
 fi
