@@ -1,9 +1,9 @@
 from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame
 from dotenv import load_dotenv
 from os import getenv
-from dimensions import process_addons, process_roomtypes
-from staging import process_bookings, process_rooms, process_booking_rooms
-from common import process_guests
+from dimensions import *
+from staging import *
 import traceback
 
 load_dotenv()
@@ -19,6 +19,11 @@ roomtypes_table = getenv("ROOMTYPES_TABLE")
 rooms_table = getenv("ROOMS_TABLE")
 bookings_table = getenv("BOOKINGS_TABLE")
 booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
+
+
+def process_guests(df: DataFrame, batch_id: int):
+    stage_guest(df, batch_id)
+    process_dim_guest(df, batch_id)
 
 
 if __name__ == "__main__":
