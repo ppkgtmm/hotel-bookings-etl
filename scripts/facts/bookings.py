@@ -12,6 +12,7 @@ query = """
     WITH RECURSIVE datetimes AS (
         SELECT id booking_id, checkin datetime, checkout
         FROM {bookings}
+        WHERE is_deleted = false AND (checkin - CURDATE()) < 7
         UNION ALL
         SELECT booking_id, datetime + INTERVAL 1 DAY, checkout
         FROM datetimes
@@ -27,7 +28,7 @@ query = """
         FROM {booking_rooms} br
         INNER JOIN {bookings} b
         ON br.booking = b.id
-        WHERE br.is_deleted = false AND br.processed = false AND b.is_deleted = false AND b.checkin < (CURDATE() - INTERVAL 1 WEEK)
+        WHERE br.is_deleted = false AND br.processed = false AND b.is_deleted = false AND (b.checkin - CURDATE()) < 7
     ), bookings AS (
         SELECT
             b.id,
