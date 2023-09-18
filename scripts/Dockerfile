@@ -10,17 +10,20 @@ RUN apk add python3 python3-dev
 RUN python3 -m ensurepip && pip3 install --upgrade pip
 
 # install required libraries
-RUN apk add bash gcc musl-dev librdkafka librdkafka-dev
+RUN apk add bash 
+# gcc musl-dev
 
 WORKDIR /processor
 
-COPY etl/stream/requirements.txt .
+COPY requirements.txt .
 
 # install required packages
 RUN pip3 install -r requirements.txt
 
-COPY etl/stream/*.py scripts/
+COPY *.py .
 
-COPY utilities/*.py scripts/utilities/
+COPY dimensions/ dimensions/
+
+COPY staging/ staging/
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
