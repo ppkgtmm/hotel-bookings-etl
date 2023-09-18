@@ -10,8 +10,7 @@ RUN apk add python3 python3-dev
 RUN python3 -m ensurepip && pip3 install --upgrade pip
 
 # install required libraries
-RUN apk add bash 
-# gcc musl-dev
+RUN apk add bash gcc musl-dev
 
 WORKDIR /processor
 
