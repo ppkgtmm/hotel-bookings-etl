@@ -1,12 +1,10 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
-from dotenv import load_dotenv
 from os import getenv
 from dimensions import *
 from staging import *
 import traceback
 
-load_dotenv()
 
 max_offsets = 20
 # broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")

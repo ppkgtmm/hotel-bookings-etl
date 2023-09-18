@@ -1,10 +1,8 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
-from dotenv import load_dotenv
 from os import getenv
 from common import decode_data, get_connection_string
 
-load_dotenv()
 
 addons_table = getenv("ADDONS_TABLE")
 dim_addon_table = getenv("DIM_ADDON_TABLE")

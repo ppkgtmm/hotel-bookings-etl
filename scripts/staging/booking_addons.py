@@ -1,11 +1,9 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
-from dotenv import load_dotenv
 from os import getenv
 from common import decode_data, get_connection_string
 from db_writer import execute_query
 
-load_dotenv()
 
 booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
 raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")

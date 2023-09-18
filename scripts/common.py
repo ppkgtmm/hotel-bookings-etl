@@ -2,10 +2,8 @@ from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 from pyspark.sql.avro.functions import from_avro
 from confluent_kafka.schema_registry import SchemaRegistryClient
-from dotenv import load_dotenv
 from os import getenv
 
-load_dotenv()
 
 driver = "mysql+mysqlconnector://"
 jdbc_driver = "jdbc:mysql://"

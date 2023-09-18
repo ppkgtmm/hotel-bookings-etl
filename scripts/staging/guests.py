@@ -1,10 +1,7 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
-from dotenv import load_dotenv
 from os import getenv
 from common import decode_data, get_connection_string
-
-load_dotenv()
 
 guest_table = getenv("GUESTS_TABLE")
 raw_guest_table = getenv("RAW_GUEST_TABLE")
