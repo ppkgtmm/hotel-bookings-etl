@@ -18,7 +18,7 @@ print() {
 
 setup() {
     print "running project set up"
-    python3 -m venv venv
+    python3.9 -m venv venv
     activate
     pip3 install -r requirements.txt
     down
