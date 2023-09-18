@@ -106,19 +106,15 @@ CREATE TEMPORARY TABLE fact_bookings AS
 """
 
 
-def process_fct_bookings():
-    print(
-        query.format(
-            bookings=raw_booking_table,
-            booking_rooms=raw_booking_room_table,
-            dim_guest=dim_guest_table,
-            rooms=raw_room_table,
-            guests=raw_guest_table,
-            dim_location=dim_location_table,
-            dim_roomtype=dim_roomtype_table,
-            fct_bookings=fct_booking_table,
-        )
+def process_bookings():
+    formatted_query = query.format(
+        bookings=raw_booking_table,
+        booking_rooms=raw_booking_room_table,
+        dim_guest=dim_guest_table,
+        rooms=raw_room_table,
+        guests=raw_guest_table,
+        dim_location=dim_location_table,
+        dim_roomtype=dim_roomtype_table,
+        fct_bookings=fct_booking_table,
     )
-
-
-process_fct_bookings()
+    execute_query(get_connection_string(False), formatted_query)
