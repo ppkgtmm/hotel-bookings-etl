@@ -1,4 +1,5 @@
 pyspark==3.4.1
 SQLAlchemy==2.0.20
 mysql-connector-python==8.0.33
+requests==2.31.0
 confluent-kafka==2.1.1
