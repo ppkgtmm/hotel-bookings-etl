@@ -19,6 +19,7 @@ roomtypes_table = getenv("ROOMTYPES_TABLE")
 rooms_table = getenv("ROOMS_TABLE")
 bookings_table = getenv("BOOKINGS_TABLE")
 booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
+booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
 
 
 def process_guests(df: DataFrame, batch_id: int):
@@ -135,26 +136,24 @@ if __name__ == "__main__":
         .start()
     )
 
-    # booking_addons = (
-    #     spark.readStream.format("kafka")
-    #     .option("kafka.bootstrap.servers", broker)
-    #     .option("subscribe", booking_addons_table)
-    #     .option("startingOffsets", "earliest")
-    #     # .option("maxOffsetsPerTrigger", 1)
-    #     .load()
-    # )
+    booking_addons = (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", broker)
+        .option("subscribe", booking_addons_table)
+        .option("startingOffsets", "earliest")
+        .option("maxOffsetsPerTrigger", max_offsets)
+        .load()
+    )
 
-    # (
-    #     booking_addons.writeStream.option(
-    #         "checkpointLocation", "/tmp/booking_addons/_checkpoints/"
-    #     )
-    #     .foreachBatch(process_booking_addons)
-    #     .start()
-    # )
+    (
+        booking_addons.writeStream.option(
+            "checkpointLocation", "/tmp/booking_addons/_checkpoints/"
+        )
+        .foreachBatch(process_booking_addons)
+        .start()
+    )
 
     try:
         spark.streams.awaitAnyTermination()
     except Exception as e:
         traceback.print_exc()
-    # finally:
-    #     tear_down()
