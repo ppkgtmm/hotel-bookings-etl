@@ -1,4 +1,4 @@
-FROM alpine:3.18.2
+FROM alpine:3.15
 
 # install java 8
 RUN apk add openjdk8
