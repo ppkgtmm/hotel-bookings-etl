@@ -7,8 +7,7 @@ import traceback
 
 
 max_offsets = 20
-# broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
-broker = getenv("KAFKA_BOOTSTRAP_SERVERS")
+broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 
 location_table = getenv("LOCATION_TABLE")
 guests_table = getenv("GUESTS_TABLE")
