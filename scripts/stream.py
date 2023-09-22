@@ -28,10 +28,6 @@ if __name__ == "__main__":
     spark = (
         SparkSession.builder.appName("hotel oltp processor")
         .config("spark.driver.memory", "1g")
-        # .config(
-        #     "spark.jars",
-        #     "/Users/pinky/Downloads/mysql-connector-java-8.0.13/mysql-connector-java-8.0.13.jar",
-        # )
         .config(
             "spark.jars.packages",
             "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1,org.apache.spark:spark-avro_2.12:3.4.1,mysql:mysql-connector-java:8.0.13",
