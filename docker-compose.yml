@@ -57,17 +57,6 @@ services:
       - .env
     command: "./run.sh"
 
-  # ksqldb-server:
-  #   image: confluentinc/ksqldb-server:0.29.0
-  #   container_name: $KSQL_SERVER_HOST_INTERNAL
-  #   depends_on:
-  #     - broker
-  #     - schema-registry
-  #   ports:
-  #     - $KSQL_SERVER_PORT:8088
-  #   env_file:
-  #     - .env
-
   processor:
     depends_on:
       - kafka-connect
