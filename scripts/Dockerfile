@@ -8,7 +8,7 @@ RUN wget -O Python-3.9.17.tgz https://www.python.org/ftp/python/3.9.17/Python-3.
 
 RUN tar -xzf Python-3.9.17.tgz && cd Python-3.9.17 && ./configure && make && make install
 
-RUN cd ../ && rm -r Python-3.9.17
+RUN cd ../ && rm -r Python-3.9.17 && rm Python-3.9.17.tgz
 
 # install required libraries
 RUN apk add --no-cache bash librdkafka librdkafka-dev
@@ -27,5 +27,3 @@ COPY *.py .
 COPY dimensions/ dimensions/
 
 COPY staging/ staging/
-
-ENTRYPOINT ["/bin/sh", "-c"]
