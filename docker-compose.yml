@@ -72,14 +72,12 @@ services:
     depends_on:
       - kafka-connect
       - mysql
-    build:
-      context: .
-      dockerfile: etl/stream/Dockerfile
+    build: scripts/
     image: processor
-    container_name: $PROCESSORS_HOST_INTERNAL
+    container_name: $PROCESSOR_HOST_INTERNAL
     env_file:
       - '.env'
-    command: "python3 scripts/stream.py"
+    command: "python3 stream.py"
   
   # postgres:
   #   image: postgres:13
