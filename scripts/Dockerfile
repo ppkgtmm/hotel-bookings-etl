@@ -28,4 +28,4 @@ COPY dimensions/ dimensions/
 
 COPY staging/ staging/
 
-ENTRYPOINT ["/bin/sh", "-c" ]
+ENTRYPOINT ["/bin/sh", "-c"]
