@@ -68,11 +68,11 @@ services:
       - '.env'
     command: "python3 stream.py"
   
-  # postgres:
-  #   image: postgres:13
-  #   container_name: postgres
-  #   env_file:
-  #   - '.env'
+  postgres:
+    image: postgres:13
+    container_name: $POSTGRES_HOST_INTERNAL
+    env_file:
+    - '.env'
     
 
   # airflow-init:
