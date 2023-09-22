@@ -6,7 +6,7 @@ from staging import *
 import traceback
 
 
-max_offsets = 20
+max_offsets = 150
 broker = getenv("KAFKA_BOOTSTRAP_SERVERS_INTERNAL")
 
 location_table = getenv("LOCATION_TABLE")
