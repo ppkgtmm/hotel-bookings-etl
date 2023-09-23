@@ -41,3 +41,11 @@ def decode_data(df: DataFrame, topic: str):
         .withColumn("decoded", from_avro("data", get_avro_schema(topic)))
         .select("decoded.*")
     )
+
+
+def cast_date(datetime: str):
+    return "DATE('{}')".format(datetime)
+
+
+def cast_datetime(datetime: str):
+    return "CAST('{}' AS DATETIME)".format(datetime)
