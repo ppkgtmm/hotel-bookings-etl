@@ -8,4 +8,4 @@ DELETE b
 FROM {{ params.bookings }} b
 INNER JOIN to_delete tbd
 ON b.id = tbd.booking
-WHERE tbd.cnt_pending = 0;
+WHERE b.is_deleted = true OR tbd.cnt_pending = 0;
