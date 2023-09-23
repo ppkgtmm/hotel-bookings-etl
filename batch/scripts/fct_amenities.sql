@@ -10,7 +10,7 @@ CREATE TEMPORARY TABLE fact_amenities AS
         FROM {{ params.booking_addons }} ba
         INNER JOIN {{ params.booking_rooms }} br
         ON ba.booking_room = br.id
-        WHERE ba.is_deleted = false AND ba.processed = false AND br.is_deleted = false AND TIMESTAMPDIFF(DAY, CAST('{{ ts }}' AS DATETIME), ba.datetime) < 7
+        WHERE ba.is_deleted = false AND ba.processed = false AND br.is_deleted = false AND TIMESTAMPDIFF(DAY, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), ba.datetime) < 7
     ), amenities AS (
         SELECT
             a.id,
@@ -18,26 +18,26 @@ CREATE TEMPORARY TABLE fact_amenities AS
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_guest }}
-                WHERE _id = a.guest AND created_at <= IF(a.datetime > CAST('{{ ts }}' AS DATETIME), a.datetime, CAST('{{ ts }}' AS DATETIME))
+                WHERE _id = a.guest AND created_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
             ) guest,
             (
                 SELECT JSON_OBJECT("state", g.state, "country", g.country)
                 FROM {{ params.guests }} g
-                WHERE g.id = a.guest AND g.updated_at <= IF(a.datetime > CAST('{{ ts }}' AS DATETIME), a.datetime, CAST('{{ ts }}' AS DATETIME))
+                WHERE g.id = a.guest AND g.updated_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
                 ORDER BY g.updated_at DESC
                 LIMIT 1
             ) guest_location,
             (
                 SELECT type
                 FROM {{ params.rooms }} r
-                WHERE r.id = a.room AND r.updated_at <= IF(a.datetime > CAST('{{ ts }}' AS DATETIME), a.datetime, CAST('{{ ts }}' AS DATETIME))
+                WHERE r.id = a.room AND r.updated_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
                 ORDER BY r.updated_at DESC
                 LIMIT 1
             ) room_type,
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_addon }}
-                WHERE _id = a.addon AND created_at <= IF(a.datetime > CAST('{{ ts }}' AS DATETIME), a.datetime, CAST('{{ ts }}' AS DATETIME))
+                WHERE _id = a.addon AND created_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
             ) addon,
             a.quantity
         FROM raw_amenities a
@@ -56,7 +56,7 @@ CREATE TEMPORARY TABLE fact_amenities AS
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_roomtype }}
-                WHERE _id = a.room_type AND created_at <= IF(a.datetime > CAST('{{ ts }}' AS DATETIME), a.datetime, CAST('{{ ts }}' AS DATETIME))
+                WHERE _id = a.room_type AND created_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
             ) room_type
         FROM amenities a
         WHERE a.guest IS NOT NULL AND a.guest_location IS NOT NULL AND a.room_type IS NOT NULL AND a.addon IS NOT NULL
