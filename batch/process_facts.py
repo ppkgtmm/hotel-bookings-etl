@@ -17,10 +17,7 @@ raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 dim_addon_table = getenv("DIM_ADDON_TABLE")
 fct_amenities_table = getenv("FCT_AMENITIES_TABLE")
 
-default_args = dict(
-    owner="airflow",
-    depends_on_past=False,
-)
+default_args = dict(owner="airflow", depends_on_past=False)
 
 dag = DAG(
     "process_facts",
