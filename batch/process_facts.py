@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.mysql_operator import MySqlOperator
+from airflow.sensors.external_task import ExternalTaskSensor
 from datetime import datetime
 import pytz
 from os import getenv
@@ -26,6 +27,14 @@ dag = DAG(
     catchup=False,
     start_date=datetime(2023, 9, 22, 0, 0, 0, 0, tzinfo=pytz.timezone("Asia/Bangkok")),
     schedule="0 0 * * *",
+)
+
+check_dims_populated = ExternalTaskSensor(
+    external_dag_id="process_dims",
+    poke_interval=10,
+    timeout=300,
+    task_id="check_dims_populated",
+    dag=dag,
 )
 
 process_fct_booking = MySqlOperator(
@@ -62,3 +71,5 @@ process_fct_amenities = MySqlOperator(
     task_id="process_fct_amenities",
     dag=dag,
 )
+
+check_dims_populated >> process_fct_booking >> process_fct_amenities
