@@ -32,15 +32,16 @@ dag = DAG(
     catchup=False,
 )
 
-process_fct_booking = PythonOperator(
+process_fct_booking = MySqlOperator(
     python_callable=process_bookings,
     op_args=("{{ ts }}",),
     task_id="process_fct_booking",
     dag=dag,
 )
-process_fct_amenities = PythonOperator(
-    python_callable=process_amenities,
-    op_args=("{{ ts }}",),
-    task_id="process_fct_amenities",
-    dag=dag,
-)
+
+# process_fct_amenities = PythonOperator(
+#     python_callable=process_amenities,
+#     op_args=("{{ ts }}",),
+#     task_id="process_fct_amenities",
+#     dag=dag,
+# )
