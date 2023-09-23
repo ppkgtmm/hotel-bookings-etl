@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.mysql_operator import MySqlOperator
+from airflow.sensors.external_task import ExternalTaskSensor
 from datetime import datetime
 from os import getenv
 import pytz
@@ -20,6 +21,14 @@ dag = DAG(
     start_date=datetime(2023, 9, 22, 0, 0, 0, 0, tzinfo=pytz.timezone("Asia/Bangkok")),
     schedule="30 0 * * *",
     catchup=False,
+)
+
+check_facts_processed = ExternalTaskSensor(
+    external_dag_id="process_facts",
+    poke_interval=10,
+    timeout=300,
+    task_id="check_facts_processed",
+    dag=dag,
 )
 
 cleanup_booking_addons = MySqlOperator(
@@ -68,4 +77,5 @@ cleanup_rooms = MySqlOperator(
     dag=dag,
 )
 
+check_facts_processed >> [cleanup_bookings, cleanup_guests, cleanup_rooms]
 cleanup_bookings >> cleanup_booking_rooms >> cleanup_booking_addons
