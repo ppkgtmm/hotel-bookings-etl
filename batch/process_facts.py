@@ -1,8 +1,21 @@
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.mysql_operator import MySqlOperator
 from datetime import datetime
 import pytz
-from scripts.facts import *
+from scripts.common import *
+from os import getenv
+
+raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
+raw_booking_table = getenv("RAW_BOOKING_TABLE")
+raw_room_table = getenv("RAW_ROOM_TABLE")
+raw_guest_table = getenv("RAW_GUEST_TABLE")
+dim_roomtype_table = getenv("DIM_ROOMTYPE_TABLE")
+dim_guest_table = getenv("DIM_GUEST_TABLE")
+dim_location_table = getenv("DIM_LOCATION_TABLE")
+fct_booking_table = getenv("FCT_BOOKING_TABLE")
+raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
+dim_addon_table = getenv("DIM_ADDON_TABLE")
+fct_amenities_table = getenv("FCT_AMENITIES_TABLE")
 
 default_args = dict(
     owner="airflow",
