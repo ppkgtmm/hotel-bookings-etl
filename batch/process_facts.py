@@ -5,6 +5,7 @@ import pytz
 from scripts.common import *
 from os import getenv
 
+mysql_conn_id = getenv("AIRFLOW_OLAP_CONN_ID")
 raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
 raw_booking_table = getenv("RAW_BOOKING_TABLE")
 raw_room_table = getenv("RAW_ROOM_TABLE")
@@ -33,8 +34,20 @@ dag = DAG(
 )
 
 process_fct_booking = MySqlOperator(
-    python_callable=process_bookings,
-    op_args=("{{ ts }}",),
+    sql="scripts/fct_bookings.sql",
+    mysql_conn_id=mysql_conn_id,
+    parameters=dict(
+        bookings=raw_booking_table,
+        booking_rooms=raw_booking_room_table,
+        dim_guest=dim_guest_table,
+        rooms=raw_room_table,
+        guests=raw_guest_table,
+        dim_location=dim_location_table,
+        dim_roomtype=dim_roomtype_table,
+        fct_bookings=fct_booking_table,
+        date=cast_date("{{ ts }}"),
+        datetime=cast_datetime("{{ ts }}"),
+    ),
     task_id="process_fct_booking",
     dag=dag,
 )
