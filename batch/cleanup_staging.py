@@ -30,36 +30,15 @@ cleanup_booking_addons = MySqlOperator(
     dag=dag,
 )
 
-cleanup_del_booking_addons = create_table = MySqlOperator(
-    sql=delete_del_booking_addons.format(
-        del_booking_addon_table=del_booking_addon_table, datetime="{{ ts }}"
-    ),
-    task_id="cleanup_del_booking_addons",
-    mysql_conn_id=mysql_conn_id,
-    dag=dag,
-)
 
-cleanup_stg_booking_rooms = MySqlOperator(
-    sql=delete_stg_booking_rooms.format(
-        stg_booking_room_table=stg_booking_room_table,
-        stg_booking_table=stg_booking_table,
-        del_booking_table=del_booking_table,
-        date="{{ ds }}",
-    ),
-    task_id="cleanup_stg_booking_rooms",
+cleanup_booking_rooms = MySqlOperator(
+    sql="scripts/stg_booking_rooms.sql",
     mysql_conn_id=mysql_conn_id,
-    dag=dag,
-)
-
-cleanup_del_booking_rooms = MySqlOperator(
-    sql=delete_del_booking_rooms.format(
-        del_booking_room_table=del_booking_room_table,
-        stg_booking_table=stg_booking_table,
-        del_booking_table=del_booking_table,
-        date="{{ ds }}",
+    params=dict(
+        booking_addons=raw_booking_addon_table,
+        booking_rooms=raw_booking_room_table,
     ),
-    task_id="cleanup_del_booking_rooms",
-    mysql_conn_id=mysql_conn_id,
+    task_id="cleanup_booking_rooms",
     dag=dag,
 )
 
