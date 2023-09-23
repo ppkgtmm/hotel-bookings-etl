@@ -45,11 +45,14 @@ def insert_dim_date(ts: str):
         end_date = datetime.fromisoformat(ts) + timedelta(days=1)
         delta = end_date.replace(tzinfo=None) - max_date
         hour_diff = ceil((delta.days * seconds_in_day + delta.seconds) / 3600)
-        conn.execute(
-            text(
-                f"INSERT INTO {dim_date_table} (id, datetime, date, month, quarter, year) VALUES (:id, :datetime, :date, :month, :quarter, :year)"
-            ).bindparams(generate_datetime(max_date, hour_diff))
-        )
+        for data in generate_datetime(max_date, hour_diff):
+            conn.execute(
+                text(
+                    f"INSERT INTO {dim_date_table} VALUES (:id, :datetime, :date, :month, :quarter, :year)"
+                ),
+                data,
+            )
+            conn.commit()
 
 
 default_args = dict(owner="airflow", depends_on_past=False)
