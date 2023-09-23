@@ -24,7 +24,7 @@ dag = DAG(
     default_args=default_args,
     max_active_runs=1,  # no concurrent runs
     catchup=False,
-    start_date=datetime(2023, 9, 21, 0, 0, 0, 0, tzinfo=pytz.timezone("Asia/Bangkok")),
+    start_date=datetime(2023, 9, 22, 0, 0, 0, 0, tzinfo=pytz.timezone("Asia/Bangkok")),
     schedule="0 0 * * *",
 )
 
