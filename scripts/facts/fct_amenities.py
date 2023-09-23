@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from os import getenv
-from common import get_connection_string
+from common import get_connection_string, cast_datetime
 from db_writer import execute_query
 
 load_dotenv()
@@ -28,7 +28,7 @@ CREATE TEMPORARY TABLE fact_amenities AS
         FROM {booking_addons} ba
         INNER JOIN {booking_rooms} br
         ON ba.booking_room = br.id
-        WHERE ba.is_deleted = false AND ba.processed = false AND br.is_deleted = false AND TIMESTAMPDIFF(DAY, CURRENT_TIMESTAMP(), ba.datetime) < 7
+        WHERE ba.is_deleted = false AND ba.processed = false AND br.is_deleted = false AND TIMESTAMPDIFF(DAY, {datetime}, ba.datetime) < 7
     ), amenities AS (
         SELECT
             a.id,
@@ -36,26 +36,26 @@ CREATE TEMPORARY TABLE fact_amenities AS
             (
                 SELECT MAX(id)
                 FROM {dim_guest}
-                WHERE _id = a.guest AND created_at <= IF(a.datetime > CURRENT_TIMESTAMP(), a.datetime, CURRENT_TIMESTAMP())
+                WHERE _id = a.guest AND created_at <= IF(a.datetime > {datetime}, a.datetime, {datetime})
             ) guest,
             (
                 SELECT JSON_OBJECT("state", g.state, "country", g.country)
                 FROM {guests} g
-                WHERE g.id = a.guest AND g.updated_at <= IF(a.datetime > CURRENT_TIMESTAMP(), a.datetime, CURRENT_TIMESTAMP())
+                WHERE g.id = a.guest AND g.updated_at <= IF(a.datetime > {datetime}, a.datetime, {datetime})
                 ORDER BY g.updated_at DESC
                 LIMIT 1
             ) guest_location,
             (
                 SELECT type
                 FROM {rooms} r
-                WHERE r.id = a.room AND r.updated_at <= IF(a.datetime > CURRENT_TIMESTAMP(), a.datetime, CURRENT_TIMESTAMP())
+                WHERE r.id = a.room AND r.updated_at <= IF(a.datetime > {datetime}, a.datetime, {datetime})
                 ORDER BY r.updated_at DESC
                 LIMIT 1
             ) room_type,
             (
                 SELECT MAX(id)
                 FROM {dim_addon}
-                WHERE _id = a.addon AND created_at <= IF(a.datetime > CURRENT_TIMESTAMP(), a.datetime, CURRENT_TIMESTAMP())
+                WHERE _id = a.addon AND created_at <= IF(a.datetime > {datetime}, a.datetime, {datetime})
             ) addon,
             a.quantity
         FROM raw_amenities a
@@ -74,7 +74,7 @@ CREATE TEMPORARY TABLE fact_amenities AS
             (
                 SELECT MAX(id)
                 FROM {dim_roomtype}
-                WHERE _id = a.room_type AND created_at <= IF(a.datetime > CURRENT_TIMESTAMP(), a.datetime, CURRENT_TIMESTAMP())
+                WHERE _id = a.room_type AND created_at <= IF(a.datetime > {datetime}, a.datetime, {datetime})
             ) room_type
         FROM amenities a
         WHERE a.guest IS NOT NULL AND a.guest_location IS NOT NULL AND a.room_type IS NOT NULL AND a.addon IS NOT NULL
@@ -105,7 +105,7 @@ CREATE TEMPORARY TABLE fact_amenities AS
 """
 
 
-def process_amenities():
+def process_amenities(datetime: str):
     formatted_query = query.format(
         booking_addons=raw_booking_addon_table,
         booking_rooms=raw_booking_room_table,
@@ -116,5 +116,6 @@ def process_amenities():
         dim_roomtype=dim_roomtype_table,
         dim_addon=dim_addon_table,
         fct_amenities=fct_amenities_table,
+        datetime=cast_datetime(datetime),
     )
     execute_query(get_connection_string(False), formatted_query)
