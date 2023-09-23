@@ -19,7 +19,7 @@ fct_amenities_table = getenv("FCT_AMENITIES_TABLE")
 
 default_args = dict(
     owner="airflow",
-    start_date=datetime(2023, 9, 22, tzinfo=pytz.timezone("Asia/Bangkok")),
+    start_date=datetime(2023, 9, 22, 0, 0, 0, 0, tzinfo=pytz.timezone("Asia/Bangkok")),
     depends_on_past=False,
     schedule_interval="0 0 * * *",
 )
