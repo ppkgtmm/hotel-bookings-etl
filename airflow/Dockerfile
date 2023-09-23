@@ -17,13 +17,13 @@ USER airflow
 
 WORKDIR /
 
-COPY requirements.txt .
+COPY airflow/requirements.txt .
 
 # install required packages
 RUN pip3 --no-cache-dir install -r requirements.txt
 
-COPY setup.sh .
+COPY airflow/setup.sh .
 
-COPY utilities/ ${DAGS_FOLDER}/utilities
+COPY scripts/common.py ${DAGS_FOLDER}/
 
-COPY airflow/*.py ${DAGS_FOLDER}/
+COPY scripts/db_writer.py ${DAGS_FOLDER}/
