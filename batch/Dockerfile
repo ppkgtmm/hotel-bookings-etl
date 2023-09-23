@@ -26,4 +26,4 @@ COPY setup.sh .
 
 COPY scripts/ ${DAGS_FOLDER}/scripts/
 
-COPY process_facts.py ${DAGS_FOLDER}/process_facts.py
+COPY *.py ${DAGS_FOLDER}/
