@@ -22,7 +22,6 @@ default_args = dict(
     start_date=datetime(2023, 9, 22, tzinfo=pytz.timezone("Asia/Bangkok")),
     depends_on_past=False,
     schedule_interval="0 0 * * *",
-    catchup=False,
 )
 
 dag = DAG(
