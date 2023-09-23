@@ -46,9 +46,9 @@ etl() {
     print "registering oltp db and running ETL"
     activate
     python3 connect/register_source.py
-    python3 scripts/dimensions/dim_date.py
-    python3 scripts/dimensions/dim_location.py
-    docker-compose up -d processor --no-recreate 
+    python3 batch/dependencies/dim_date.py
+    python3 batch/dependencies/dim_location.py
+    docker-compose up -d stream-processor --no-recreate 
 }
 
 usage() {  
