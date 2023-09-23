@@ -39,7 +39,7 @@ def insert_dim_date(ts: str):
         max_date = conn.execute(f"SELECT MAX(datetime) FROM {dim_date_table}").all()
         if not max_date or len(max_date) == 0:
             return
-        max_date = max_date[0]
+        max_date = max_date[0][0]
         seconds_in_day = 24 * 3600
         end_date = datetime.fromisoformat(ts) + timedelta(days=1)
         delta = end_date - max_date
