@@ -30,7 +30,6 @@ cleanup_booking_addons = MySqlOperator(
     dag=dag,
 )
 
-
 cleanup_booking_rooms = MySqlOperator(
     sql="scripts/stg_booking_rooms.sql",
     mysql_conn_id=mysql_conn_id,
@@ -41,7 +40,6 @@ cleanup_booking_rooms = MySqlOperator(
     task_id="cleanup_booking_rooms",
     dag=dag,
 )
-
 
 cleanup_bookings = MySqlOperator(
     sql="scripts/stg_bookings.sql",
