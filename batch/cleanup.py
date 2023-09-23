@@ -14,7 +14,7 @@ raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 default_args = dict(owner="airflow", depends_on_past=False)
 
 dag = DAG(
-    "cleanup_staging",
+    "clean_up",
     default_args=default_args,
     max_active_runs=1,  # no concurrent runs
     start_date=datetime(2023, 9, 22, 0, 0, 0, 0, tzinfo=pytz.timezone("Asia/Bangkok")),
