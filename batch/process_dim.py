@@ -16,18 +16,22 @@ dim_date_table = getenv("DIM_DATE_TABLE")
 
 
 def generate_datetime(base_date: datetime, hour_diff: int):
+    result = []
     for hour in range(hour_diff):
         date_time = base_date + timedelta(hours=hour + 1)
-        yield dict(
-            id=int(date_time.strftime("%Y%m%d%H%M%S")),
-            datetime=date_time,
-            date=date_time.date(),
-            month=date_time.replace(day=1).date(),
-            quarter=date_time.replace(
-                month=((date_time.month - 1) // 3) * 3 + 1, day=1
-            ).date(),
-            year=date_time.replace(month=1, day=1).date(),
+        result.append(
+            dict(
+                id=int(date_time.strftime("%Y%m%d%H%M%S")),
+                datetime=date_time,
+                date=date_time.date(),
+                month=date_time.replace(day=1).date(),
+                quarter=date_time.replace(
+                    month=((date_time.month - 1) // 3) * 3 + 1, day=1
+                ).date(),
+                year=date_time.replace(month=1, day=1).date(),
+            )
         )
+    return result
 
 
 def insert_dim_date(ts: str):
@@ -46,7 +50,7 @@ def insert_dim_date(ts: str):
         hour_diff = ceil((delta.days * seconds_in_day + delta.seconds) / 3600)
         conn.execute(
             f"INSERT INTO {dim_date_table} (id, datetime, date, month, quarter, year) VALUES (:id, :datetime, :date, :month, :quarter, :year)",
-            list(generate_datetime(max_date, hour_diff)),
+            generate_datetime(max_date, hour_diff),
         )
 
 
