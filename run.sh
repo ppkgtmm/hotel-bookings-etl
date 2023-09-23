@@ -51,9 +51,13 @@ etl() {
     docker-compose up -d stream-processor --no-recreate 
 }
 
+airflow() {
+    docker-compose up -d --no-recreate
+}
+
 usage() {  
     echo "usage: ./run.sh command"  
-    echo "where command is one of setup, datagen, seed, etl, down"
+    echo "where command is one of setup, datagen, seed, etl, airflow and down"
 } 
 
 if [ "$1" = "setup" ]
@@ -68,6 +72,9 @@ then
 elif [ "$1" = "etl" ]
 then
     etl
+elif [ "$1" = "airflow" ]
+then
+    airflow
 elif [ "$1" = "down" ]
 then
     down   
