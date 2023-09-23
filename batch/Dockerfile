@@ -24,10 +24,6 @@ RUN pip3 --no-cache-dir install -r requirements.txt
 
 COPY setup.sh .
 
-COPY scripts/common.py ${DAGS_FOLDER}/
-
-COPY scripts/db_writer.py ${DAGS_FOLDER}/
-
 COPY scripts/facts/ ${DAGS_FOLDER}/scripts/facts/
 
 # COPY airflow/*.py ${DAGS_FOLDER}/
