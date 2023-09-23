@@ -7,6 +7,9 @@ import pytz
 mysql_conn_id = getenv("AIRFLOW_OLAP_CONN_ID")
 raw_room_table = getenv("RAW_ROOM_TABLE")
 raw_guest_table = getenv("RAW_GUEST_TABLE")
+raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
+raw_booking_table = getenv("RAW_BOOKING_TABLE")
+raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 
 default_args = dict(owner="airflow", depends_on_past=False)
 
