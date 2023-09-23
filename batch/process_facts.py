@@ -48,9 +48,20 @@ process_fct_booking = MySqlOperator(
     dag=dag,
 )
 
-# process_fct_amenities = PythonOperator(
-#     python_callable=process_amenities,
-#     op_args=("{{ ts }}",),
-#     task_id="process_fct_amenities",
-#     dag=dag,
-# )
+process_fct_amenities = MySqlOperator(
+    sql="scripts/fct_amenities.sql",
+    mysql_conn_id=mysql_conn_id,
+    params=dict(
+        booking_addons=raw_booking_addon_table,
+        booking_rooms=raw_booking_room_table,
+        dim_guest=dim_guest_table,
+        rooms=raw_room_table,
+        guests=raw_guest_table,
+        dim_location=dim_location_table,
+        dim_roomtype=dim_roomtype_table,
+        dim_addon=dim_addon_table,
+        fct_amenities=fct_amenities_table,
+    ),
+    task_id="process_fct_amenities",
+    dag=dag,
+)
