@@ -103,6 +103,6 @@ services:
     container_name: $WEBSERVER_HOST_INTERNAL
     command: webserver
     ports:
-      - 8080:8080
+      - $WEBSERVER_PORT:8080
     depends_on:
       - airflow-scheduler
