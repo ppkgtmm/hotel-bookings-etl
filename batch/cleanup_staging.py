@@ -22,12 +22,11 @@ dag = DAG(
     catchup=False,
 )
 
-cleanup_stg_booking_addons = create_table = MySqlOperator(
-    sql=delete_stg_booking_addons.format(
-        stg_booking_addon_table=stg_booking_addon_table, datetime="{{ ts }}"
-    ),
-    task_id="cleanup_stg_booking_addons",
+cleanup_booking_addons = MySqlOperator(
+    sql="scripts/stg_booking_addons.sql",
     mysql_conn_id=mysql_conn_id,
+    params=dict(booking_addons=raw_booking_addon_table),
+    task_id="cleanup_booking_addons",
     dag=dag,
 )
 
