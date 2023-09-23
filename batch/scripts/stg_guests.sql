@@ -10,4 +10,4 @@ WITH ranked_guests AS (
 DELETE stg
 FROM {{ params.guests }} stg
 INNER JOIN to_delete tbd
-ON stg.id = tbd.id AND stg.updated_at = tbd.updated_at
+ON stg.id = tbd.id AND stg.updated_at = tbd.updated_at;
