@@ -216,23 +216,3 @@ delete_del_bookings = """
     ON br.booking = db.id
     WHERE br.booking IS NULL AND checkout <= DATE('{date}')
 """
-
-delete_rooms_query = """
-    DELETE stg
-    FROM {stg_room_table} stg
-    INNER JOIN (
-        SELECT id, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnum
-        FROM {stg_room_table}
-    ) sub
-    ON sub.rnum > 3 AND stg.id = sub.id
-"""
-
-delete_guests_query = """
-    DELETE stg
-    FROM {stg_guest_table} stg
-    INNER JOIN (
-        SELECT id, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnum
-        FROM {stg_guest_table}
-    ) sub
-    ON sub.rnum > 3 AND stg.id = sub.id
-"""
