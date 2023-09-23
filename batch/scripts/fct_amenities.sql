@@ -61,26 +61,26 @@ CREATE TEMPORARY TABLE fact_amenities AS
         FROM amenities a
         WHERE a.guest IS NOT NULL AND a.guest_location IS NOT NULL AND a.room_type IS NOT NULL AND a.addon IS NOT NULL
     )
-    SELECT
-        id,
-        DATE_FORMAT(datetime, '%Y%m%d%H%i%s') datetime,
-        guest,
-        guest_location,
-        room_type roomtype,
-        addon,
-        quantity addon_quantity
-    FROM enriched_amenities
-    WHERE guest_location IS NOT NULL AND room_type IS NOT NULL;
+SELECT
+    id,
+    DATE_FORMAT(datetime, '%Y%m%d%H%i%s') datetime,
+    guest,
+    guest_location,
+    room_type roomtype,
+    addon,
+    quantity addon_quantity
+FROM enriched_amenities
+WHERE guest_location IS NOT NULL AND room_type IS NOT NULL;
 
-    INSERT INTO {{ params.fct_amenities }} (datetime, guest, guest_location, roomtype, addon, addon_quantity)
-    SELECT datetime, guest, guest_location, roomtype, addon, addon_quantity
-    FROM fact_amenities;
+INSERT INTO {{ params.fct_amenities }} (datetime, guest, guest_location, roomtype, addon, addon_quantity)
+SELECT datetime, guest, guest_location, roomtype, addon, addon_quantity
+FROM fact_amenities;
 
-    UPDATE {{ params.booking_addons }} ba
-    INNER JOIN (
-        SELECT id
-        FROM fact_amenities
-        GROUP BY 1
-    ) fa
-    ON ba.id = fa.id
-    SET ba.processed = true;
+UPDATE {{ params.booking_addons }} ba
+INNER JOIN (
+    SELECT id
+    FROM fact_amenities
+    GROUP BY 1
+) fa
+ON ba.id = fa.id
+SET ba.processed = true;
