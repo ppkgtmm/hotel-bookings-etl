@@ -2,7 +2,6 @@ from airflow import DAG
 from airflow.operators.mysql_operator import MySqlOperator
 from datetime import datetime
 import pytz
-from scripts.common import *
 from os import getenv
 
 mysql_conn_id = getenv("AIRFLOW_OLAP_CONN_ID")
@@ -45,8 +44,6 @@ process_fct_booking = MySqlOperator(
         dim_location=dim_location_table,
         dim_roomtype=dim_roomtype_table,
         fct_bookings=fct_booking_table,
-        date=cast_date("{{ ts }}"),
-        datetime=cast_datetime("{{ ts }}"),
     ),
     task_id="process_fct_booking",
     dag=dag,
