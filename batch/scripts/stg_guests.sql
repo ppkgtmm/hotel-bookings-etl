@@ -1,13 +1,13 @@
-WITH ranked_rooms AS (
+WITH ranked_guests AS (
     SELECT id, updated_at, ROW_NUMBER() OVER(PARTITION BY id ORDER BY updated_at DESC) rnum
-    FROM {{ params.rooms }}
+    FROM {{ params.guests }}
 ), to_delete AS (
     SELECT id, updated_at
-    FROM ranked_rooms
+    FROM ranked_guests
     WHERE rnum > 3
 )
 
 DELETE stg
-FROM {{ params.rooms }} stg
+FROM {{ params.guests }} stg
 INNER JOIN to_delete tbd
 ON stg.id = tbd.id AND stg.updated_at = tbd.updated_at
