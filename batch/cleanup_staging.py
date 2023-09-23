@@ -42,27 +42,15 @@ cleanup_booking_rooms = MySqlOperator(
     dag=dag,
 )
 
-cleanup_stg_bookings = MySqlOperator(
-    sql=delete_stg_bookings.format(
-        stg_booking_table=stg_booking_table,
-        stg_booking_room_table=stg_booking_room_table,
-        del_booking_room_table=del_booking_room_table,
-        date="{{ ds }}",
-    ),
-    task_id="cleanup_stg_bookings",
-    mysql_conn_id=mysql_conn_id,
-    dag=dag,
-)
 
-cleanup_del_bookings = MySqlOperator(
-    sql=delete_del_bookings.format(
-        del_booking_table=del_booking_table,
-        stg_booking_room_table=stg_booking_room_table,
-        del_booking_room_table=del_booking_room_table,
-        date="{{ ds }}",
-    ),
-    task_id="cleanup_del_bookings",
+cleanup_bookings = MySqlOperator(
+    sql="scripts/stg_bookings.sql",
     mysql_conn_id=mysql_conn_id,
+    params=dict(
+        bookings=raw_booking_table,
+        booking_rooms=raw_booking_room_table,
+    ),
+    task_id="cleanup_bookings",
     dag=dag,
 )
 
