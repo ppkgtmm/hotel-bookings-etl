@@ -5,6 +5,7 @@ import pytz
 from os import getenv
 from sqlalchemy import create_engine
 from sqlalchemy.pool import NullPool
+from sqlalchemy.sql import text
 from math import ceil
 
 db_host = getenv("DB_HOST_INTERNAL")
@@ -49,7 +50,9 @@ def insert_dim_date(ts: str):
         delta = end_date.replace(tzinfo=None) - max_date
         hour_diff = ceil((delta.days * seconds_in_day + delta.seconds) / 3600)
         conn.execute(
-            f"INSERT INTO {dim_date_table} (id, datetime, date, month, quarter, year) VALUES (:id, :datetime, :date, :month, :quarter, :year)",
+            text(
+                f"INSERT INTO {dim_date_table} (id, datetime, date, month, quarter, year) VALUES (:id, :datetime, :date, :month, :quarter, :year)"
+            ),
             generate_datetime(max_date, hour_diff),
         )
 
