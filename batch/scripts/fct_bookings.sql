@@ -2,7 +2,7 @@ CREATE TEMPORARY TABLE fact_bookings AS
     WITH RECURSIVE datetimes AS (
         SELECT id booking_id, checkin datetime, checkout
         FROM {{ params.bookings }}
-        WHERE is_deleted = false AND (checkin - DATE('{{ ts }}')) < 7
+        WHERE is_deleted = false AND (checkin - DATE('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}')) < 7
         UNION ALL
         SELECT booking_id, datetime + INTERVAL 1 DAY, checkout
         FROM datetimes
@@ -17,7 +17,7 @@ CREATE TEMPORARY TABLE fact_bookings AS
         FROM {{ params.booking_rooms }} br
         INNER JOIN {{ params.bookings }} b
         ON br.booking = b.id
-        WHERE br.is_deleted = false AND br.processed = false AND b.is_deleted = false AND (b.checkin - DATE('{{ ts }}')) < 7
+        WHERE br.is_deleted = false AND br.processed = false AND b.is_deleted = false AND (b.checkin - DATE('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}')) < 7
     ), bookings AS (
         SELECT
             b.id,
@@ -26,19 +26,19 @@ CREATE TEMPORARY TABLE fact_bookings AS
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_guest }}
-                WHERE _id = b.guest AND created_at <= IF(b.checkin > CAST('{{ ts }}' AS DATETIME), b.checkin, CAST('{{ ts }}' AS DATETIME))
+                WHERE _id = b.guest AND created_at <= IF(b.checkin > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), b.checkin, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
             ) guest,
             (
                 SELECT JSON_OBJECT("state", g.state, "country", g.country)
                 FROM {{ params.guests }} g
-                WHERE g.id = b.guest AND g.updated_at <= IF(b.checkin > CAST('{{ ts }}' AS DATETIME), b.checkin, CAST('{{ ts }}' AS DATETIME))
+                WHERE g.id = b.guest AND g.updated_at <= IF(b.checkin > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), b.checkin, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
                 ORDER BY g.updated_at DESC
                 LIMIT 1
             ) guest_location,
             (
                 SELECT type
                 FROM {{ params.rooms }} r
-                WHERE r.id = b.room AND r.updated_at <= IF(b.checkin > CAST('{{ ts }}' AS DATETIME), b.checkin, CAST('{{ ts }}' AS DATETIME))
+                WHERE r.id = b.room AND r.updated_at <= IF(b.checkin > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), b.checkin, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
                 ORDER BY r.updated_at DESC
                 LIMIT 1
             ) room_type
@@ -57,7 +57,7 @@ CREATE TEMPORARY TABLE fact_bookings AS
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_roomtype }}
-                WHERE _id = b.room_type AND created_at <= IF(b.checkin > CAST('{{ ts }}' AS DATETIME), b.checkin, CAST('{{ ts }}' AS DATETIME))
+                WHERE _id = b.room_type AND created_at <= IF(b.checkin > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), b.checkin, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
             ) room_type
         FROM bookings b
         WHERE b.guest IS NOT NULL AND b.guest_location IS NOT NULL AND b.room_type IS NOT NULL
