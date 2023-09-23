@@ -52,7 +52,7 @@ etl() {
 }
 
 airflow() {
-    docker-compose up -d --no-recreate
+    docker-compose up -d airflow-scheduler airflow-webserver --no-recreate
 }
 
 usage() {  
