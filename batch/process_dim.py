@@ -52,8 +52,7 @@ def insert_dim_date(ts: str):
         conn.execute(
             text(
                 f"INSERT INTO {dim_date_table} (id, datetime, date, month, quarter, year) VALUES (:id, :datetime, :date, :month, :quarter, :year)"
-            ),
-            generate_datetime(max_date, hour_diff),
+            ).bindparams(generate_datetime(max_date, hour_diff))
         )
 
 
