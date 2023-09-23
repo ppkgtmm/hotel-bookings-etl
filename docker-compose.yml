@@ -57,16 +57,16 @@ services:
       - .env
     command: "./run.sh"
 
-  processor:
+  stream-processor:
     depends_on:
       - kafka-connect
       - mysql
-    build: scripts/
-    image: processor
+    build: stream/
+    image: stream-processor
     container_name: $PROCESSOR_HOST_INTERNAL
     env_file:
       - '.env'
-    command: "python3 stream.py"
+    command: "python3 main.py"
   
   postgres:
     image: postgres:13
