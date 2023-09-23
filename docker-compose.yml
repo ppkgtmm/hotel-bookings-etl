@@ -84,25 +84,25 @@ services:
         - AIRFLOW_VERSION=$AIRFLOW_VERSION
         - PYTHON_VERSION=$PYTHON_VERSION
     <<: *airflow-common
-    container_name: airflow-init
+    container_name: $INIT_HOST_INTERNAL
     entrypoint: bash -c
     command: ./setup.sh
     depends_on:
       - postgres
 
-  # airflow-scheduler:
-  #   <<: *airflow-common
-  #   container_name: airflow-scheduler
-  #   command: scheduler
-  #   depends_on:
-  #     airflow-init:
-  #       condition: service_completed_successfully
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: $SCHEDULER_HOST_INTERNAL
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
   
-  # airflow-webserver:
-  #   <<: *airflow-common
-  #   container_name: airflow-webserver
-  #   command: webserver
-  #   ports:
-  #     - 8080:8080
-  #   depends_on:
-  #     - airflow-scheduler
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: $WEBSERVER_HOST_INTERNAL
+    command: webserver
+    ports:
+      - 8080:8080
+    depends_on:
+      - airflow-scheduler
