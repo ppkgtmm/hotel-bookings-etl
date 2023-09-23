@@ -67,3 +67,5 @@ cleanup_rooms = MySqlOperator(
     params=dict(rooms=raw_room_table),
     dag=dag,
 )
+
+cleanup_bookings >> cleanup_booking_rooms >> cleanup_booking_addons
