@@ -1,12 +1,12 @@
 version: '3'
-# x-common:
-#   &airflow-common
-#   image: airflow:$AIRFLOW_VERSION
-#   environment:
-#     - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres/$POSTGRES_DB
-#     - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres/$POSTGRES_DB
-#   env_file:
-#     - '.env'
+x-common:
+  &airflow-common
+  image: airflow:$AIRFLOW_VERSION
+  environment:
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=$AIRFLOW_DATABASE_CONN
+    - AIRFLOW__CORE__SQL_ALCHEMY_CONN=$AIRFLOW_DATABASE_CONN
+  env_file:
+    - '.env'
 services:
   mysql:
     image: mysql:8.0.33
@@ -75,21 +75,20 @@ services:
     - '.env'
     
 
-  # airflow-init:
-  #   build:
-  #     context: processors/
-  #     dockerfile: airflow/Dockerfile
-  #     args:
-  #       - AIRFLOW_HOME=$AIRFLOW_HOME
-  #       - DAGS_FOLDER=$DAGS_FOLDER
-  #       - AIRFLOW_VERSION=$AIRFLOW_VERSION
-  #       - PYTHON_VERSION=$PYTHON_VERSION
-  #   <<: *airflow-common
-  #   container_name: airflow-init
-  #   entrypoint: bash -c
-  #   command: /setup.sh
-  #   depends_on:
-  #     - postgres
+  airflow-init:
+    build:
+      context: batch/
+      args:
+        - AIRFLOW_HOME=$AIRFLOW_HOME
+        - DAGS_FOLDER=$DAGS_FOLDER
+        - AIRFLOW_VERSION=$AIRFLOW_VERSION
+        - PYTHON_VERSION=$PYTHON_VERSION
+    <<: *airflow-common
+    container_name: airflow-init
+    entrypoint: bash -c
+    command: ./setup.sh
+    depends_on:
+      - postgres
 
   # airflow-scheduler:
   #   <<: *airflow-common
