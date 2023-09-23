@@ -1,9 +1,7 @@
-from dotenv import load_dotenv
 from os import getenv
 from common import get_connection_string, cast_date, cast_datetime
 from db_writer import execute_query
 
-load_dotenv()
 
 raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
 raw_booking_table = getenv("RAW_BOOKING_TABLE")
