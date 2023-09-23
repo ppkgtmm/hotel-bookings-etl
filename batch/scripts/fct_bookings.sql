@@ -63,26 +63,26 @@ CREATE TEMPORARY TABLE fact_bookings AS
         WHERE b.guest IS NOT NULL AND b.guest_location IS NOT NULL AND b.room_type IS NOT NULL
     )
 
-    SELECT 
-        b.id,
-        DATE_FORMAT(dt.datetime, '%Y%m%d000000') datetime,
-        b.guest,
-        b.guest_location,
-        b.room_type roomtype
-    FROM enriched_bookings b
-    INNER JOIN datetimes dt
-    ON b.booking = dt.booking_id
-    WHERE b.guest_location IS NOT NULL AND b.room_type IS NOT NULL;
-    
-    INSERT INTO {{ params.fct_bookings }} (datetime, guest, guest_location, roomtype)
-    SELECT datetime, guest, guest_location, roomtype
-    FROM fact_bookings;
+SELECT 
+    b.id,
+    DATE_FORMAT(dt.datetime, '%Y%m%d000000') datetime,
+    b.guest,
+    b.guest_location,
+    b.room_type roomtype
+FROM enriched_bookings b
+INNER JOIN datetimes dt
+ON b.booking = dt.booking_id
+WHERE b.guest_location IS NOT NULL AND b.room_type IS NOT NULL;
 
-    UPDATE {{ params.booking_rooms }} br
-    INNER JOIN (
-        SELECT id
-        FROM fact_bookings
-        GROUP BY 1
-    ) fb
-    ON br.id = fb.id
-    SET br.processed = true;
+INSERT INTO {{ params.fct_bookings }} (datetime, guest, guest_location, roomtype)
+SELECT datetime, guest, guest_location, roomtype
+FROM fact_bookings;
+
+UPDATE {{ params.booking_rooms }} br
+INNER JOIN (
+    SELECT id
+    FROM fact_bookings
+    GROUP BY 1
+) fb
+ON br.id = fb.id
+SET br.processed = true;
