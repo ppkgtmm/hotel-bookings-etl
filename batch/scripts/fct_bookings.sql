@@ -26,19 +26,19 @@ CREATE TEMPORARY TABLE fact_bookings AS
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_guest }}
-                WHERE _id = b.guest AND created_at <= IF(b.checkin > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), b.checkin, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
+                WHERE _id = b.guest
             ) guest,
             (
                 SELECT JSON_OBJECT("state", g.state, "country", g.country)
                 FROM {{ params.guests }} g
-                WHERE g.id = b.guest AND g.updated_at <= IF(b.checkin > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), b.checkin, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
+                WHERE g.id = b.guest
                 ORDER BY g.updated_at DESC
                 LIMIT 1
             ) guest_location,
             (
                 SELECT type
                 FROM {{ params.rooms }} r
-                WHERE r.id = b.room AND r.updated_at <= IF(b.checkin > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), b.checkin, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
+                WHERE r.id = b.room
                 ORDER BY r.updated_at DESC
                 LIMIT 1
             ) room_type
@@ -57,7 +57,7 @@ CREATE TEMPORARY TABLE fact_bookings AS
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_roomtype }}
-                WHERE _id = b.room_type AND created_at <= IF(b.checkin > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), b.checkin, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
+                WHERE _id = b.room_type
             ) room_type
         FROM bookings b
         WHERE b.guest IS NOT NULL AND b.guest_location IS NOT NULL AND b.room_type IS NOT NULL
