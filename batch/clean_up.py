@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.mysql_operator import MySqlOperator
 from airflow.sensors.external_task import ExternalTaskSensor
-from datetime import datetime
+from datetime import datetime, timedelta
 from os import getenv
 import pytz
 
@@ -27,6 +27,7 @@ check_facts_processed = ExternalTaskSensor(
     external_dag_id="process_facts",
     poke_interval=10,
     timeout=300,
+    execution_delta=timedelta(minutes=30),
     task_id="check_facts_processed",
     dag=dag,
 )
