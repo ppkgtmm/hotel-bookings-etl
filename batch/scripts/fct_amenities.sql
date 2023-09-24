@@ -18,26 +18,26 @@ CREATE TEMPORARY TABLE fact_amenities AS
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_guest }}
-                WHERE _id = a.guest AND created_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
+                WHERE _id = a.guest
             ) guest,
             (
                 SELECT JSON_OBJECT("state", g.state, "country", g.country)
                 FROM {{ params.guests }} g
-                WHERE g.id = a.guest AND g.updated_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
+                WHERE g.id = a.guest
                 ORDER BY g.updated_at DESC
                 LIMIT 1
             ) guest_location,
             (
                 SELECT type
                 FROM {{ params.rooms }} r
-                WHERE r.id = a.room AND r.updated_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
+                WHERE r.id = a.room
                 ORDER BY r.updated_at DESC
                 LIMIT 1
             ) room_type,
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_addon }}
-                WHERE _id = a.addon AND created_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
+                WHERE _id = a.addon
             ) addon,
             a.quantity
         FROM raw_amenities a
@@ -56,7 +56,7 @@ CREATE TEMPORARY TABLE fact_amenities AS
             (
                 SELECT MAX(id)
                 FROM {{ params.dim_roomtype }}
-                WHERE _id = a.room_type AND created_at <= IF(a.datetime > CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME), a.datetime, CAST('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}' AS DATETIME))
+                WHERE _id = a.room_type
             ) room_type
         FROM amenities a
         WHERE a.guest IS NOT NULL AND a.guest_location IS NOT NULL AND a.room_type IS NOT NULL AND a.addon IS NOT NULL
