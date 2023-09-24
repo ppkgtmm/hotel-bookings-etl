@@ -6,6 +6,6 @@ WITH to_delete AS (
 
 DELETE br
 FROM {{ params.booking_rooms }} br
-INNER JOIN to_delete tbd
+LEFT JOIN to_delete tbd
 ON br.id = tbd.booking_room
-WHERE br.is_deleted = true OR tbd.cnt_pending = 0;
+WHERE tbd.booking_room IS NULL OR br.is_deleted = true OR tbd.cnt_pending = 0;
