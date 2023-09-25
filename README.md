@@ -67,7 +67,7 @@ Every change in dimension related tables are captured while only latest state of
    - process_dims
    - process_facts
 
-4. Click on any dag name to monitor it while running
+4. Optionally, click on any dag name to monitor it while running
 
 Fact tables are now populated after ensuring existence of required dimesions and staging area is cleaned up to reduce storage consumption upon successful completion of the pipelines triggered daily
 
