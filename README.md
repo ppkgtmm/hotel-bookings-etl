@@ -2,21 +2,17 @@
 
 ## Usage
 
-#### Set up
-1. Copy file `example.env` into a new file called `.env` in same directory
+Make sure to be inside project directory in your terminal
+
+#### Initialization
+1. Copy file `example.env` into a new file called `.env` in the same directory
    
-2. In `.env` file created, replace values that have following pattern `<FILL IN ...>` with suitable values 
+2. In `.env` file created, fill in values that have following pattern `<TO BE FILLED>` as needed 
 
-3. Run following to allow set up script execution
-
-```
-chmod +x setup.sh
-```
-
-4. Run the set up script
+3. Run following to allow helper script execution
 
 ```
-./setup.sh
+chmod +x run.sh
 ```
 
 #### Execute project 
