@@ -5,6 +5,9 @@
 Make sure to be inside project directory in your terminal
 
 #### Initialization
+
+Required only for the first time you are running the project
+
 1. Copy file `example.env` into a new file called `.env` in the same directory
    
 2. In `.env` file created, fill in values that have following pattern `<TO BE FILLED>` as needed 
