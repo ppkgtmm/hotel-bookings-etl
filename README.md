@@ -73,6 +73,8 @@ Fact tables are now populated after ensuring existence of required dimesions and
 
 #### Tear down
 
+With this step, containers in use by project are stopped and removed
+
 ```
 ./run.sh down
 ```
