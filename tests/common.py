@@ -17,10 +17,3 @@ def get_connection_str():
         "oltp": f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}/{oltp_db}",
         "olap": f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}/{olap_db}",
     }
-
-
-def get_insert_query(table_name: str, fields: List[str]):
-    query = "INSERT INTO {}".format(table_name)
-    columns = " (" + ", ".join(fields) + ") "
-    values = "VALUES (" + ", ".join([":" + field for field in fields]) + ")"
-    return query + columns + values
