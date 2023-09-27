@@ -53,7 +53,6 @@ def insert_dim_date(ts: str):
                 ),
                 data,
             )
-            conn.commit()
 
 
 default_args = dict(owner="airflow", depends_on_past=False)
