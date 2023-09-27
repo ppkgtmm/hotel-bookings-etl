@@ -1,6 +1,5 @@
-from typing import List
 from dotenv import load_dotenv
-from os import getenv
+from os import getenv, path
 
 load_dotenv()
 
@@ -14,6 +13,11 @@ olap_db = getenv("OLAP_DB")
 booking_id = 100000001
 booking_room_ids = [100000001, 100000002]
 booking_addon_ids = [100000001, 100000002]
+
+results_dir = path.join(path.abspath(path.dirname(__file__)), "results")
+booking_file = path.join(results_dir, "booking.csv")
+booking_room_file = path.join(results_dir, "booking_room.csv")
+booking_addon_file = path.join(results_dir, "booking_addon.csv")
 
 
 def get_connection_str():
