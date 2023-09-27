@@ -42,7 +42,7 @@ def insert_dim_date(ts: str):
             return
         max_date = max_date[0][0]
         seconds_in_day = 24 * 3600
-        end_date = datetime.fromisoformat(ts) + timedelta(days=1)
+        end_date = datetime.fromisoformat(ts) + timedelta(days=8)
         delta = end_date.replace(tzinfo=None) - max_date
         hour_diff = ceil((delta.days * seconds_in_day + delta.seconds) / 3600)
         for data in generate_datetime(max_date, hour_diff):
