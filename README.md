@@ -51,7 +51,8 @@ In this step, insert, update or delete operations inside transactional database 
 ```
 
 
-Every change in dimension related tables are captured while only latest state of fact related tables are retained in staging area
+- Every change in dimension related tables are captured while only latest state of fact related tables are retained in staging area
+- If the command fails because of `AssertionError` or `connection issue`, retry after some time
 
 #### Run ETL - Part 2
 
