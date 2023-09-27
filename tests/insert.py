@@ -7,6 +7,7 @@ from common import get_connection_str, get_insert_query
 load_dotenv()
 
 # location_table = getenv("LOCATION_TABLE")
+
 # addons_table = getenv("ADDONS_TABLE")
 # roomtypes_table = getenv("ROOMTYPES_TABLE")
 guests_table = getenv("GUESTS_TABLE")
