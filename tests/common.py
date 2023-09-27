@@ -26,34 +26,3 @@ def get_connection_str():
         "oltp": f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}/{oltp_db}",
         "olap": f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}/{olap_db}",
     }
-
-
-def get_facts(booking_file: str, booking_room_file: str, booking_addon_file: str):
-    booking = pd.read_csv(booking_file)
-    booking_rooms = pd.read_csv(booking_room_file)
-    booking_addons = pd.read_csv(booking_addon_file)
-
-    booking = booking[["id", "checkin", "checkout"]]
-    booking_rooms = booking_rooms[["id", "booking", "guest", "room"]]
-    booking_addons = booking_addons[
-        ["id", "datetime", "addon", "booking_room", "quantity"]
-    ]
-
-    booking["checkin"] = pd.to_datetime(booking["checkin"])
-    booking["checkout"] = pd.to_datetime(booking["checkout"])
-    booking_addons["datetime"] = pd.to_datetime(booking_addons["datetime"])
-
-    fct_booking = (
-        booking.set_index("id")
-        .join(booking_rooms.set_index("booking"))
-        .dropna()
-        .reset_index(names=["booking"])
-    )
-
-    fct_amenities = (
-        booking_rooms.set_index("id")
-        .join(booking_addons.set_index("booking_room"))
-        .dropna()
-        .reset_index(names=["booking_room"])
-    )
-    return fct_booking, fct_amenities
