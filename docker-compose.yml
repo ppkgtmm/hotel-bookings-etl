@@ -8,12 +8,12 @@ x-common:
         - DAGS_FOLDER=$DAGS_FOLDER
         - AIRFLOW_VERSION=$AIRFLOW_VERSION
         - PYTHON_VERSION=$PYTHON_VERSION
-  image: airflow:$AIRFLOW_VERSION
   environment:
     - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=$AIRFLOW_DATABASE_CONN
     - AIRFLOW__CORE__SQL_ALCHEMY_CONN=$AIRFLOW_DATABASE_CONN
   env_file:
     - '.env'
+
 services:
   mysql:
     image: mysql:8.0.33
@@ -83,6 +83,7 @@ services:
     
 
   airflow-init:
+    image: airflow:$AIRFLOW_VERSION
     <<: *airflow-common
     container_name: $INIT_HOST_INTERNAL
     entrypoint: bash -c
