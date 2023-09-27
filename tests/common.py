@@ -11,6 +11,10 @@ db_port = getenv("DB_PORT")
 oltp_db = getenv("OLTP_DB")
 olap_db = getenv("OLAP_DB")
 
+booking_id = 100000001
+booking_room_ids = [100000001, 100000002]
+booking_addon_ids = [100000001, 100000002]
+
 
 def get_connection_str():
     return {
