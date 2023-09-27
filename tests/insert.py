@@ -7,13 +7,13 @@ from common import get_connection_str, get_insert_query
 load_dotenv()
 
 # location_table = getenv("LOCATION_TABLE")
-# guests_table = getenv("GUESTS_TABLE")
-# users_table = getenv("USERS_TABLE")
 # addons_table = getenv("ADDONS_TABLE")
 # roomtypes_table = getenv("ROOMTYPES_TABLE")
-# rooms_table = getenv("ROOMS_TABLE")
-# bookings_table = getenv("BOOKINGS_TABLE")
-# booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
+guests_table = getenv("GUESTS_TABLE")
+rooms_table = getenv("ROOMS_TABLE")
+users_table = getenv("USERS_TABLE")
+bookings_table = getenv("BOOKINGS_TABLE")
+booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
 # booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
 
 if __name__ == "__main__":
