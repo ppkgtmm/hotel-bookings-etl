@@ -14,13 +14,14 @@ db_user = getenv("DB_USER")
 db_password = getenv("DB_PASSWORD")
 db_name = getenv("OLAP_DB")
 dim_date_table = getenv("DIM_DATE_TABLE")
+fmt = getenv("DT_FORMAT")
 
 
 def generate_datetime(base_date: datetime, hour_diff: int):
     for hour in range(hour_diff):
         date_time = base_date + timedelta(hours=hour + 1)
         yield dict(
-            id=int(date_time.strftime("%Y%m%d%H%M%S")),
+            id=int(date_time.strftime(fmt)),
             datetime=date_time,
             date=date_time.date(),
             month=date_time.replace(day=1).date(),
