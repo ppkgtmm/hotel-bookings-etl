@@ -34,6 +34,7 @@ def get_facts(booking_file: str, booking_room_file: str, booking_addon_file: str
     booking_addons = pd.read_csv(booking_addon_file)
 
     booking = booking[["id", "checkin", "checkout"]]
+    booking_rooms = booking_rooms[["id", "booking", "guest", "room"]]
     booking_addons = booking_addons[
         ["id", "datetime", "addon", "booking_room", "quantity"]
     ]
@@ -45,13 +46,14 @@ def get_facts(booking_file: str, booking_room_file: str, booking_addon_file: str
     fct_booking = (
         booking.set_index("id")
         .join(booking_rooms.set_index("booking"))
-        .rename(columns={"id": "booking_room_id"})
+        .dropna()
+        .reset_index(names=["booking"])
     )
 
     fct_amenities = (
         booking_rooms.set_index("id")
         .join(booking_addons.set_index("booking_room"))
         .dropna()
-        .rename(columns={"id": "booking_addon_id"})
+        .reset_index(names=["booking_room"])
     )
     return fct_booking, fct_amenities
