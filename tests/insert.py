@@ -18,12 +18,6 @@ booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
 # booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
 
 
-booking = dict(
-    checkin=datetime.today() + timedelta(days=10),
-    checkout=datetime.today() + timedelta(days=15),
-    payment=datetime.now(),
-)
-
 
 def insert_booking_room(booking: int):
     table = Table(booking_rooms_table, MetaData(), autoload_with=oltp_engine)
@@ -48,7 +42,12 @@ def insert_booking():
     user_table = Table(users_table, MetaData(), autoload_with=oltp_engine)
     user_query = select(user_table.c.id).limit(1)
     user_id = oltp_conn.execute(user_query).fetchone()[0]
-    data = dict(**booking, user=user_id)
+    data = dict(
+        checkin=datetime.today() + timedelta(days=10),
+        checkout=datetime.today() + timedelta(days=15),
+        payment=datetime.now(),
+        user=user_id,
+    )
     query = insert(table).values(**data)
     result = oltp_conn.execute(query)
     oltp_conn.commit()
