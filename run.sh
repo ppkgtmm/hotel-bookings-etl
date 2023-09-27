@@ -4,6 +4,8 @@ GREEN="\033[0;32m"
 RED="\033[0;31m"
 CLEAR="\033[0m"
 
+set -e # exit immediately if any command fails
+
 activate_venv() {
     source venv/bin/activate
 }
@@ -21,7 +23,7 @@ setup() {
     python3.9 -m venv venv
     activate_venv
     pip3 install -r requirements.txt
-    down
+    tear_down
     docker-compose up -d mysql zookeeper
 	sleep 60
 	docker-compose up -d broker schema-registry kafka-connect --no-recreate
