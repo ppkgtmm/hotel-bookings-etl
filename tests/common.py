@@ -20,6 +20,7 @@ dim_addon_table = getenv("DIM_ADDON_TABLE")
 fct_booking_table = getenv("FCT_BOOKING_TABLE")
 raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
 raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
+fct_amenities_table = getenv("FCT_AMENITIES_TABLE")
 
 booking_id = 100000001
 booking_room_ids = [100000001, 100000002]
@@ -52,48 +53,55 @@ class TestHelper:
         self.dim_addon = Table(
             dim_addon_table, MetaData(), autoload_with=self.olap_engine
         )
+        self.fct_amenities = Table(
+            fct_amenities_table, MetaData(), autoload_with=self.olap_engine
+        )
+
+    def get_dim_guest(self, _id: int):
+        guest_query = (
+            select(self.dim_guest.c.id)
+            .where(self.dim_guest.c._id == _id)
+            .order_by(desc(self.dim_guest.c.id))
+            .limit(1)
+        )
+        return self.olap_conn.execute(guest_query).fetchone()
+
+    def get_dim_addon(self, _id: int):
+        addon_query = (
+            select(self.dim_addon.c.id)
+            .where(self.dim_addon.c._id == _id)
+            .order_by(desc(self.dim_addon.c.id))
+            .limit(1)
+        )
+        return self.olap_conn.execute(addon_query).fetchone()
 
     def get_fct_bookings(self, booking: dict, booking_room: dict):
         checkin = datetime.fromisoformat(booking["checkin"]).strftime(fmt)
         checkout = datetime.fromisoformat(booking["checkout"]).strftime(fmt)
-        guest_query = (
-            select(self.dim_guest.c.id)
-            .where(self.dim_guest.c._id == booking_room["guest"])
-            .order_by(desc(self.dim_guest.c.id))
-            .limit(1)
-        )
-        guest = self.olap_conn.execute(guest_query).fetchone()[0]
+        guest = self.get_dim_guest(booking_room["guest"])
+        if not guest:
+            return []
         booking_query = (
             select(self.fct_booking)
             .where(self.fct_booking.c.datetime >= int(checkin))
             .where(self.fct_booking.c.datetime <= int(checkout))
-            .where(self.fct_booking.c.guest == guest)
+            .where(self.fct_booking.c.guest == guest[0])
         )
         return self.olap_conn.execute(booking_query).fetchall()
 
-    # def get_fct_amenities(self, booking_room: dict, booking_addon: dict):
-    #     guest_query = (
-    #         select(self.dim_guest.c.id)
-    #         .where(self.dim_guest.c._id == booking_room["guest"])
-    #         .order_by(desc(self.dim_guest.c.id))
-    #         .limit(1)
-    #     )
-    #     guest = self.olap_conn.execute(guest_query).fetchone()[0]
-    #     addon_query = (
-    #         select(self.dim_addon.c.id)
-    #         .where(self.dim_guest.c._id == booking_room["guest"])
-    #         .order_by(desc(self.dim_guest.c.id))
-    #         .limit(1)
-    #     )
-    #     guest = self.olap_conn.execute(guest_query).fetchone()[0]
-
-    #     booking_query = (
-    #         select(self.fct_booking)
-    #         .where(self.fct_booking.c.datetime >= checkin)
-    #         .where(self.fct_booking.c.datetime <= checkout)
-    #         .where(self.fct_booking.c.guest == guest)
-    #     )
-    #     return self.olap_conn.execute(booking_query).fetchall()
+    def get_fct_amenities(self, booking_room: dict, booking_addon: dict):
+        date_time = datetime.fromisoformat(booking_addon["datetime"]).strftime(fmt)
+        guest = self.get_dim_guest(booking_room["guest"])
+        addon = self.get_dim_addon(booking_addon["addon"])
+        if None in [guest, addon]:
+            return []
+        amenities_query = (
+            select(self.fct_amenities)
+            .where(self.fct_amenities.c.datetime == int(date_time))
+            .where(self.fct_amenities.c.addon <= addon[0])
+            .where(self.fct_amenities.c.guest == guest[0])
+        )
+        return self.olap_conn.execute(amenities_query).fetchall()
 
     def tear_down(self):
         self.olap_conn.close()
