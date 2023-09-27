@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 from os import getenv
-import pandas as pd
-from sqlalchemy import create_engine
-from common import get_connection_str
+from datetime import datetime, timedelta
+from sqlalchemy import create_engine, Table, MetaData, select, insert
+from common import get_connection_str, get_insert_query
 
 load_dotenv()
 
