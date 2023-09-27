@@ -57,9 +57,14 @@ start_airflow() {
     docker-compose up -d airflow-scheduler airflow-webserver --no-recreate
 }
 
+run_tests() {
+    activate_venv
+    python3 tests/insert.py
+}
+
 usage() {  
     echo "usage: ./run.sh command"  
-    echo "where command is one of setup, datagen, seed, etl, airflow and down"
+    echo "where command is one of setup, datagen, seed, etl, airflow, test and down"
 } 
 
 if [ "$1" = "setup" ]
@@ -77,6 +82,9 @@ then
 elif [ "$1" = "airflow" ]
 then
     start_airflow
+elif [ "$1" = "test" ]
+then
+    run_tests
 elif [ "$1" = "down" ]
 then
     tear_down
