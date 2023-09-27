@@ -20,7 +20,7 @@ raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 def insert_booking_addons(booking_rooms: List[dict], booking: dict):
     addon_table = Table(addons_table, MetaData(), autoload_with=oltp_engine)
     addon = oltp_conn.execute(select(addon_table.c.id)).fetchone()[0]
-    date_time = datetime.fromtimestamp(booking["checkin"].timestamp())
+    date_time = datetime.fromisoformat(booking["checkin"].isoformat())
     date_time = date_time.replace(hour=14, minute=30, second=0)
     data = [
         dict(
@@ -66,8 +66,8 @@ def insert_booking_room(booking: dict):
 def insert_booking():
     data = dict(
         id=booking_id,
-        checkin=datetime.today() + timedelta(days=10),
-        checkout=datetime.today() + timedelta(days=15),
+        checkin=datetime.today().date() + timedelta(days=10),
+        checkout=datetime.today().date() + timedelta(days=15),
         updated_at=datetime.now(),
     )
     table = Table(raw_booking_table, MetaData(), autoload_with=olap_engine)
