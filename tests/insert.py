@@ -2,17 +2,11 @@ from typing import List
 from dotenv import load_dotenv
 from os import getenv
 from datetime import datetime, timedelta
-from sqlalchemy import create_engine, Table, MetaData, select, insert
-from common import get_connection_str
-
-booking_id = 100000001
-booking_room_id = [100000001, 100000002]
-booking_addon_id = [100000001, 100000002]
+import pandas as pd
+from sqlalchemy import create_engine, Table, MetaData, select, insert, delete
+from common import *
 
 load_dotenv()
-
-# location_table = getenv("LOCATION_TABLE")
-# roomtypes_table = getenv("ROOMTYPES_TABLE")
 
 addons_table = getenv("ADDONS_TABLE")
 guests_table = getenv("GUESTS_TABLE")
@@ -20,16 +14,31 @@ rooms_table = getenv("ROOMS_TABLE")
 users_table = getenv("USERS_TABLE")
 raw_booking_table = getenv("RAW_BOOKING_TABLE")
 raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
-# booking_rooms_table = getenv("BOOKING_ROOMS_TABLE")
-# booking_addons_table = getenv("BOOKING_ADDONS_TABLE")
+raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 
 
-# def insert_booking_addons(booking_rooms: List[int]):
-#     table = Table(booking_addons_table, MetaData(), autoload_with=oltp_engine)
-#     addon_table = Table(addons_table, MetaData(), autoload_with=oltp_engine)
-#     addon_query = select(addon_table.c.id).limit(1)
-#     addon = oltp_conn.execute()
-#     # for booking_room in booking_rooms:
+def insert_booking_addons(booking_rooms: List[dict], booking: dict):
+    addon_table = Table(addons_table, MetaData(), autoload_with=oltp_engine)
+    addon = oltp_conn.execute(select(addon_table.c.id)).fetchone()[0]
+    date_time = datetime.fromtimestamp(booking["checkin"].timestamp())
+    date_time = date_time.replace(hour=14, minute=30, second=0)
+    data = [
+        dict(
+            id=id,
+            booking_room=booking_room["id"],
+            addon=addon,
+            datetime=date_time,
+            quantity=1,
+            updated_at=datetime.now(),
+        )
+        for id, booking_room in zip(booking_addon_ids, booking_rooms)
+    ]
+
+    table = Table(raw_booking_addon_table, MetaData(), autoload_with=olap_engine)
+    query = insert(table).values(data)
+    olap_conn.execute(query)
+    olap_conn.commit()
+    return data
 
 
 def insert_booking_room(booking: dict):
@@ -46,7 +55,7 @@ def insert_booking_room(booking: dict):
             guest=guest[0],
             updated_at=datetime.now(),
         )
-        for id, room, guest in zip(booking_room_id, room_ids, guest_ids)
+        for id, room, guest in zip(booking_room_ids, room_ids, guest_ids)
     ]
     query = insert(table).values(data)
     olap_conn.execute(query)
@@ -68,6 +77,26 @@ def insert_booking():
     return data
 
 
+def pre_insert():
+    booking_table = Table(raw_booking_table, MetaData(), autoload_with=olap_engine)
+    booking_room_table = Table(
+        raw_booking_room_table, MetaData(), autoload_with=olap_engine
+    )
+    booking_addon_table = Table(
+        raw_booking_addon_table, MetaData(), autoload_with=olap_engine
+    )
+    queries = [
+        delete(booking_table).where(booking_table.c.id == booking_id),
+        delete(booking_room_table).where(booking_room_table.c.id.in_(booking_room_ids)),
+        delete(booking_addon_table).where(
+            booking_addon_table.c.id.in_(booking_addon_ids)
+        ),
+    ]
+    for query in queries:
+        olap_conn.execute(query)
+        olap_conn.commit()
+
+
 if __name__ == "__main__":
     conn_str_map = get_connection_str()
     oltp_engine = create_engine(conn_str_map.get("oltp"))
@@ -75,10 +104,14 @@ if __name__ == "__main__":
     oltp_conn = oltp_engine.connect()
     olap_conn = olap_engine.connect()
 
+    pre_insert()
     booking = insert_booking()
-    print(booking)
     booking_rooms = insert_booking_room(booking)
-    print(booking_rooms)
+    booking_addons = insert_booking_addons(booking_rooms, booking)
+
+    pd.DataFrame([booking]).to_csv(booking_file, index=False)
+    pd.DataFrame(booking_rooms).to_csv(booking_room_file, index=False)
+    pd.DataFrame(booking_addons).to_csv(booking_addon_file, index=False)
 
     oltp_conn.close()
     olap_conn.close()
