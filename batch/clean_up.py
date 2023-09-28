@@ -12,7 +12,7 @@ raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
 raw_booking_table = getenv("RAW_BOOKING_TABLE")
 raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 dag_name = getenv("CLEAN_UP_DAG_NAME")
-load_dag_name = dag_name = getenv("FACT_LOAD_DAG_NAME")
+load_dag_name = getenv("FACT_LOAD_DAG_NAME")
 
 default_args = dict(owner="airflow", depends_on_past=False)
 
