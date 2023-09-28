@@ -20,7 +20,7 @@ def update_booking_addons(booking_addons: pd.DataFrame):
     table = Table(raw_booking_addon_table, MetaData(), autoload_with=olap_engine)
     data = []
     for booking_addon in booking_addons.to_dict(orient="records"):
-        id, date_time = booking_addon["id"], booking_addon["datetime"]
+        id, date_time = booking_addon["id"], booking_addon.pop("datetime")
         date_time = datetime.fromisoformat(date_time) - timedelta(days=7)
         query = update(table).where(table.c.id == id).values(datetime=date_time)
         olap_conn.execute(query)
@@ -33,7 +33,11 @@ def update_booking(bookings: pd.DataFrame):
     table = Table(raw_booking_table, MetaData(), autoload_with=olap_engine)
     data = []
     for booking in bookings.to_dict(orient="records"):
-        id, checkin, checkout = booking["id"], booking["checkin"], booking["checkout"]
+        id, checkin, checkout = (
+            booking["id"],
+            booking.pop("checkin"),
+            booking.pop("checkout"),
+        )
         checkin = datetime.fromisoformat(checkin) - timedelta(days=7)
         checkout = datetime.fromisoformat(checkout) - timedelta(days=7)
         query = (
