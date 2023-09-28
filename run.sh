@@ -60,6 +60,7 @@ start_airflow() {
 run_tests() {
     activate_venv
     python3 tests/insert.py
+    python3 tests/trigger_dag.py
     python3 tests/test_inserted.py
 }
 
