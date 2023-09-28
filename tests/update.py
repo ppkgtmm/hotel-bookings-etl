@@ -33,11 +33,9 @@ def update_booking(bookings: pd.DataFrame):
     table = Table(raw_booking_table, MetaData(), autoload_with=olap_engine)
     data = []
     for booking in bookings.to_dict(orient="records"):
-        id, checkin, checkout = (
-            booking["id"],
-            booking.pop("checkin"),
-            booking.pop("checkout"),
-        )
+        id = booking["id"]
+        checkin = booking.pop("checkin")
+        checkout = booking.pop("checkout")
         checkin = datetime.fromisoformat(checkin) - timedelta(days=7)
         checkout = datetime.fromisoformat(checkout) - timedelta(days=7)
         query = (
