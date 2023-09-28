@@ -11,11 +11,13 @@ raw_guest_table = getenv("RAW_GUEST_TABLE")
 raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
 raw_booking_table = getenv("RAW_BOOKING_TABLE")
 raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
+dag_name = getenv("CLEAN_UP_DAG_NAME")
+load_dag_name = dag_name = getenv("FACT_LOAD_DAG_NAME")
 
 default_args = dict(owner="airflow", depends_on_past=False)
 
 dag = DAG(
-    "clean_up",
+    dag_name,
     default_args=default_args,
     max_active_runs=1,  # no concurrent runs
     start_date=datetime(2023, 9, 22, 0, 0, 0, 0, tzinfo=pytz.timezone("Asia/Bangkok")),
@@ -24,7 +26,7 @@ dag = DAG(
 )
 
 check_facts_processed = ExternalTaskSensor(
-    external_dag_id="process_facts",
+    external_dag_id=load_dag_name,
     poke_interval=10,
     timeout=300,
     task_id="check_facts_processed",
