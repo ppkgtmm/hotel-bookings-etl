@@ -18,16 +18,20 @@ raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 
 def update_booking_addons(booking_addons: pd.DataFrame):
     table = Table(raw_booking_addon_table, MetaData(), autoload_with=olap_engine)
+    data = []
     for booking_addon in booking_addons.to_dict(orient="records"):
         id, date_time = booking_addon["id"], booking_addon["datetime"]
         date_time = datetime.fromisoformat(date_time) - timedelta(days=7)
         query = update(table).where(table.c.id == id).values(datetime=date_time)
         olap_conn.execute(query)
         olap_conn.commit()
+        data.append(dict(**booking_addon, datetime=date_time))
+    return data
 
 
 def update_booking(bookings: pd.DataFrame):
     table = Table(raw_booking_table, MetaData(), autoload_with=olap_engine)
+    data = []
     for booking in bookings.to_dict(orient="records"):
         id, checkin, checkout = booking["id"], booking["checkin"], booking["checkout"]
         checkin = datetime.fromisoformat(checkin) - timedelta(days=7)
@@ -39,6 +43,8 @@ def update_booking(bookings: pd.DataFrame):
         )
         olap_conn.execute(query)
         olap_conn.commit()
+        data.append(dict(**booking, checkin=checkin.date(), checkout=checkout.date()))
+    return data
 
 
 def pre_update():
@@ -53,8 +59,11 @@ if __name__ == "__main__":
     olap_conn = olap_engine.connect()
 
     bookings, booking_addons = pre_update()
-    update_booking(bookings)
-    update_booking_addons(booking_addons)
+    updated_bookings = update_booking(bookings)
+    updated_booking_addons = update_booking_addons(booking_addons)
+
+    pd.DataFrame(updated_bookings).to_csv(booking_file, index=False)
+    pd.DataFrame(updated_booking_addons).to_csv(booking_addon_file, index=False)
 
     olap_conn.close()
     olap_engine.dispose()
