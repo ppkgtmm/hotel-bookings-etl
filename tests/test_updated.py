@@ -19,6 +19,7 @@ if __name__ == "__main__":
                 datetime.fromisoformat(booking["checkout"])
                 - datetime.fromisoformat(booking["checkin"])
             ).days
+            + 1
         )
 
     for booking_addon in booking_addons.to_dict(orient="records"):
