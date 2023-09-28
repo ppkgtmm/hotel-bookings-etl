@@ -65,12 +65,11 @@ In this step, insert, update or delete operations inside transactional database 
    
 3. Turn on the following pipelines or dags
    - clean_up
-   - process_dims
    - process_facts
 
 4. Optionally, click on any dag name to monitor it while running
 
-Fact tables are now populated after ensuring existence of required dimesions and staging area is cleaned up to reduce storage consumption upon successful completion of the pipelines triggered daily
+Fact tables are now populated after ensuring existence of required dimesions and staging area is cleaned up to reduce storage consumption upon successful completion of the pipelines which are triggered daily
 
 #### Tear down
 
