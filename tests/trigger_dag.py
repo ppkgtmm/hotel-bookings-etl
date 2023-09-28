@@ -1,6 +1,6 @@
 from time import sleep
 import requests
-from logging import Logger, INFO
+import logging
 from dotenv import load_dotenv
 from os import getenv
 
@@ -19,8 +19,12 @@ monitor_path = "dags/{dag_id}/dagRuns/{dag_run_id}"
 base_url = api_url.format(host=airflow_web_host, port=airflow_web_port)
 trigger_endpoint = base_url + trigger_path.format(dag_id=load_dag_name)
 
-
-logger = Logger("logger", level=INFO)
+# cr. https://stackoverflow.com/questions/28330317/print-timestamp-for-logging-in-python
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%dT%H:%M:%SZ",
+)
 
 
 def is_dag_complete(dag_id: str, run_id: str):
@@ -38,5 +42,5 @@ if __name__ == "__main__":
     while True:
         if is_dag_complete(load_dag_name, run_id):
             break
-        logger.info("... waiting for dag", load_dag_name, "completion ...")
+        logging.info("... waiting for dag " + load_dag_name + " completion ...")
         sleep(3)
