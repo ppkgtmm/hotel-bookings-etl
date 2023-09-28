@@ -29,6 +29,7 @@ fct_booking_table = getenv("FCT_BOOKING_TABLE")
 raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 dim_addon_table = getenv("DIM_ADDON_TABLE")
 fct_amenities_table = getenv("FCT_AMENITIES_TABLE")
+dag_name = getenv("FACT_LOAD_DAG_NAME")
 
 default_args = dict(owner="airflow", depends_on_past=False)
 
@@ -72,7 +73,7 @@ def insert_dim_date(ts: str):
 
 
 dag = DAG(
-    "process_facts",
+    dag_name,
     default_args=default_args,
     max_active_runs=1,  # no concurrent runs
     catchup=False,
