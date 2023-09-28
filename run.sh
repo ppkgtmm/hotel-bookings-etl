@@ -62,6 +62,7 @@ run_tests() {
     python3 tests/insert.py
     python3 tests/trigger_dag.py
     python3 tests/test_inserted.py
+    python3 tests/update.py
 }
 
 usage() {  
