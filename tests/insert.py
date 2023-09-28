@@ -21,7 +21,7 @@ def insert_booking_addons(booking_rooms: List[dict], booking: dict):
     addon_table = Table(addons_table, MetaData(), autoload_with=oltp_engine)
     addon = oltp_conn.execute(select(addon_table.c.id)).fetchone()[0]
     date_time = datetime.fromisoformat(booking["checkin"].isoformat())
-    date_time = date_time.replace(hour=14, minute=30, second=0)
+    date_time = date_time.replace(hour=14, minute=0, second=0)
     data = [
         dict(
             id=id,
