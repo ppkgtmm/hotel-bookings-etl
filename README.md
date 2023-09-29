@@ -72,6 +72,10 @@ In this step, insert, update or delete operations inside transactional database 
 Upon successful completion of the pipeliness, fact tables will be populated and staging area will be cleaned up to reduce storage consumption
 
 #### Run tests
+```
+./run.sh test
+```
+
 #### Tear down
 
 With this step, containers in use by project are stopped and removed
