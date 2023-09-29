@@ -6,7 +6,7 @@ For simplicity, scope of the project is limited to moving data from transactiona
 - registered users should be able to reserve available hotel rooms on specified dates
 - registered users should be able to make reservations for preferred but available room types
 - registered users should be able to make reservation for themselves or on behalf of registered guests
-- registered users must also be registered as guests before making a reservation for themselves
+- registered users must also be registered as guests before making reservation for themselves
 - one registered guest can be tied to only one room in case of multiple rooms reserved in a booking
 - one registered guest cannot have multiple bookings with overlapping dates
 - registered users should be able to purchase amenities for specific guests
