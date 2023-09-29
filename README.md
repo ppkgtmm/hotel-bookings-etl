@@ -42,7 +42,7 @@ After running commend below, data generated in previous step is populated to tra
 ./run.sh seed
 ```
 
-#### Run ETL - Part 1
+#### ETL - Part 1
 
 In this step, insert, update or delete operations inside transactional database is captured by connector from database log file and sent to kafka broker for further consumption by stream processer. Furthermore, some dimesions namely location and date dimesnions are populated
 
@@ -54,7 +54,7 @@ In this step, insert, update or delete operations inside transactional database 
 - Every change in dimension related tables are captured while only latest state of fact related tables are retained in staging area
 - If the command fails because of `AssertionError` or `connection issue`, retry after some time
 
-#### Run ETL - Part 2
+#### ETL - Part 2 
 
 1. Run command below to start airflow scheduler and webserver
 ```
@@ -71,6 +71,7 @@ In this step, insert, update or delete operations inside transactional database 
 
 Upon successful completion of the pipeliness, fact tables will be populated and staging area will be cleaned up to reduce storage consumption
 
+#### Run tests
 #### Tear down
 
 With this step, containers in use by project are stopped and removed
