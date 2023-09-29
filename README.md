@@ -1,4 +1,6 @@
 # hotel bookings etl
+Repo created to store source code of data engineering project which involves work from requirement identification, data modeling, synthetic data generation and seeding, change data capture configuration, processing logic development to tesing
+
 
 ## Usage
 
