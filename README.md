@@ -1,6 +1,19 @@
 # hotel bookings etl
 Repo created to store source code of data engineering project which involves work from requirement identification, data modeling, synthetic data generation and seeding, change data capture configuration, processing logic development to tesing
 
+## Requirement identification
+For simplicity, scope of the project is limited to moving data from transactional database to analytical database. Firstly, requirements of hotel booking website are defined to help come up with required columns and tables in transactional database. The requirements are
+- registered users should be able to reserve available hotel rooms on specified dates
+- registered users should be able to make reservations for preferred but available room types
+- registered users should be able to make reservation for themselves or on behalf of registered guests
+- one registered guest can be tied to only one room in case of multiple rooms reserved in a booking
+- one registered guest cannot have multiple bookings with overlapping dates
+- registered users should be able to purchase amenities for specific guests
+- the following operations cannot be done later than 1 week prior to checkin date
+  - room reservation
+  - purchase of amenities
+  - cancelling booking or amenities 
+  - updating booking or amenities details
 
 ## Usage
 
@@ -77,6 +90,7 @@ Upon successful completion of the pipeliness, fact tables will be populated and 
 ```
 ./run.sh test
 ```
+Firstly, test fact data yet to be processed i.e. bookings or amenities with at least 7 days different from current date are populated in staging tables. Then, airflow dag which processes facts
 
 #### Tear down
 
