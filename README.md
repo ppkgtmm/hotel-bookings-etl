@@ -2,7 +2,7 @@
 Repo created to store source code of data engineering project which involves work from requirement identification, data modeling, synthetic data generation and seeding, change data capture configuration, processing logic development to tesing
 
 ## Requirement identification
-For simplicity, scope of the project is limited to moving data from transactional database to analytical database. Firstly, hotel booking website functionalities are defined to help come up with required columns and tables in transactional database. The requirements can be found [here]
+For simplicity, scope of the project is limited to moving data from transactional database to analytical database. Firstly, hotel booking website functionalities are defined to help come up with required columns and tables in transactional database. The requirements can be found [here](https://github.com/ppkgtmm/hotel-bookings-etl/blob/main/files/README.MD)
 
 ## Usage
 
