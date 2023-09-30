@@ -2,7 +2,9 @@
 
 Repo created to store source code of data engineering project involving data identification, data modeling, artificial data generation, data seeding, data streaming, data processing and automated testing
 
-## Problem statement
+## Data identification
+Below illustration depicts business process that was defined piror to identifying data needed
+
 
 ## Data source
 Required data attributes were determined based on possible functionalities of hotel booking websites. Few constraints are also enforced for such websites for simplicity of project
