@@ -2,7 +2,21 @@
 Repo created to store source code of data engineering project which involves work from requirement identification, data modeling, synthetic data generation and seeding, change data capture configuration, processing logic development to tesing
 
 ## Requirement identification
-For simplicity, scope of the project is limited to moving data from transactional database to analytical database. Firstly, hotel booking website functionalities are defined to help come up with required columns and tables in transactional database. The requirements can be found [here](https://github.com/ppkgtmm/hotel-bookings-etl/blob/main/files/README.MD)
+Possible functionalities of hotel booking web application were defined to help determine required data attributes. For this project, a hotel booking web application should allow
+- registered users to reserve available hotel rooms on specified dates
+- registered users to make reservations for preferred and available room types
+- registered users to make reservation for themselves or on behalf of registered guests
+- registered users to purchase amenities or addons for convenience
+
+There are also contraints enforced by hotel booking web application, namely
+- registered users must be registered as guests before making reservation for themselves
+- a registered guest can be tied to only one room in case of multiple rooms reserved in a booking
+- a registered guest cannot have multiple bookings with overlapping dates
+- room reservation, purchase of amenities, cancelling booking or amenities and updating booking or amenities details cannot be done later than 1 week prior to checkin date
+
+
+
+## Data modeling
 
 ## Usage
 
