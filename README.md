@@ -1,5 +1,11 @@
 # hotel bookings etl
-Repo of data engineering project that involves synthetic data source preparation, data modeling, change data capture configuration, data streaming, data processing logic development and testing
+
+Holiyay Inn is an imaginary hotel with in-house website for making online reservations. Holiyay Inn plans to analyse data collected through the in-house website to monitor how well the business is functioning. To help Holiday Inn in analysis
+ 
+Repo of data engineering project that utilizes synthetic data prepared based on data modeling, change data capture configuration, data streaming, data processing logic development and testing
+## Problem statement
+Repo of data engineering project that utilizes synthetic data prepared based on 
+, data modeling, change data capture configuration, data streaming, data processing logic development and testing
 
 ## Data source
 Required data attributes were determined based on possible functionalities of hotel booking websites. Few constraints are also enforced for such websites for simplicity of project
