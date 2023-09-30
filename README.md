@@ -7,11 +7,11 @@ Below image depicts business process that was required to be defined before iden
 ![image](https://github.com/ppkgtmm/hotel-bookings-etl/assets/57994731/97fd9e49-0245-4c5c-8aae-4c9a35cfbd6e)
 
 
-Few constraints need to be enforced for simplicity and ease of data management, such constraints are
-- a user must also be registered as guest before making reservation for ownself
-- a guest cannot have multiple bookings with overlapping dates
-- none of the guests can be tied to multiple rooms reserved through same booking
-- following cannot be done when less than 7 days left before checkin date : booking, amenity purchase, cancelation or modification of booking and amenities purchased 
+A few constraints need to be enforced for simplicity and ease of data management, such constraints are
+- Each user must also be registered as guest before making reservation for ownself
+- A guest cannot have multiple bookings with overlapping dates
+- None of the guests can be tied to multiple rooms reserved through same booking
+- The following cannot be done when less than 7 days left before checkin date : booking, amenity purchase, cancelation or modification of booking and amenities purchased 
 
 
 
