@@ -1,6 +1,7 @@
 # hotel bookings etl
 
-Holiyay Inn is an imaginary hotel with in-house website for making online reservations. Holiyay Inn plans to analyse data collected through the in-house website to monitor how well the business is functioning. In order to help Holiday Inn in their analysis
+Assuming we run a hotel with our own website for customers to make online reservations, now we want to analyse the data collected through the website
+to monitor how well our business is functioning
  
 Repo of data engineering project that utilizes synthetic data prepared based on data modeling, change data capture configuration, data streaming, data processing logic development and testing
 ## Problem statement
