@@ -2,7 +2,7 @@
 
 Repo created to store source code of data engineering project involving business process definition, data modeling, artificial data generation, data seeding, data streaming, data processing and automated testing
 
-## Data identification
+## Business process
 Below image depicts business process defined prior to identifying data required for project
 ![image](https://github.com/ppkgtmm/hotel-bookings-etl/assets/57994731/97fd9e49-0245-4c5c-8aae-4c9a35cfbd6e)
 
