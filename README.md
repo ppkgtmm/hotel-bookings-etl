@@ -1,12 +1,8 @@
 # hotel bookings etl
 
-Assuming we run a hotel with our own website for customers to make online reservations, now we want to analyse the data collected through the website
-to monitor how well our business is functioning
- 
-Repo of data engineering project that utilizes synthetic data prepared based on data modeling, change data capture configuration, data streaming, data processing logic development and testing
+Repo created to store source code of data engineering project involving data identification, data modeling, artificial data generation, data seeding, data streaming, data processing and automated testing
+
 ## Problem statement
-Repo of data engineering project that utilizes synthetic data prepared based on 
-, data modeling, change data capture configuration, data streaming, data processing logic development and testing
 
 ## Data source
 Required data attributes were determined based on possible functionalities of hotel booking websites. Few constraints are also enforced for such websites for simplicity of project
