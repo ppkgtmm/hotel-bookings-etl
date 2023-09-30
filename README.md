@@ -13,16 +13,6 @@ A few constraints need to be enforced for simplicity and ease of data management
 - None of the guests can be tied to multiple rooms reserved through same booking
 - The following cannot be done when less than 7 days left before checkin date : room booking, amenity purchase, cancelation or modification of booking and amenities purchased 
 
-
-
-## Data source
-Required data attributes were determined based on possible functionalities of hotel booking websites. Few constraints are also enforced for such websites for simplicity of project
-
-Some constraints of the imaginary hotel website are
-
-
-
-
 ## Data modeling
 
 ## Usage
