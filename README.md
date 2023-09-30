@@ -2,7 +2,7 @@
 Repo created to store source code of data engineering project which involves work from requirement identification, data modeling, synthetic data generation and seeding, change data capture configuration, processing logic development to tesing
 
 ## Requirement identification
-Possible functionalities of hotel booking web application were defined to help determine data attributes that are required. For this project, a hotel booking web application should allow
+Possible functionalities of hotel booking web application were defined to help determine data attributes that are required. A hotel booking web application should allow
 - registered users to reserve available hotel rooms on specified dates
 - registered users to make reservations for preferred and available room types
 - registered users to make reservation for themselves or on behalf of registered guests
