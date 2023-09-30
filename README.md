@@ -1,5 +1,5 @@
 # hotel bookings etl
-Repo created to store source code of data engineering project which involves work from project definition, data modeling, synthetic data generation and seeding, change data capture configuration, processing logic development to tesing
+Repo created to store source code of data engineering project with primary focus on ETL of hotel reservation data from transactional database to analytical database. Work invloved range from data source preparation, data modeling, change data capture configuration, data processing logic development and testing
 
 ## Project definition
 Primary focus of this project is to do ETL on bookings data generated from a hotel website that does not exist in reality. In order to determine data attributes required to be present in source database, possible functionalities of the imaginary website were listed down as follows
