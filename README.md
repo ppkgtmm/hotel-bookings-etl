@@ -1,5 +1,5 @@
 # hotel bookings etl
-Repo created to store source code of data engineering project that invlove work from synthetic data source preparation, data modeling, change data capture configuration, data processing logic development and testing
+Repo of data engineering project that involves synthetic data source preparation, data modeling, change data capture configuration, data streaming, data processing logic development and testing
 
 ## Data source
 Before artificial data generation, required data attributes were determined based on features a hotel booking website might have. In this project, below functionalities and constraints are assumed for hotel reservation website 
