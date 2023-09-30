@@ -2,7 +2,8 @@
 Repo of data engineering project that involves synthetic data source preparation, data modeling, change data capture configuration, data streaming, data processing logic development and testing
 
 ## Data source
-Before artificial data generation, required data attributes were determined based on features a hotel booking website might have. In this project, below functionalities and constraints are assumed for hotel reservation website 
+Required data attributes were determined based on possible functionalities of hotel booking websites. Few constraints are also enforced for such websites for simplicity of project
+
 - registered users should be able to reserve available hotel rooms on specified dates
 - registered users should be able to make reservations for preferred and available room types
 - registered users should be able to make reservation for themselves or on behalf of registered guests
