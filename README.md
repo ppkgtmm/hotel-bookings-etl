@@ -3,22 +3,23 @@
 Repo created to store source code of data engineering project involving data identification, data modeling, artificial data generation, data seeding, data streaming, data processing and automated testing
 
 ## Data identification
-Below illustration depicts business process that was defined piror to identifying data needed
+Below image depicts business process that was required to be defined before identifying data needed
+![image](https://github.com/ppkgtmm/hotel-bookings-etl/assets/57994731/97fd9e49-0245-4c5c-8aae-4c9a35cfbd6e)
+
+
+Few constraints need to be enforced for simplicity and ease of data management, such constraints are
+- a user must also be registered as guest before making reservation for ownself
+- a guest cannot have multiple bookings with overlapping dates
+- none of the guests can be tied to multiple rooms reserved through same booking
+- following cannot be done when less than 7 days left before checkin date : booking, amenity purchase, cancelation or modification of booking and amenities purchased 
+
 
 
 ## Data source
 Required data attributes were determined based on possible functionalities of hotel booking websites. Few constraints are also enforced for such websites for simplicity of project
 
-- registered users should be able to reserve available hotel rooms on specified dates
-- registered users should be able to make reservations for preferred and available room types
-- registered users should be able to make reservation for themselves or on behalf of registered guests
-- registered users should be able to purchase amenities or addons for convenience
-
 Some constraints of the imaginary hotel website are
-- registered users must be registered as guests before making reservation for themselves
-- one registered guest can be tied to only one room in case of multiple rooms reserved in a booking
-- one registered guest cannot have multiple bookings with overlapping dates
-- room reservation, purchase of amenities, cancelling and updating details of booking or amenities cannot be done later than 1 week prior to checkin date
+
 
 
 
