@@ -1,18 +1,18 @@
 # hotel bookings etl
-Repo created to store source code of data engineering project which involves work from requirement identification, data modeling, synthetic data generation and seeding, change data capture configuration, processing logic development to tesing
+Repo created to store source code of data engineering project which involves work from project definition, data modeling, synthetic data generation and seeding, change data capture configuration, processing logic development to tesing
 
-## Requirement identification
-Possible functionalities of hotel booking web application were defined to help determine data attributes that are required. A hotel booking web application should allow
-- registered users to reserve available hotel rooms on specified dates
-- registered users to make reservations for preferred and available room types
-- registered users to make reservation for themselves or on behalf of registered guests
-- registered users to purchase amenities or addons for convenience
+## Project definition
+Primary focus of this project is to do ETL on bookings data generated from a hotel website that doesn't exist in reality. In order to determine data attributes required to be present in source database, possible functionalities of the imaginary website were listed down as follows
+- registered users should be able to reserve available hotel rooms on specified dates
+- registered users should be able to make reservations for preferred and available room types
+- registered users should be able to make reservation for themselves or on behalf of registered guests
+- registered users should be able to purchase amenities or addons for convenience
 
-Few contraints are also specified for hotel booking web application, namely
+Some constraints of the imaginary hotel website are
 - registered users must be registered as guests before making reservation for themselves
-- a registered guest can be tied to only one room in case of multiple rooms reserved in a booking
-- a registered guest cannot have multiple bookings with overlapping dates
-- room reservation, purchase of amenities, cancelling booking or amenities and updating booking or amenities details cannot be done later than 1 week prior to checkin date
+- one registered guest can be tied to only one room in case of multiple rooms reserved in a booking
+- one registered guest cannot have multiple bookings with overlapping dates
+- room reservation, purchase of amenities, cancelling and updating details of booking or amenities cannot be done later than 1 week prior to checkin date
 
 
 
