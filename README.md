@@ -8,7 +8,7 @@ Possible functionalities of hotel booking web application were defined to help d
 - registered users to make reservation for themselves or on behalf of registered guests
 - registered users to purchase amenities or addons for convenience
 
-There are also contraints enforced by hotel booking web application, namely
+There are also contraints defined for hotel booking web application, namely
 - registered users must be registered as guests before making reservation for themselves
 - a registered guest can be tied to only one room in case of multiple rooms reserved in a booking
 - a registered guest cannot have multiple bookings with overlapping dates
