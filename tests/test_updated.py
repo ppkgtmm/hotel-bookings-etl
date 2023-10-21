@@ -21,11 +21,13 @@ if __name__ == "__main__":
             ).days
             + 1
         )
+        helper.del_fct_bookings(fct_bookings)
 
     for booking_addon in booking_addons.to_dict(orient="records"):
         booking_room = booking_rooms[booking_rooms.id == booking_addon["booking_room"]]
         booking_room = booking_room.to_dict(orient="records")[0]
         fct_amenities = helper.get_fct_amenities(booking_room, booking_addon)
         assert len(fct_amenities) == 1
+        helper.del_fct_amenities(fct_amenities)
 
     helper.tear_down()
