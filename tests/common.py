@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 from os import getenv, path
-import pandas as pd
-from sqlalchemy import create_engine, Table, MetaData, select, desc
+from sqlalchemy import create_engine, Table, MetaData, select, desc, delete
 from datetime import datetime
 
 
@@ -102,6 +101,18 @@ class TestHelper:
             .where(self.fct_amenities.c.guest == guest[0])
         )
         return self.olap_conn.execute(amenities_query).fetchall()
+
+    def del_fct_bookings(self, fct_bookings: list):
+        ids = [row.id for row in fct_bookings]
+        booking_query = delete(self.fct_booking).where(self.fct_booking.c.id.in_(ids))
+        self.olap_conn.execute(booking_query)
+
+    def del_fct_amenities(self, fct_amenities: list):
+        ids = [row.id for row in fct_amenities]
+        amenities_query = delete(self.fct_amenities).where(
+            self.fct_amenities.c.id.in_(ids)
+        )
+        self.olap_conn.execute(amenities_query)
 
     def tear_down(self):
         self.olap_conn.close()
