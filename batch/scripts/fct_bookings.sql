@@ -32,15 +32,11 @@ CREATE TEMPORARY TABLE fact_bookings AS
                 SELECT JSON_OBJECT("state", g.state, "country", g.country)
                 FROM {{ params.guests }} g
                 WHERE g.id = b.guest
-                ORDER BY g.updated_at DESC
-                LIMIT 1
             ) guest_location,
             (
                 SELECT type
                 FROM {{ params.rooms }} r
                 WHERE r.id = b.room
-                ORDER BY r.updated_at DESC
-                LIMIT 1
             ) room_type
         FROM raw_bookings b
     ), enriched_bookings AS (
