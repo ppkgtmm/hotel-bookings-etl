@@ -62,8 +62,8 @@ In this step, insert, update or delete operations inside transactional database 
 2. After a few minutes, go to `http://localhost:8080/` in web browser then login to airflow website with `AIRFLOW_ADMIN_USERNAME` and `AIRFLOW_ADMIN_PASSWORD` defined in `.env` file
    
 3. Turn on the following pipelines or dags
-   - clean_up
-   - process_facts
+- clean_up
+- process_facts
 
 4. Optionally, click on any dag name to monitor it while running
 
