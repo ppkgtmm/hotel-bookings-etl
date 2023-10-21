@@ -106,6 +106,7 @@ class TestHelper:
         ids = [row._asdict()["id"] for row in fct_bookings]
         booking_query = delete(self.fct_booking).where(self.fct_booking.c.id.in_(ids))
         self.olap_conn.execute(booking_query)
+        self.olap_conn.commit()
 
     def del_fct_amenities(self, fct_amenities: list):
         ids = [row._asdict()["id"] for row in fct_amenities]
@@ -113,6 +114,7 @@ class TestHelper:
             self.fct_amenities.c.id.in_(ids)
         )
         self.olap_conn.execute(amenities_query)
+        self.olap_conn.commit()
 
     def tear_down(self):
         self.olap_conn.close()
