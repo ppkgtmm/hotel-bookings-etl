@@ -73,6 +73,7 @@ In this step, insert, update or delete operations inside transactional database 
 4. Optionally, click on any dag name to monitor it while running
 
 Upon successful completion of the pipeliness, fact tables will be populated and staging area will be cleaned up to reduce storage consumption
+
 <br />
 
 **Run tests**
@@ -84,6 +85,7 @@ Fact tables population logic are tested in this step i.e. to verify that booking
 ```
 
 Test run is considered as failed when  `AssertionError` is thrown
+
 <br />
 
 **Tear down**
