@@ -71,7 +71,7 @@ Upon successful completion of the pipeliness, fact tables will be populated and 
 
 **Run tests**
 
-Fact tables population logic are tested in this step i.e. bookings or amenities data should only be inserted if less than 7 days is left prior to checkin or amenity serving date time
+Fact tables population logic are tested in this step i.e. to verify that bookings or amenities data is only inserted if less than 7 days is left prior to checkin date or amenity serving date time
 
 ```
 ./run.sh test
