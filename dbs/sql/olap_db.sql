@@ -4,16 +4,18 @@ CREATE DATABASE IF NOT EXISTS olap_hotel;
 USE olap_hotel;
 
 CREATE TABLE `stg_room` (
-  `id` integer,
+  `id` integer PRIMARY KEY,
   `type` integer,
-  `updated_at` datetime
+  `updated_at` datetime,
+  `is_deleted` boolean DEFAULT false
 );
 
 CREATE TABLE `stg_guest` (
-  `id` integer,
+  `id` integer PRIMARY KEY,
   `state` varchar(255),
   `country` varchar(255),
-  `updated_at` datetime
+  `updated_at` datetime,
+  `is_deleted` boolean DEFAULT false
 );
 
 CREATE TABLE `stg_booking` (
