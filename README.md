@@ -77,7 +77,7 @@ Fact tables population logic are tested in this step i.e. to verify that booking
 ./run.sh test
 ```
 
-- Test run is considered as failed when  `AssertionError` is thrown
+Test run is considered as failed when  `AssertionError` is thrown
   
 **Tear down**
 
