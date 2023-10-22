@@ -107,3 +107,11 @@ services:
       - $WEBSERVER_PORT:8080
     depends_on:
       - airflow-scheduler
+
+  metabase:
+    image: metabase/metabase:$METABASE_VERSION
+    container_name: metabase
+    ports:
+    - $METABASE_PORT:3000
+    env_file:
+    - '.env'
