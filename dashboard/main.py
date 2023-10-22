@@ -13,3 +13,6 @@ end_date = col2.date_input(
     value=datetime.today() + relativedelta(months=1, day=1, days=-1),
     format=date_format,
 )
+
+col1, col2 = st.columns(2)
+col1.map()
