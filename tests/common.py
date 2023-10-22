@@ -39,83 +39,81 @@ def get_connection_str():
 
 
 class TestHelper:
-    def __init__(self):
-        conn_str_map = get_connection_str()
-        self.olap_engine = create_engine(conn_str_map.get("olap"))
-        self.olap_conn = self.olap_engine.connect()
-        self.fct_booking = Table(
-            fct_booking_table, MetaData(), autoload_with=self.olap_engine
-        )
-        self.dim_guest = Table(
-            dim_guest_table, MetaData(), autoload_with=self.olap_engine
-        )
-        self.dim_addon = Table(
-            dim_addon_table, MetaData(), autoload_with=self.olap_engine
-        )
-        self.fct_amenities = Table(
-            fct_amenities_table, MetaData(), autoload_with=self.olap_engine
-        )
+    conn_str_map = get_connection_str()
+    olap_engine = create_engine(conn_str_map.get("olap"))
+    olap_conn = olap_engine.connect()
+    fct_booking = Table(fct_booking_table, MetaData(), autoload_with=olap_engine)
+    dim_guest = Table(dim_guest_table, MetaData(), autoload_with=olap_engine)
+    dim_addon = Table(dim_addon_table, MetaData(), autoload_with=olap_engine)
+    fct_amenities = Table(fct_amenities_table, MetaData(), autoload_with=olap_engine)
 
-    def get_dim_guest(self, _id: int):
+    @classmethod
+    def get_dim_guest(cls, _id: int):
         guest_query = (
-            select(self.dim_guest.c.id)
-            .where(self.dim_guest.c._id == _id)
-            .order_by(desc(self.dim_guest.c.id))
+            select(cls.dim_guest.c.id)
+            .where(cls.dim_guest.c._id == _id)
+            .order_by(desc(cls.dim_guest.c.id))
             .limit(1)
         )
-        return self.olap_conn.execute(guest_query).fetchone()
+        return cls.olap_conn.execute(guest_query).fetchone()
 
-    def get_dim_addon(self, _id: int):
+    @classmethod
+    def get_dim_addon(cls, _id: int):
         addon_query = (
-            select(self.dim_addon.c.id)
-            .where(self.dim_addon.c._id == _id)
-            .order_by(desc(self.dim_addon.c.id))
+            select(cls.dim_addon.c.id)
+            .where(cls.dim_addon.c._id == _id)
+            .order_by(desc(cls.dim_addon.c.id))
             .limit(1)
         )
-        return self.olap_conn.execute(addon_query).fetchone()
+        return cls.olap_conn.execute(addon_query).fetchone()
 
-    def get_fct_bookings(self, booking: dict, booking_room: dict):
+    @classmethod
+    def get_fct_bookings(cls, booking: dict, booking_room: dict):
         checkin = datetime.fromisoformat(booking["checkin"]).strftime(fmt)
         checkout = datetime.fromisoformat(booking["checkout"]).strftime(fmt)
-        guest = self.get_dim_guest(booking_room["guest"])
+        guest = cls.get_dim_guest(booking_room["guest"])
         if not guest:
             return []
         booking_query = (
-            select(self.fct_booking)
-            .where(self.fct_booking.c.datetime >= int(checkin))
-            .where(self.fct_booking.c.datetime <= int(checkout))
-            .where(self.fct_booking.c.guest == guest[0])
+            select(cls.fct_booking)
+            .where(cls.fct_booking.c.datetime >= int(checkin))
+            .where(cls.fct_booking.c.datetime <= int(checkout))
+            .where(cls.fct_booking.c.guest == guest[0])
         )
-        return self.olap_conn.execute(booking_query).fetchall()
+        return cls.olap_conn.execute(booking_query).fetchall()
 
-    def get_fct_amenities(self, booking_room: dict, booking_addon: dict):
+    @classmethod
+    def get_fct_amenities(cls, booking_room: dict, booking_addon: dict):
         date_time = datetime.fromisoformat(booking_addon["datetime"]).strftime(fmt)
-        guest = self.get_dim_guest(booking_room["guest"])
-        addon = self.get_dim_addon(booking_addon["addon"])
+        guest = cls.get_dim_guest(booking_room["guest"])
+        addon = cls.get_dim_addon(booking_addon["addon"])
         if None in [guest, addon]:
             return []
         amenities_query = (
-            select(self.fct_amenities)
-            .where(self.fct_amenities.c.datetime == int(date_time))
-            .where(self.fct_amenities.c.addon <= addon[0])
-            .where(self.fct_amenities.c.guest == guest[0])
+            select(cls.fct_amenities)
+            .where(cls.fct_amenities.c.datetime == int(date_time))
+            .where(cls.fct_amenities.c.addon <= addon[0])
+            .where(cls.fct_amenities.c.guest == guest[0])
         )
-        return self.olap_conn.execute(amenities_query).fetchall()
+        return cls.olap_conn.execute(amenities_query).fetchall()
 
-    def del_fct_bookings(self, fct_bookings: list):
+    @classmethod
+    def del_fct_bookings(cls, fct_bookings: list):
         ids = [row._asdict()["id"] for row in fct_bookings]
-        booking_query = delete(self.fct_booking).where(self.fct_booking.c.id.in_(ids))
-        self.olap_conn.execute(booking_query)
-        self.olap_conn.commit()
+        booking_query = delete(cls.fct_booking).where(cls.fct_booking.c.id.in_(ids))
+        cls.olap_conn.execute(booking_query)
+        cls.olap_conn.commit()
 
-    def del_fct_amenities(self, fct_amenities: list):
+    @classmethod
+    def del_fct_amenities(cls, fct_amenities: list):
         ids = [row._asdict()["id"] for row in fct_amenities]
-        amenities_query = delete(self.fct_amenities).where(
-            self.fct_amenities.c.id.in_(ids)
+        amenities_query = delete(cls.fct_amenities).where(
+            cls.fct_amenities.c.id.in_(ids)
         )
-        self.olap_conn.execute(amenities_query)
-        self.olap_conn.commit()
+        cls.olap_conn.execute(amenities_query)
+        cls.olap_conn.commit()
 
-    def tear_down(self):
-        self.olap_conn.close()
-        self.olap_engine.dispose()
+    @classmethod
+    def tear_down(cls):
+        cls.olap_conn.close()
+        cls.olap_engine.dispose()
