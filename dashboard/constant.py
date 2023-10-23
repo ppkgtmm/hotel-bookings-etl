@@ -4,10 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-summary_by_guest = """
+summary_by_age = """
 WITH cte AS (
 	SELECT 
-		g.gender, 
 		TIMESTAMPDIFF(YEAR, CAST(g.dob AS datetime), CURRENT_TIMESTAMP()) age,
 		t.price
 	FROM fct_bookings b
@@ -19,7 +18,6 @@ WITH cte AS (
 )
 
 SELECT 
-	gender,
 	CASE
 	WHEN age < 20 THEN 'less than 20'
 	WHEN age BETWEEN 20 AND 29 THEN '20 - 29'
@@ -31,7 +29,22 @@ SELECT
 	COUNT(1) num_days,
 	SUM(price) revenue
 FROM cte
-GROUP BY 1, 2;
+GROUP BY 1
+ORDER BY MIN(age);
+"""
+
+summary_by_gender = """
+SELECT 
+	g.gender,
+	COUNT(1) num_days,
+	SUM(price) revenue
+FROM fct_bookings b
+LEFT JOIN dim_guest g
+ON b.guest = g.id
+LEFT JOIN dim_roomtype t
+ON b.roomtype = t.id
+WHERE b.datetime BETWEEN {start_datetime} AND {end_datetime}
+GROUP BY 1;
 """
 
 summary_by_location = """
@@ -77,4 +90,4 @@ def fetch_data(query: str):
     engine = create_engine(connection_string, poolclass=NullPool)
     with engine.connect() as conn:
         rows = conn.execute(text(query))
-    return [row._asdict() for row in rows]
+        return [row._asdict() for row in rows]
