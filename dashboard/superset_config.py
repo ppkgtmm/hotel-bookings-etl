@@ -1,3 +1,0 @@
-FEATURE_FLAGS = {
-    "HORIZONTAL_FILTER_BAR": True,
-}
