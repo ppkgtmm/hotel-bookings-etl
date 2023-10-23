@@ -120,9 +120,9 @@ def get_booking_details():
         available_guests = set(guests) - set(overlapping.guest.to_list())
         available_rooms = set(rooms) - set(overlapping.room.to_list())
         assert len(available_guests) >= num_rooms
-        guest = random.sample(available_guests, k=num_rooms)
+        guest = random.sample(list(available_guests), k=num_rooms)
         assert len(available_rooms) >= num_rooms
-        room = random.sample(available_rooms, k=num_rooms)
+        room = random.sample(list(available_rooms), k=num_rooms)
 
         yield booking["id"], room, guest
 
