@@ -56,7 +56,7 @@ ON b.guest_location = l.id
 LEFT JOIN dim_roomtype t
 ON b.roomtype = t.id
 WHERE b.datetime BETWEEN {start_datetime} AND {end_datetime}
-GROUP BY 1, 2;
+GROUP BY 1, 2, 3;
 """
 
 summary_by_type = """
