@@ -47,6 +47,7 @@ summary_by_location = """
 SELECT 
 	l.state, 
 	l.country,
+	l.fips,
 	COUNT(1) num_days,
 	SUM(t.price) revenue
 FROM fct_bookings b
