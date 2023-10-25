@@ -83,6 +83,7 @@ CREATE TABLE `dim_guest` (
 
 CREATE TABLE `dim_location` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `fips` varchar(10),
   `state` varchar(255),
   `country` varchar(255)
 );
