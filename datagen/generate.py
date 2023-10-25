@@ -22,7 +22,7 @@ class DataGenerator:
     def get_locations():
         url = getenv("LOCATION_FILE")
         locations = pd.read_csv(url)
-        states, countries = locations["name"], locations["country_name"]
+        states, countries = locations["name"], locations["admin"]
         return zip(states.tolist(), countries.tolist())
 
     def generate_rooms(self, floors: int, floor_rooms: int):
