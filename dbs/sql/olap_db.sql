@@ -147,7 +147,7 @@ CREATE TABLE `mrt_location` (
   `date` date,
   `fips` varchar(255),
   `state` varchar(255),
-  `city` varchar(255),
+  `country` varchar(255),
   `revenue` integer,
   `addons_revenue` integer,
   `total_revenue` integer,
