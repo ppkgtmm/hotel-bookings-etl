@@ -7,12 +7,12 @@ WITH max_date AS (
 		d.`date`,
 		g.gender,
 		SUM(t.price) revenue
-	FROM fct_bookings f
-	LEFT JOIN dim_date d
+	FROM {{ params.fct_bookings }} f
+	LEFT JOIN {{ params.dim_date }} d
 	ON f.datetime = d.id
-	LEFT JOIN dim_guest g
+	LEFT JOIN {{ params.dim_guest }} g
 	ON f.guest = g.id
-	LEFT JOIN dim_roomtype t
+	LEFT JOIN {{ params.dim_roomtype }} t
 	ON f.roomtype = t.id
 	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` >= (SELECT * FROM max_date)
 	GROUP BY 1, 2
@@ -21,12 +21,12 @@ WITH max_date AS (
 		d.`date`,
 		g.gender,
 		SUM(a.price) revenue
-	FROM fct_amenities f
-	LEFT JOIN dim_date d
+	FROM {{ params.fct_amenities }} f
+	LEFT JOIN {{ params.dim_date }} d
 	ON f.datetime = d.id
-	LEFT JOIN dim_guest g
+	LEFT JOIN {{ params.dim_guest }} g
 	ON f.guest = g.id
-	LEFT JOIN dim_addon a
+	LEFT JOIN {{ params.dim_addon }} a
 	ON f.addon = a.id
 	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` >= (SELECT * FROM max_date)
 	GROUP BY 1, 2
