@@ -122,7 +122,7 @@ if button and start_date and end_date:
             color="revenue",
             featureidkey="properties.fips",
             color_continuous_scale=px.colors.sequential.Bluyl,
-            template="plotly",
+            template="plotly_dark",
             fitbounds="locations",
             hover_data=["state", "country", "num_days", "revenue"],
         ),
