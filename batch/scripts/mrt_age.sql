@@ -14,7 +14,7 @@ WITH max_date AS (
 	ON f.guest = g.id
 	LEFT JOIN {{ params.dim_roomtype }} t
 	ON f.roomtype = t.id
-	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` >= (SELECT * FROM max_date)
+	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` > (SELECT * FROM max_date)
 ), raw_addon_age AS (
 	SELECT 
 		TIMESTAMPDIFF(YEAR, CAST(g.dob AS datetime), CURRENT_TIMESTAMP()) age,
@@ -27,7 +27,7 @@ WITH max_date AS (
 	ON f.guest = g.id
 	LEFT JOIN {{ params.dim_addon }} a
 	ON f.addon = a.id
-	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` >= (SELECT * FROM max_date)
+	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` > (SELECT * FROM max_date)
 ), booking_age AS (
 	SELECT
 		`date`,

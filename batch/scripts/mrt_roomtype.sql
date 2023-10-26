@@ -14,5 +14,5 @@ LEFT JOIN {{ params.dim_date }} d
 ON f.datetime = d.id
 LEFT JOIN {{ params.dim_roomtype }} t
 ON f.roomtype = t.id
-WHERE (SELECT * FROM max_date) IS NULL OR d.`date` >= (SELECT * FROM max_date)
+WHERE (SELECT * FROM max_date) IS NULL OR d.`date` > (SELECT * FROM max_date)
 GROUP BY 1, 2;

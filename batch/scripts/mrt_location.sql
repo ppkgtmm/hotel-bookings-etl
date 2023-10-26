@@ -16,7 +16,7 @@ WITH max_date AS (
 	ON f.guest_location = l.id
 	LEFT JOIN {{ params.dim_roomtype }} t
 	ON f.roomtype = t.id
-	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` >= (SELECT * FROM max_date)
+	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` > (SELECT * FROM max_date)
 	GROUP BY 1, 2, 3, 4
 ), addon_location AS (
 	SELECT
@@ -32,7 +32,7 @@ WITH max_date AS (
 	ON f.guest_location = l.id
 	LEFT JOIN {{ params.dim_addon }} a
 	ON f.addon = a.id
-	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` >= (SELECT * FROM max_date)
+	WHERE (SELECT * FROM max_date) IS NULL OR d.`date` > (SELECT * FROM max_date)
 	GROUP BY 1, 2, 3, 4
 )
 SELECT
