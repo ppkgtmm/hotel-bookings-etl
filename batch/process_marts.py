@@ -117,10 +117,11 @@ process_mrt_addon = MySqlOperator(
     dag=dag,
 )
 
-check_facts_processed >> [
-    process_mrt_age
+(
+    check_facts_processed
+    >> process_mrt_age
     >> process_mrt_gender
     >> process_mrt_location
     >> process_mrt_roomtype
     >> process_mrt_addon
-]
+)
