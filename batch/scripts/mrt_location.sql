@@ -1,6 +1,7 @@
+insert into {{ params.mrt_location }}
 WITH max_date AS (
 	select MAX(date) max_date 
-	from mrt_location
+	from {{ params.mrt_location }}
 ), booking_location AS (
 	SELECT
 		d.`date`,
@@ -8,12 +9,12 @@ WITH max_date AS (
 		l.country,
 		l.`state`,
 		sum(t.price) revenue
-	FROM fct_bookings f
-	left join dim_date d
+	FROM {{ params.fct_bookings }} f
+	left join {{ params.dim_date }} d
 	on f.datetime = d.id
-	LEFT JOIN dim_location l
+	LEFT JOIN {{ params.dim_location }} l
 	ON f.guest_location = l.id
-	LEFT JOIN dim_roomtype t
+	LEFT JOIN {{ params.dim_roomtype }} t
 	ON f.roomtype = t.id
 	WHERE (SELECT * from max_date) Is null or d.`date` >= (SELECT * from max_date)
 	GROUP BY 1, 2, 3, 4
@@ -24,12 +25,12 @@ WITH max_date AS (
 		l.country,
 		l.`state`,
 		sum(a.price) revenue
-	FROM fct_amenities f
-	left join dim_date d
+	FROM {{ params.fct_amenities }} f
+	left join {{ params.dim_date }} d
 	on f.datetime = d.id
-	LEFT JOIN dim_location l
+	LEFT JOIN {{ params.dim_location }} l
 	ON f.guest_location = l.id
-	LEFT JOIN dim_addon a
+	LEFT JOIN {{ params.dim_addon }} a
 	ON f.addon = a.id
 	WHERE (SELECT * from max_date) Is null or d.`date` >= (SELECT * from max_date)
 	GROUP BY 1, 2, 3, 4
