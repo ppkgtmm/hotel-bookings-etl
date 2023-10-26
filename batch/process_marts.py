@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.mysql_operator import MySqlOperator
+from airflow.sensors.external_task import ExternalTaskSensor
 from datetime import datetime
 import pytz
 from os import getenv
@@ -19,6 +20,7 @@ mrt_roomtype_table = getenv("MRT_ROOMTYPE")
 mrt_addon_table = getenv("MRT_ADDON")
 
 dag_name = getenv("MART_LOAD_DAG_NAME")
+load_dag_name = getenv("FACT_LOAD_DAG_NAME")
 
 default_args = dict(owner="airflow", depends_on_past=False)
 
@@ -30,6 +32,14 @@ dag = DAG(
     catchup=False,
     start_date=datetime(2023, 9, 22, 0, 0, 0, 0, tzinfo=pytz.timezone("Asia/Bangkok")),
     schedule="0 7 * * *",
+)
+
+check_facts_processed = ExternalTaskSensor(
+    external_dag_id=load_dag_name,
+    poke_interval=10,
+    timeout=300,
+    task_id="check_facts_processed",
+    dag=dag,
 )
 
 
@@ -107,7 +117,7 @@ process_mrt_addon = MySqlOperator(
     dag=dag,
 )
 
-(
+check_facts_processed >> (
     process_mrt_age
     >> process_mrt_gender
     >> process_mrt_location
