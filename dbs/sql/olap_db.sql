@@ -123,3 +123,49 @@ ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`guest`) REFERENCES `dim_guest` (`i
 ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtype` (`id`);
 
 ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
+
+CREATE TABLE `mrt_age` (
+  `date` date,
+  `age_range` varchar(255),
+  `min_age` integer,
+  `revenue` integer,
+  `addons_revenue` integer,
+  `total_revenue` integer,
+  PRIMARY KEY (`date`, `age_range`)
+);
+
+CREATE TABLE `mrt_gender` (
+  `date` date,
+  `gender` varchar(255),
+  `revenue` integer,
+  `addons_revenue` integer,
+  `total_revenue` integer,
+  PRIMARY KEY (`date`, `gender`)
+);
+
+CREATE TABLE `mrt_location` (
+  `date` date,
+  `fips` varchar(255),
+  `state` varchar(255),
+  `city` varchar(255),
+  `revenue` integer,
+  `addons_revenue` integer,
+  `total_revenue` integer,
+  PRIMARY KEY (`date`, `fips`)
+);
+
+CREATE TABLE `mrt_roomtype` (
+  `date` date,
+  `room_type` varchar(255),
+  `num_booked` varchar(255),
+  `revenue` integer,
+  PRIMARY KEY (`date`, `room_type`)
+);
+
+CREATE TABLE `mrt_addon` (
+  `date` date,
+  `addon` varchar(255),
+  `quantity` integer,
+  `revenue` integer,
+  PRIMARY KEY (`date`, `addon`)
+);
