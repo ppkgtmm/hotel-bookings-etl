@@ -34,10 +34,10 @@ def insert_booking_addons(booking_rooms: List[dict], booking: dict):
         for id, booking_room in zip(booking_addon_ids, booking_rooms)
     ]
 
-    table = Table(raw_booking_addon_table, MetaData(), autoload_with=olap_engine)
+    table = Table(raw_booking_addon_table, MetaData(), autoload_with=dwh_engine)
     query = insert(table).values(data)
-    olap_conn.execute(query)
-    olap_conn.commit()
+    dwh_conn.execute(query)
+    dwh_conn.commit()
     return data
 
 
@@ -46,7 +46,7 @@ def insert_booking_room(booking: dict):
     guest_table = Table(guests_table, MetaData(), autoload_with=oltp_engine)
     room_ids = oltp_conn.execute(select(room_table.c.id)).fetchmany(2)
     guest_ids = oltp_conn.execute(select(guest_table.c.id)).fetchmany(2)
-    table = Table(raw_booking_room_table, MetaData(), autoload_with=olap_engine)
+    table = Table(raw_booking_room_table, MetaData(), autoload_with=dwh_engine)
     data = [
         dict(
             id=id,
@@ -58,8 +58,8 @@ def insert_booking_room(booking: dict):
         for id, room, guest in zip(booking_room_ids, room_ids, guest_ids)
     ]
     query = insert(table).values(data)
-    olap_conn.execute(query)
-    olap_conn.commit()
+    dwh_conn.execute(query)
+    dwh_conn.commit()
     return data
 
 
@@ -70,20 +70,20 @@ def insert_booking():
         checkout=datetime.today().date() + timedelta(days=15),
         updated_at=datetime.now(),
     )
-    table = Table(raw_booking_table, MetaData(), autoload_with=olap_engine)
+    table = Table(raw_booking_table, MetaData(), autoload_with=dwh_engine)
     query = insert(table).values(**data)
-    olap_conn.execute(query)
-    olap_conn.commit()
+    dwh_conn.execute(query)
+    dwh_conn.commit()
     return data
 
 
 def pre_insert():
-    booking_table = Table(raw_booking_table, MetaData(), autoload_with=olap_engine)
+    booking_table = Table(raw_booking_table, MetaData(), autoload_with=dwh_engine)
     booking_room_table = Table(
-        raw_booking_room_table, MetaData(), autoload_with=olap_engine
+        raw_booking_room_table, MetaData(), autoload_with=dwh_engine
     )
     booking_addon_table = Table(
-        raw_booking_addon_table, MetaData(), autoload_with=olap_engine
+        raw_booking_addon_table, MetaData(), autoload_with=dwh_engine
     )
     queries = [
         delete(booking_table).where(booking_table.c.id == booking_id),
@@ -93,16 +93,16 @@ def pre_insert():
         ),
     ]
     for query in queries:
-        olap_conn.execute(query)
-        olap_conn.commit()
+        dwh_conn.execute(query)
+        dwh_conn.commit()
 
 
 if __name__ == "__main__":
     conn_str_map = get_connection_str()
     oltp_engine = create_engine(conn_str_map.get("oltp"))
-    olap_engine = create_engine(conn_str_map.get("olap"))
+    dwh_engine = create_engine(conn_str_map.get("dwh"))
     oltp_conn = oltp_engine.connect()
-    olap_conn = olap_engine.connect()
+    dwh_conn = dwh_engine.connect()
 
     pre_insert()
     booking = insert_booking()
@@ -114,6 +114,6 @@ if __name__ == "__main__":
     pd.DataFrame(booking_addons).to_csv(booking_addon_file, index=False)
 
     oltp_conn.close()
-    olap_conn.close()
+    dwh_conn.close()
     oltp_engine.dispose()
-    olap_engine.dispose()
+    dwh_engine.dispose()

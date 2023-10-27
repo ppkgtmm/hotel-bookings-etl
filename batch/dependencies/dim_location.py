@@ -10,7 +10,7 @@ db_host = getenv("DB_HOST")
 db_port = getenv("DB_PORT")
 db_user = getenv("DB_USER")
 db_password = getenv("DB_PASSWORD")
-db_name = getenv("OLAP_DB")
+db_name = getenv("DWH_DB")
 dim_location_table = getenv("DIM_LOCATION_TABLE")
 
 connection_string = (

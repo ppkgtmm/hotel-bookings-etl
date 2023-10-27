@@ -1,7 +1,7 @@
-DROP DATABASE IF EXISTS olap_hotel;
-CREATE DATABASE IF NOT EXISTS olap_hotel;
+DROP DATABASE IF EXISTS dwh_hotel;
+CREATE DATABASE IF NOT EXISTS dwh_hotel;
 
-USE olap_hotel;
+USE dwh_hotel;
 
 CREATE TABLE `stg_room` (
   `id` integer PRIMARY KEY,

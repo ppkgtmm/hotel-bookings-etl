@@ -17,20 +17,20 @@ raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 
 
 def update_booking_addons(booking_addons: pd.DataFrame):
-    table = Table(raw_booking_addon_table, MetaData(), autoload_with=olap_engine)
+    table = Table(raw_booking_addon_table, MetaData(), autoload_with=dwh_engine)
     data = []
     for booking_addon in booking_addons.to_dict(orient="records"):
         id, date_time = booking_addon["id"], booking_addon.pop("datetime")
         date_time = datetime.fromisoformat(date_time) - timedelta(days=14)
         query = update(table).where(table.c.id == id).values(datetime=date_time)
-        olap_conn.execute(query)
-        olap_conn.commit()
+        dwh_conn.execute(query)
+        dwh_conn.commit()
         data.append(dict(**booking_addon, datetime=date_time))
     return data
 
 
 def update_booking(bookings: pd.DataFrame):
-    table = Table(raw_booking_table, MetaData(), autoload_with=olap_engine)
+    table = Table(raw_booking_table, MetaData(), autoload_with=dwh_engine)
     data = []
     for booking in bookings.to_dict(orient="records"):
         id = booking["id"]
@@ -43,8 +43,8 @@ def update_booking(bookings: pd.DataFrame):
             .where(table.c.id == id)
             .values(checkin=checkin.date(), checkout=checkout.date())
         )
-        olap_conn.execute(query)
-        olap_conn.commit()
+        dwh_conn.execute(query)
+        dwh_conn.commit()
         data.append(dict(**booking, checkin=checkin.date(), checkout=checkout.date()))
     return data
 
@@ -57,8 +57,8 @@ def pre_update():
 
 if __name__ == "__main__":
     conn_str_map = get_connection_str()
-    olap_engine = create_engine(conn_str_map.get("olap"))
-    olap_conn = olap_engine.connect()
+    dwh_engine = create_engine(conn_str_map.get("dwh"))
+    dwh_conn = dwh_engine.connect()
 
     bookings, booking_addons = pre_update()
     updated_bookings = update_booking(bookings)
@@ -67,5 +67,5 @@ if __name__ == "__main__":
     pd.DataFrame(updated_bookings).to_csv(booking_file, index=False)
     pd.DataFrame(updated_booking_addons).to_csv(booking_addon_file, index=False)
 
-    olap_conn.close()
-    olap_engine.dispose()
+    dwh_conn.close()
+    dwh_engine.dispose()

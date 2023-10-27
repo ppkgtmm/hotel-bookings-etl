@@ -14,7 +14,7 @@ dbz_password = getenv("DBZ_PASSWORD")
 dbz_previllages = getenv("DBZ_PREVILLAGES")
 
 oltp_sql = path.join(path.abspath(path.dirname(__file__)), "sql/oltp_db.sql")
-olap_sql = path.join(path.abspath(path.dirname(__file__)), "sql/olap_db.sql")
+dwh_sql = path.join(path.abspath(path.dirname(__file__)), "sql/dwh_db.sql")
 
 connection_str = f"mysql+mysqlconnector://{db_user}:{db_password}@{db_host}:{db_port}"
 debezium_sql = f"""
@@ -52,11 +52,11 @@ if __name__ == "__main__":
 
     print("oltp database set up done")
     print("-" * 30)
-    print("setting up olap database")
+    print("setting up dwh database")
 
-    execute_queries(read_queries(olap_sql), connection_str)
+    execute_queries(read_queries(dwh_sql), connection_str)
 
-    print("olap database set up done")
+    print("dwh database set up done")
     print("-" * 30)
     print("setting up debezium user")
 

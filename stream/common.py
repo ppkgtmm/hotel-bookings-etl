@@ -12,7 +12,7 @@ db_host = getenv("DB_HOST_INTERNAL")
 db_port = getenv("DB_PORT")
 db_user = getenv("DB_USER")
 db_password = getenv("DB_PASSWORD")
-db_name = getenv("OLAP_DB")
+db_name = getenv("DWH_DB")
 
 schema_registry_url = getenv("SCHEMA_REGISTRY_URL_INTERNAL")
 

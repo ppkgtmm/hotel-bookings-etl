@@ -5,7 +5,7 @@ from datetime import datetime
 from os import getenv
 import pytz
 
-mysql_conn_id = getenv("AIRFLOW_OLAP_CONN_ID")
+mysql_conn_id = getenv("AIRFLOW_DWH_CONN_ID")
 raw_room_table = getenv("RAW_ROOM_TABLE")
 raw_guest_table = getenv("RAW_GUEST_TABLE")
 raw_booking_room_table = getenv("RAW_BOOKING_ROOM_TABLE")
