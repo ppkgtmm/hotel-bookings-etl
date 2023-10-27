@@ -13,17 +13,15 @@ ORDER BY MIN(min_age)
 """
 
 summary_by_gender = """
-SELECT 
-	g.gender,
+SELECT
+	gender,
 	COUNT(1) num_days,
-	SUM(price) revenue
-FROM fct_bookings b
-LEFT JOIN dim_guest g
-ON b.guest = g.id
-LEFT JOIN dim_roomtype t
-ON b.roomtype = t.id
-WHERE b.datetime BETWEEN {start_datetime} AND {end_datetime}
-GROUP BY 1;
+	SUM(revenue) revenue,
+	SUM(addons_revenue) addons_revenue,
+	SUM(total_revenue) total_revenue
+FROM mrt_gender
+WHERE date BETWEEN {start_date} AND {end_date}
+GROUP BY 1
 """
 
 summary_by_location = """
