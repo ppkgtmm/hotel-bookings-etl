@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, NullPool, text
 summary_by_age = """
 SELECT
 	age_range,
+	COUNT(1) num_days,
 	SUM(revenue) revenue,
 	SUM(addons_revenue) addons_revenue,
 	SUM(total_revenue) total_revenue
