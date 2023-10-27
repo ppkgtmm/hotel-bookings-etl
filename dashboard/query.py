@@ -26,31 +26,37 @@ GROUP BY 1
 """
 
 summary_by_location = """
-SELECT 
-	l.state, 
-	l.country,
-	l.fips,
+SELECT
+	fips,
+	state,
+	country,
 	COUNT(1) num_days,
-	SUM(t.price) revenue
-FROM fct_bookings b
-LEFT JOIN dim_location l
-ON b.guest_location = l.id
-LEFT JOIN dim_roomtype t
-ON b.roomtype = t.id
-WHERE b.datetime BETWEEN {start_datetime} AND {end_datetime}
-GROUP BY 1, 2, 3;
+	SUM(revenue) revenue,
+	SUM(addons_revenue) addons_revenue,
+	SUM(total_revenue) total_revenue
+FROM mrt_location
+WHERE date BETWEEN {start_date} AND {end_date}
+GROUP BY 1, 2, 3
 """
 
 summary_by_type = """
-SELECT 
-	t.name,
-	COUNT(1) num_days,
-	SUM(t.price) revenue
-FROM fct_bookings b
-LEFT JOIN dim_roomtype t
-ON b.roomtype = t.id
-WHERE b.datetime BETWEEN {start_datetime} AND {end_datetime}
-GROUP BY 1;
+SELECT
+	room_type,
+	SUM(num_booked) num_booked,
+	SUM(revenue) revenue
+FROM mrt_roomtype
+WHERE date BETWEEN {start_date} AND {end_date}
+GROUP BY 1
+"""
+
+summary_by_addon = """
+SELECT
+	addon,
+	SUM(quantity) quantity,
+	SUM(revenue) revenue
+FROM mrt_addon
+WHERE date BETWEEN {start_date} AND {end_date}
+GROUP BY 1
 """
 
 
