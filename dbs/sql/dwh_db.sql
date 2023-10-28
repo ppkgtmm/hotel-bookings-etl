@@ -127,13 +127,13 @@ ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_l
 CREATE TABLE `full_picture` (
   `date` date,
   `guest` integer,
-  `dob` date,
-  `age` integer,
+  `guest_dob` date,
+  `guest_age` integer,
   `age_range` varchar(255),
-  `country` varchar(255),
-  `roomtype` varchar(255),
+  `guest_country` varchar(255),
+  `room_type` varchar(255),
   `price` integer,
-  `addon` json,
+  `addons` json,
   PRIMARY KEY (`date`, `guest`)
 );
 
