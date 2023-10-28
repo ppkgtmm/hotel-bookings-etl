@@ -21,7 +21,7 @@ def update_booking_addons(booking_addons: pd.DataFrame):
     data = []
     for booking_addon in booking_addons.to_dict(orient="records"):
         id, date_time = booking_addon["id"], booking_addon.pop("datetime")
-        date_time = datetime.fromisoformat(date_time) - timedelta(days=14)
+        date_time = datetime.fromisoformat(date_time) - timedelta(days=4)
         query = update(table).where(table.c.id == id).values(datetime=date_time)
         dwh_conn.execute(query)
         dwh_conn.commit()
@@ -36,8 +36,8 @@ def update_booking(bookings: pd.DataFrame):
         id = booking["id"]
         checkin = booking.pop("checkin")
         checkout = booking.pop("checkout")
-        checkin = datetime.fromisoformat(checkin) - timedelta(days=14)
-        checkout = datetime.fromisoformat(checkout) - timedelta(days=14)
+        checkin = datetime.fromisoformat(checkin) - timedelta(days=4)
+        checkout = datetime.fromisoformat(checkout) - timedelta(days=4)
         query = (
             update(table)
             .where(table.c.id == id)
