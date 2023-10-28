@@ -68,12 +68,11 @@ run_tests() {
 }
 
 dashboard(){
-    activate_venv
-    python3 -m streamlit run dashboard/main.py   
+    docker-compose up -d superset --no-recreate  
 }
 usage() {  
     echo "usage: ./run.sh command"  
-    echo "where command is one of setup, datagen, seed, etl, airflow, test, ui and down"
+    echo "where command is one of setup, datagen, seed, etl, airflow, test, viz and down"
 } 
 
 if [ "$1" = "setup" ]
@@ -94,7 +93,7 @@ then
 elif [ "$1" = "test" ]
 then
     run_tests
-elif [ "$1" = "ui" ]
+elif [ "$1" = "viz" ]
 then
     dashboard
 elif [ "$1" = "down" ]
