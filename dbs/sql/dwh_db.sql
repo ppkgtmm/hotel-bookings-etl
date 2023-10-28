@@ -127,6 +127,7 @@ ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_l
 CREATE TABLE `full_picture` (
   `date` date,
   `guest` integer,
+  `guest_gender` varchar(25),
   `guest_dob` date,
   `guest_age` integer,
   `age_range` varchar(255),
