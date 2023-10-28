@@ -29,7 +29,6 @@ fct_booking_table = getenv("FCT_BOOKING_TABLE")
 raw_booking_addon_table = getenv("RAW_BOOKING_ADDON_TABLE")
 dim_addon_table = getenv("DIM_ADDON_TABLE")
 fct_amenities_table = getenv("FCT_AMENITIES_TABLE")
-full_picture_table = getenv("FULL_PICTURE_TABLE")
 dag_name = getenv("FACT_LOAD_DAG_NAME")
 
 default_args = dict(owner="airflow", depends_on_past=False)
@@ -121,26 +120,4 @@ process_fct_amenities = MySqlOperator(
     dag=dag,
 )
 
-process_full_picture = MySqlOperator(
-    sql="scripts/full_picture.sql",
-    mysql_conn_id=mysql_conn_id,
-    params=dict(
-        full_picture=full_picture_table,
-        dim_date=dim_date_table,
-        dim_guest=dim_guest_table,
-        dim_location=dim_location_table,
-        dim_roomtype=dim_roomtype_table,
-        dim_addon=dim_addon_table,
-        fct_amenities=fct_amenities_table,
-        fct_bookings=fct_booking_table,
-    ),
-    task_id="process_full_picture",
-    dag=dag,
-)
-
-(
-    ensure_dim_date_populated
-    >> process_fct_booking
-    >> process_fct_amenities
-    >> process_full_picture
-)
+ensure_dim_date_populated >> process_fct_booking >> process_fct_amenities
