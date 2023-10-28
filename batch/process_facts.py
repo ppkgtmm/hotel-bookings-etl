@@ -106,6 +106,7 @@ process_fct_amenities = MySqlOperator(
     sql="scripts/fct_amenities.sql",
     mysql_conn_id=mysql_conn_id,
     params=dict(
+        bookings=raw_booking_table,
         booking_addons=raw_booking_addon_table,
         booking_rooms=raw_booking_room_table,
         dim_guest=dim_guest_table,
