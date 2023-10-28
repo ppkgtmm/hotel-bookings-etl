@@ -12,7 +12,7 @@ CREATE TEMPORARY TABLE fact_amenities AS
         ON ba.booking_room = br.id
         INNER JOIN {{ params.bookings }} b
         ON br.booking = b.id
-        WHERE ba.is_deleted = false AND ba.processed = false AND br.is_deleted = false AND b.is_deleted = false AND (b.checkin - DATE('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}')) < 7
+        WHERE ba.is_deleted = false AND ba.processed = false AND br.is_deleted = false AND b.is_deleted = false AND DATEDIFF(b.checkin, DATE('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}')) < 7
     ), amenities AS (
         SELECT
             a.id,

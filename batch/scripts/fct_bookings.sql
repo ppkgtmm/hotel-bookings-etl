@@ -2,7 +2,7 @@ CREATE TEMPORARY TABLE fact_bookings AS
     WITH RECURSIVE datetimes AS (
         SELECT id booking_id, checkin datetime, checkout
         FROM {{ params.bookings }}
-        WHERE is_deleted = false AND (checkin - DATE('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}')) < 7
+        WHERE is_deleted = false AND DATEDIFF(checkin, DATE('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}')) < 7
         UNION ALL
         SELECT booking_id, datetime + INTERVAL 1 DAY, checkout
         FROM datetimes
@@ -17,7 +17,7 @@ CREATE TEMPORARY TABLE fact_bookings AS
         FROM {{ params.booking_rooms }} br
         INNER JOIN {{ params.bookings }} b
         ON br.booking = b.id
-        WHERE br.is_deleted = false AND br.processed = false AND b.is_deleted = false AND (b.checkin - DATE('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}')) < 7
+        WHERE br.is_deleted = false AND br.processed = false AND b.is_deleted = false AND DATEDIFF(b.checkin, DATE('{{ macros.datetime.fromisoformat(ts) + macros.timedelta(days=1) }}')) < 7
     ), bookings AS (
         SELECT
             b.id,
