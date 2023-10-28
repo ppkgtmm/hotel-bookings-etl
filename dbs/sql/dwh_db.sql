@@ -124,50 +124,17 @@ ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`roomtype`) REFERENCES `dim_roomtyp
 
 ALTER TABLE `fct_amenities` ADD FOREIGN KEY (`guest_location`) REFERENCES `dim_location` (`id`);
 
-CREATE TABLE `mrt_age` (
+CREATE TABLE `full_picture` (
   `date` date,
+  `guest` integer,
+  `dob` date,
+  `age` integer,
   `age_range` varchar(255),
-  `min_age` integer,
-  `revenue` integer,
-  `addons_revenue` integer,
-  `total_revenue` integer,
-  PRIMARY KEY (`date`, `age_range`)
-);
-
-CREATE TABLE `mrt_gender` (
-  `date` date,
-  `gender` varchar(255),
-  `revenue` integer,
-  `addons_revenue` integer,
-  `total_revenue` integer,
-  PRIMARY KEY (`date`, `gender`)
-);
-
-CREATE TABLE `mrt_location` (
-  `date` date,
-  `fips` varchar(255),
-  `state` varchar(255),
   `country` varchar(255),
-  `revenue` integer,
-  `addons_revenue` integer,
-  `total_revenue` integer,
-  PRIMARY KEY (`date`, `fips`)
-);
-
-CREATE TABLE `mrt_roomtype` (
-  `date` date,
-  `room_type` varchar(255),
-  `num_booked` varchar(255),
-  `revenue` integer,
-  PRIMARY KEY (`date`, `room_type`)
-);
-
-CREATE TABLE `mrt_addon` (
-  `date` date,
-  `addon` varchar(255),
-  `quantity` integer,
-  `revenue` integer,
-  PRIMARY KEY (`date`, `addon`)
+  `roomtype` varchar(255),
+  `price` integer,
+  `addon` json,
+  PRIMARY KEY (`date`, `guest`)
 );
 
 CREATE FUNCTION get_age_range(age INTEGER) RETURNS VARCHAR(25) DETERMINISTIC
