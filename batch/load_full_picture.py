@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.mysql_operator import MySqlOperator
 from airflow.sensors.external_task import ExternalTaskSensor
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytz
 from os import getenv
 
