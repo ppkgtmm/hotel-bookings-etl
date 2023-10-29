@@ -1,4 +1,4 @@
-FROM apache/superset:3.0.1
+FROM apache/superset:latest-py39
 
 COPY --chown=superset run.sh /app/
 
