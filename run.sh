@@ -67,12 +67,9 @@ run_tests() {
     python3 tests/test_updated.py
 }
 
-dashboard(){
-    docker-compose up -d superset --no-recreate  
-}
 usage() {  
     echo "usage: ./run.sh command"  
-    echo "where command is one of setup, datagen, seed, etl, airflow, test, viz and down"
+    echo "where command is one of setup, datagen, seed, etl, airflow, test and down"
 } 
 
 if [ "$1" = "setup" ]
@@ -93,9 +90,6 @@ then
 elif [ "$1" = "test" ]
 then
     run_tests
-elif [ "$1" = "viz" ]
-then
-    dashboard
 elif [ "$1" = "down" ]
 then
     tear_down
