@@ -4,6 +4,8 @@ SELECT
   guest_gender,
   age_range,
   guest_country,
+  guest_state,
+  fips,
   room_type,
   IF(ROW_NUMBER() OVER(PARTITION BY date, guest) = 1, price, 0) price,
   addons.addon addon_name,
