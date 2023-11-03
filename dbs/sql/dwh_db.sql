@@ -132,6 +132,8 @@ CREATE TABLE `full_picture` (
   `guest_age` integer,
   `age_range` varchar(255),
   `guest_country` varchar(255),
+  `guest_state` varchar(255),
+  `fips` varchar(10),
   `room_type` varchar(255),
   `price` integer,
   `addons` json,
