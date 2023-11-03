@@ -74,7 +74,6 @@ services:
     container_name: $POSTGRES_HOST_INTERNAL
     env_file:
     - '.env'
-    
 
   airflow-init:
     <<: *airflow-common
@@ -107,14 +106,3 @@ services:
       - $WEBSERVER_PORT:8080
     depends_on:
       - airflow-scheduler
-    
-  superset:
-    build: dashboard/
-    image: superset
-    container_name: dashboard
-    env_file:
-      - .env
-    ports:
-      - $SUPERSET_PORT:8088
-    entrypoint: bash -c 
-    command: /app/run.sh
