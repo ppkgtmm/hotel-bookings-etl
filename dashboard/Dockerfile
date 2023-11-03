@@ -1,4 +1,4 @@
-FROM apache/superset:3.0.1
+FROM apache/superset:latest
 
 COPY --chown=superset run.sh /app/
 
