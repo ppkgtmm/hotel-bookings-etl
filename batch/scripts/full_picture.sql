@@ -3,7 +3,7 @@ WITH max_date AS (
 	SELECT MAX(`date`) max_date 
 	FROM {{ params.full_picture }}
 ), bookings AS (
-    SELECT d.`date`, f.guest, g.gender guest_gender, g.dob guest_dob, TIMESTAMPDIFF(YEAR, CAST(g.dob AS datetime), CURRENT_TIMESTAMP()) guest_age, get_age_range(TIMESTAMPDIFF(YEAR, CAST(g.dob AS datetime), CURRENT_TIMESTAMP())) age_range, l.country guest_country, t.name room_type, t.price
+    SELECT d.`date`, f.guest, g.gender guest_gender, g.dob guest_dob, TIMESTAMPDIFF(YEAR, CAST(g.dob AS datetime), CURRENT_TIMESTAMP()) guest_age, get_age_range(TIMESTAMPDIFF(YEAR, CAST(g.dob AS datetime), CURRENT_TIMESTAMP())) age_range, l.country guest_country, l.state guest_state, l.fips, t.name room_type, t.price
     FROM {{ params.fct_bookings }} f
     LEFT JOIN {{ params.dim_date }} d
     ON f.datetime = d.id
