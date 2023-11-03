@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from os import getenv, path
 from sqlalchemy import create_engine
 import pandas as pd
+import requests
 
 load_dotenv()
 
@@ -33,3 +34,7 @@ if __name__ == "__main__":
 
     conn.close()
     engine.dispose()
+
+    with open(path.join(output_folder, geo_json_file), "wb") as fp:
+        response = requests.get(geo_json_url)
+        fp.write(response.content)
