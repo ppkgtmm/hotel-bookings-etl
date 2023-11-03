@@ -67,9 +67,14 @@ run_tests() {
     python3 tests/test_updated.py
 }
 
+export_data() {
+    activate_venv
+    python3 dashboard/prepare_data.py
+}
+
 usage() {  
     echo "usage: ./run.sh command"  
-    echo "where command is one of setup, datagen, seed, etl, airflow, test and down"
+    echo "where command is one of setup, datagen, seed, etl, airflow, test, export and down"
 } 
 
 if [ "$1" = "setup" ]
@@ -90,6 +95,9 @@ then
 elif [ "$1" = "test" ]
 then
     run_tests
+elif [ "$1" = "export" ]
+then
+    export_data
 elif [ "$1" = "down" ]
 then
     tear_down
