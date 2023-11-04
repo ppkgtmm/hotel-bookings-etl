@@ -6,11 +6,9 @@ SELECT
   guest_country,
   guest_state,
   fips,
-  room_type,
-  IF(ROW_NUMBER() OVER(PARTITION BY date, guest) = 1, price, 0) price,
-  addons.addon addon_name,
-  addons.quantity addon_quantity,
-  addons.unit_price addon_unit_price
+  addons.addon,
+  addons.quantity,
+  addons.unit_price
 FROM full_picture
 LEFT JOIN JSON_TABLE(addons, '$[*]' COLUMNS (
     addon VARCHAR(255) PATH '$.addon',
