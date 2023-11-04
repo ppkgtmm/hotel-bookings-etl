@@ -9,11 +9,10 @@ SELECT
   addons.addon,
   addons.quantity,
   addons.unit_price
-FROM full_picture
-LEFT JOIN JSON_TABLE(addons, '$[*]' COLUMNS (
+FROM full_picture,
+JSON_TABLE(addons, '$[*]' COLUMNS (
     addon VARCHAR(255) PATH '$.addon',
     unit_price INTEGER PATH '$.price',
     quantity INTEGER PATH '$.quantity'
   )
-) addons
-ON TRUE;
+) addons;
