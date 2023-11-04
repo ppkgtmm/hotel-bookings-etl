@@ -5,4 +5,3 @@ __pycache__
 seeds/*.csv
 tests/results/*.csv
 dashboard/data/*.csv
-dashboard/data/*.json
