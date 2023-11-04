@@ -6,9 +6,8 @@ import requests
 
 load_dotenv()
 
-data_file = "full_picture.csv"
-geo_json_file = "states_provinces.json"
-query_file_path = path.abspath(path.join(path.dirname(__file__), "full_picture.sql"))
+query_files = ["bookings", "addons"]
+query_folder = path.abspath(path.join(path.dirname(__file__), "queries"))
 output_folder = path.abspath(path.join(path.dirname(__file__), "data"))
 
 db_host = getenv("DB_HOST")
@@ -26,15 +25,11 @@ if __name__ == "__main__":
     engine = create_engine(connection_str)
     conn = engine.connect()
 
-    with open(query_file_path, "r") as fp:
-        query = fp.read()
-
-    dashboard_data = pd.read_sql(query, conn)
-    dashboard_data.to_csv(path.join(output_folder, data_file), index=False)
+    for file in query_files:
+        with open(path.join(query_folder, file + ".sql"), "r") as fp:
+            query = fp.read()
+        data = pd.read_sql(query, conn)
+        data.to_csv(path.join(output_folder, file + ".csv"), index=False)
 
     conn.close()
     engine.dispose()
-
-    with open(path.join(output_folder, geo_json_file), "wb") as fp:
-        response = requests.get(geo_json_url)
-        fp.write(response.content)
