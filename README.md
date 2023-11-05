@@ -69,16 +69,17 @@ In this step, insert, update or delete operations inside transactional database 
 3. Turn on the following pipelines or dags
 - clean_up
 - process_facts
+- process_full_picture
 
 4. Optionally, click on any dag name to monitor it while running
 
-Upon successful completion of the pipeliness, fact tables will be populated and staging area will be cleaned up to reduce storage consumption
+Upon successful completion of the pipelines, fact tables and full picture table will be populated. In addition, staging area will also be cleaned up to reduce storage consumption
 
 <br />
 
 **Run tests**
 
-Fact tables population logic are tested in this step i.e. to verify that bookings or amenities data is only inserted if less than 7 days is left prior to checkin date or amenity serving date time
+Fact tables population logic are tested in this step to verify if bookings or amenities data are correctly inserted only when less than 7 days is left prior to checkin date
 
 ```
 ./run.sh test
