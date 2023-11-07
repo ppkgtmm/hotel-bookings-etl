@@ -19,7 +19,7 @@ chmod +x run.sh
 
 **Set up**
 
-With this step, virtual environment is created (if not exist) and libraries are installed. Also, containers required to execute the project are started. Eventually, transactional and analytical databases are initialized
+With this step, virtual environment is created (if not exist) and libraries are installed. Also, containers required to execute the project are started. Eventually, transactional database and data warehouse are initialized
 
 ```
 ./run.sh setup
@@ -44,20 +44,20 @@ After running commend below, data generated in previous step is populated to tra
 ```
 <br />
 
-**ETL - Part 1**
+**Streaming ETL**
 
-In this step, insert, update or delete operations inside transactional database is captured from database log file  by connector and sent to kafka broker for further consumption by stream processer. Furthermore, some dimesions namely location and date dimesnions are populated
+In this step, insert, update or delete operations inside transactional database is captured from database log file by connector and sent to kafka broker for further consumption by stream processer. Furthermore, some dimesions namely location and date dimesnions are populated
 
 ```
 ./run.sh etl
 ```
 
 
-- Every change in dimension related tables are captured while only latest state of fact related tables are retained in staging area
+- Every change in dimension related tables are captured while only latest state of fact related tables are retained in staging tables
 - If the command fails because of `AssertionError` or `connection issue`, retry after some time
 <br />
 
-**ETL - Part 2**
+**Batch Loading**
 
 1. Run command below to start airflow scheduler and webserver
 ```
@@ -73,13 +73,13 @@ In this step, insert, update or delete operations inside transactional database 
 
 4. Optionally, click on any dag name to monitor it while running
 
-Upon successful completion of the pipelines, fact tables and full picture table will be populated. In addition, staging area will also be cleaned up to reduce storage consumption
+Upon successful completion of the pipelines, fact tables and full picture table will be populated. In addition, staging tables will also be cleaned up to reduce storage consumption
 
 <br />
 
-**Run tests**
+**Testing**
 
-Fact tables population logic are tested in this step to verify if bookings or amenities data are correctly inserted only when less than 7 days is left prior to checkin date
+Fact tables population logic are tested in this step to verify if bookings or amenities data are correctly inserted and if the data are inserted only when less than 7 days is left prior to checkin date
 
 ```
 ./run.sh test
