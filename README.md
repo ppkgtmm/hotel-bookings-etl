@@ -15,7 +15,7 @@ Required only for the first time you are running the project
 ```
 chmod +x run.sh
 ```
-<br />
+
 
 ### Set up
 
@@ -24,7 +24,7 @@ With this step, virtual environment is created (if not exist) and libraries are 
 ```
 ./run.sh setup
 ```
-<br />
+
 
 ### Data generation
 
@@ -33,7 +33,7 @@ Fake data related to hotel reservations e.g. users, rooms, bookings, amenities e
 ```
 ./run.sh datagen
 ```
-<br />
+
 
 ### Data population
 
@@ -42,7 +42,7 @@ After running commend below, data generated in previous step is populated to tra
 ```
 ./run.sh seed
 ```
-<br />
+
 
 ### Streaming ETL
 
@@ -55,7 +55,7 @@ In this step, insert, update or delete operations inside transactional database 
 
 - Every change in dimension related tables are captured while only latest state of fact related tables are retained in staging tables
 - If the command fails because of `AssertionError` or `connection issue`, retry after some time
-<br />
+
 
 ### Batch Loading
 
@@ -75,7 +75,7 @@ In this step, insert, update or delete operations inside transactional database 
 
 Upon successful completion of the pipelines, fact tables and full picture table will be populated. In addition, staging tables will also be cleaned up to reduce storage consumption
 
-<br />
+
 
 ### Testing
 
@@ -87,7 +87,7 @@ Fact tables population logic are tested in this step to verify if bookings or am
 
 Test run is considered as failed when  `AssertionError` is thrown
 
-<br />
+
 
 ### Tear down
 
