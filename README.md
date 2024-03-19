@@ -1,4 +1,4 @@
-# 🏨 hotel bookings etl
+# 🗺️ hotel bookings etl
 
 data warehousing on realistic hotel reservation data through batch and real-time processing
 
