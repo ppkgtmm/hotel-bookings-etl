@@ -71,20 +71,22 @@ if the command fails because of `AssertionError` or `connection issue`, retry af
 ./run.sh airflow
 ```
 
-2. after a few minutes, go to `http://localhost:8080/` in web browser then login to airflow website with `AIRFLOW_ADMIN_USERNAME` and `AIRFLOW_ADMIN_PASSWORD` defined in `.env` file
+2. after a few minutes, go to http://localhost:8080 in web browser then login to airflow website with `AIRFLOW_ADMIN_USERNAME` and `AIRFLOW_ADMIN_PASSWORD` defined in `.env` file
    
 3. turn on the following pipelines : clean_up, process_facts, process_full_picture
 
 4. optionally, click on any pipeline name to monitor it while running
 
-upon successful completion, fact tables and full picture table will be populated while staging tables will be cleaned up to reduce storage consumption
+upon successful completion
+- fact tables and full picture table will be populated
+- staging tables will be cleaned up to reduce storage consumption
 
 
 ## Testing
 
 tests fact tables population logic to verify if 
 - bookings or amenities data are correctly inserted and
-- the data are inserted only when less than 7 days is left prior to checkin date
+- data is inserted only when less than 7 days is left before checkin date
 
 ```
 ./run.sh test
@@ -94,7 +96,7 @@ test is considered as failed when  `AssertionError` is thrown
 
 
 
-### Tear down
+## Tear down
 
 stops and removes containers in use by the project 
 
@@ -102,7 +104,7 @@ stops and removes containers in use by the project
 ./run.sh down
 ```
 
-### References
+## References
 
 - [wikipedia-activity-diagram](https://en.wikipedia.org/wiki/Activity_diagram)
 - [database-diagram-tool](https://dbdiagram.io)
