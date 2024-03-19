@@ -65,7 +65,7 @@ if the command fails because of `AssertionError` or `connection issue`, retry af
 
 ## batch processing
 
-1. run command below to start airflow scheduler and webserver
+1. run command below to start airflow scheduler and web server
 
 ```
 ./run.sh airflow
