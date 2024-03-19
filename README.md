@@ -82,7 +82,7 @@ upon successful completion
 - staging tables will be cleaned up to reduce storage consumption
 
 
-## Testing
+## testing
 
 tests fact tables population logic to verify if 
 - bookings or amenities data are correctly inserted and
@@ -96,35 +96,10 @@ test is considered as failed when  `AssertionError` is thrown
 
 
 
-## Tear down
+## tear down
 
 stops and removes containers in use by the project 
 
 ```
 ./run.sh down
 ```
-
-## References
-
-- [wikipedia-activity-diagram](https://en.wikipedia.org/wiki/Activity_diagram)
-- [database-diagram-tool](https://dbdiagram.io)
-- [data-warehouse-online-course](https://www.udemy.com/share/106qIm/)
-- [fake-data-generator-documentation](https://faker.readthedocs.io/en/master/)
-- [sql-alchemy-documentation](https://docs.sqlalchemy.org/en/20/)
-- [debezium-mysql-documentation](https://debezium.io/documentation/reference/stable/connectors/mysql.html)
-- [debezium-mysql-privileges-stackoverflow](https://stackoverflow.com/questions/70658178/how-to-grant-all-mysql-8-0-privileges-to-debezium-in-windows)
-- [debezium-avro-documentation](https://debezium.io/documentation/reference/stable/configuration/avro.html)
-- [reading-confluent-avro-with-spark](https://medium.com/@mrugankray/real-time-avro-data-analysis-with-spark-streaming-and-confluent-kafka-in-python-426f5e05392d)
-- [spark-kafka-integration](https://spark.apache.org/docs/3.4.0/structured-streaming-kafka-integration.html)
-- [spark-package-specification](https://stackoverflow.com/questions/54285151/kafka-structured-streaming-kafkasourceprovider-could-not-be-instantiated)
-- [pyspark-3.4.0-documentation](https://spark.apache.org/docs/3.4.0/api/python/index.html)
-- [install-python-on-alpine-linux](https://stackoverflow.com/a/73294721)
-- [guide-for-running-airflow-with-docker](https://stackabuse.com/running-airflow-locally-with-docker-a-technical-guide/)
-- [creating-airflow-connections-from-cli](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#creating-a-connection-from-the-cli)
-- [airflow-templates-and-macros-documentation](https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html)
-- [airflow-external-task-sensor-documentation](https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/sensors/external_task/index.html#airflow.sensors.external_task.ExternalTaskSensor)
-- [working-with-json-data-in-mysql](https://www.digitalocean.com/community/tutorials/working-with-json-in-mysql)
-- [unnest-extract-nested-json-data-in-mysql](https://andreessulp.medium.com/how-to-unnest-extract-nested-json-data-in-mysql-8-0-c9322c90df12)
-- [booking-dashboard-tableau-public](https://public.tableau.com/views/HotelBookingDemand_16990387653270/bookingdemand?:language=en-US&publish=yes&:display_count=n&:origin=viz_share_link)
-- [addon-dashboard-tableau-public](https://public.tableau.com/views/HotelAddonDemand/addondemand?:language=en-US&:display_count=n&:origin=viz_share_link)
-
