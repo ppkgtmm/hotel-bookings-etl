@@ -1,6 +1,6 @@
 # 🗺️ hotel bookings etl
 
-data warehousing and [visualization](https://public.tableau.com/app/profile/pinky.gautam/vizzes) on realistic hotel reservation data through batch and real-time processing
+data warehousing and [visualization](https://public.tableau.com/app/profile/pinky.gautam/vizzes) of realistic hotel reservation data through batch and real-time processing
 
 ## initialization
 
